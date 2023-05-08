@@ -141,11 +141,12 @@ Connects to a database and runs a query. Double-click the node to edit the datab
 
 ![image](../screenshots/docs/db_options.png)
 
-(Select)=
+(Query)=
 
-### Select
+### Query
 
-The Select node selects a single row from the database. The query is `state.result`, so you can use the result of a previous node to select a row. 
+The query node allows you to run a query against a database. The query is `state.result`, so you can use the result of a previous node to generate a query. There are 2 types of queries: `SQLiteQuery` and `PGQuery`, for the 2 supported databases.
+
 
 (PGML)=
 
