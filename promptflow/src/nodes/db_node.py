@@ -1,6 +1,7 @@
 from abc import ABC
 import logging
 import tkinter
+import tkinter as tk
 from typing import Any, Callable, Optional, TYPE_CHECKING
 from promptflow.src.db_interface.main import (
     PGInterface,
@@ -113,6 +114,11 @@ class DBNode(NodeBase, ABC):
             self.dbname, self.user, self.password, self.host, self.port
         )
 
+    def run_subclass(
+        self, before_result: Any, state, console: tk.scrolledtext.ScrolledText
+    ) -> str:
+        self.interface.interface.connect()
+
 
 class SQLiteNode(DBNode):
     node_color = monokai.GREEN
@@ -195,7 +201,8 @@ class SelectNode(DBNode):
     def run_subclass(
         self, before_result: Any, state, console: tkinter.scrolledtext.ScrolledText
     ) -> str:
-        select = self.interface.interface.select(state.result)[0][0]
+        super().run_subclass(before_result, state, console)
+        select = self.interface.interface.select(state.result)
         return select
 
 
@@ -213,6 +220,7 @@ class PGSelectNode(DBNode):
     def run_subclass(
         self, before_result: Any, state, console: tkinter.scrolledtext.ScrolledText
     ) -> str:
+        super().run_subclass(before_result, state, console)
         select = self.interface.interface.select(state.result)[0][0]
         return select
 
@@ -221,5 +229,6 @@ class GenerateNode(PGMLNode):
     def run_subclass(
         self, before_result: Any, state, console: tkinter.scrolledtext.ScrolledText
     ) -> str:
+        super().run_subclass(before_result, state, console)
         gen = self.interface.interface.generate(self.model, state.result)[0][0]
         return gen
