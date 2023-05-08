@@ -1,7 +1,9 @@
+from abc import ABC, abstractmethod
 import json
 import uuid
 from typing import Any, Optional, Union
 import psycopg2
+import sqlite3
 from promptflow.src.db_interface.pgml_constants import (
     Algorithm,
     Sampling,
@@ -11,27 +13,13 @@ from promptflow.src.db_interface.pgml_constants import (
 )
 
 
-class DBInterface:
-    def __init__(self, dbname: str, user: str, password: str, host: str, port: str):
-        self.dbname = dbname
-        self.user = user
-        self.password = password
-        self.host = host
-        self.port = port
+class SQLBase(ABC):
+    connection: Any
+    cursor: Any
 
-        self.connection = None
-        self.cursor = None
-
+    @abstractmethod
     def connect(self):
         """Connect to the database."""
-        self.connection = psycopg2.connect(
-            dbname=self.dbname,
-            user=self.user,
-            password=self.password,
-            host=self.host,
-            port=self.port,
-        )
-        self.cursor = self.connection.cursor()
 
     def _run_query(self, query: str) -> list[tuple[Any, ...]]:
         if self.connection is None or self.cursor is None:
@@ -67,7 +55,42 @@ class DBInterface:
         return self._run_query(query)
 
 
-class PgMLInterface(DBInterface):
+class PGInterface(SQLBase):
+    def __init__(self, dbname: str, user: str, password: str, host: str, port: str):
+        self.dbname = dbname
+        self.user = user
+        self.password = password
+        self.host = host
+        self.port = port
+
+        self.connection = None
+        self.cursor = None
+
+    def connect(self):
+        """Connect to the database."""
+        self.connection = psycopg2.connect(
+            dbname=self.dbname,
+            user=self.user,
+            password=self.password,
+            host=self.host,
+            port=self.port,
+        )
+        self.cursor = self.connection.cursor()
+
+
+class SQLiteInterface(SQLBase):
+    def __init__(self, dbname: str, **kwargs):
+        self.db_path = dbname
+        self.connection = None
+        self.cursor = None
+
+    def connect(self):
+        """Connect to the database."""
+        self.connection = sqlite3.connect(self.db_path)
+        self.cursor = self.connection.cursor()
+
+
+class PgMLInterface(PGInterface):
     def train(
         self,
         project_name: str,
@@ -361,3 +384,6 @@ class PgMLInterface(DBInterface):
     def projects(self):
         query = "SELECT * from pgml.projects;"
         return self._run_query(query)
+
+
+interfaces = [PGInterface, SQLiteInterface, PgMLInterface]

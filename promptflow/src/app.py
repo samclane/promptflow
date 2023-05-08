@@ -30,7 +30,12 @@ from promptflow.src.nodes.date_node import DateNode
 from promptflow.src.nodes.env_node import EnvNode, ManualEnvNode
 from promptflow.src.nodes.http_node import HttpNode
 from promptflow.src.nodes.node_base import NodeBase
-from promptflow.src.nodes.db_node import PGMLNode, GenerateNode, SelectNode
+from promptflow.src.nodes.db_node import (
+    PGMLNode,
+    GenerateNode,
+    SelectNode,
+    PGSelectNode,
+)
 from promptflow.src.nodes.regex_node import RegexNode, TagNode
 from promptflow.src.nodes.start_node import InitNode, StartNode
 from promptflow.src.nodes.prompt_node import PromptNode
@@ -226,8 +231,12 @@ class App:
         self.add_menu.add_cascade(label="Embedding", menu=self.embedding_menu)
         self.db_menu = tk.Menu(self.add_menu, tearoff=0)
         self.db_menu.add_command(
-            label="Select - Query the PGML database",
+            label="Select - Query a SQLite database",
             command=self.create_add_node_function(SelectNode, "Select"),
+        )
+        self.db_menu.add_command(
+            label="PG Select - Query a PostgreSQL database",
+            command=self.create_add_node_function(PGSelectNode, "PG Select"),
         )
         self.db_menu.add_command(
             label="Generate - Generate next text from PGML model",
