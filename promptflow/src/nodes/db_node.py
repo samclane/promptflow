@@ -205,6 +205,20 @@ class SelectNode(DBNode):
         select = self.interface.interface.select(state.result)
         return select
 
+    def edit_options(self, event):
+        self.options_popup = NodeOptions(
+            self.canvas,
+            {
+                "dbname": self.dbname,
+            },
+        )
+        self.canvas.wait_window(self.options_popup)
+        result = self.options_popup.result
+        if self.options_popup.cancelled:
+            return
+        self.dbname = result["dbname"]
+        self.interface.update(self.dbname)
+
 
 class PGSelectNode(DBNode):
     def __init__(
