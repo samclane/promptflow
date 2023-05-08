@@ -1,3 +1,5 @@
+import json
+import tkinter as tk
 from enum import Enum
 import customtkinter
 
@@ -28,6 +30,14 @@ class HistoryEditor(customtkinter.CTkToplevel):
             self.save_button,
             self.cancel_button,
         ]
+        self.menu = tk.Menu(self)
+        self.file_menu = tk.Menu(self.menu, tearoff=0)
+        self.file_menu.add_command(label="Save", command=self.save)
+        self.file_menu.add_command(label="Load...", command=self.load)
+        self.file_menu.add_separator()
+        self.file_menu.add_command(label="Exit", command=self.cancel)
+        self.menu.add_cascade(label="File", menu=self.file_menu)
+        self.config(menu=self.menu)
 
         self.build_gui()
 
@@ -85,6 +95,22 @@ class HistoryEditor(customtkinter.CTkToplevel):
         Cancel the edit
         """
         self.destroy()
+
+    def load(self):
+        """
+        Load from jsonl file
+        """
+        self.history = []
+        filename = tk.filedialog.askopenfilename(
+            initialdir=".",
+            title="Select file",
+            filetypes=(("jsonl files", "*.jsonl"), ("all files", "*.*")),
+        )
+        with open(filename, "r", encoding="utf-8") as f:
+            for line in f:
+                self.history.append(json.loads(line))
+
+        self.build_gui()
 
     def add_entry(self, index):
         role = customtkinter.CTkComboBox(self, values=[role.value for role in Role])
