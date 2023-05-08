@@ -1,7 +1,9 @@
+from abc import ABC, abstractmethod
 import json
 import uuid
 from typing import Any, Optional, Union
 import psycopg2
+import sqlite3
 from promptflow.src.db_interface.pgml_constants import (
     Algorithm,
     Sampling,
@@ -11,29 +13,15 @@ from promptflow.src.db_interface.pgml_constants import (
 )
 
 
-class DBInterface:
-    def __init__(self, dbname: str, user: str, password: str, host: str, port: str):
-        self.dbname = dbname
-        self.user = user
-        self.password = password
-        self.host = host
-        self.port = port
+class SQLBase(ABC):
+    connection: Any
+    cursor: Any
 
-        self.connection = None
-        self.cursor = None
-
+    @abstractmethod
     def connect(self):
         """Connect to the database."""
-        self.connection = psycopg2.connect(
-            dbname=self.dbname,
-            user=self.user,
-            password=self.password,
-            host=self.host,
-            port=self.port,
-        )
-        self.cursor = self.connection.cursor()
 
-    def _run_query(self, query: str) -> list[tuple[Any, ...]]:
+    def run_query(self, query: str) -> list[tuple[Any, ...]]:
         if self.connection is None or self.cursor is None:
             raise RuntimeError("Not connected to database.")
         try:
@@ -56,7 +44,7 @@ class DBInterface:
         for column, _type in zip(columns, types):
             query += f"{column} {_type},"
         query = query[:-1] + ");"
-        self._run_query(query)
+        self.run_query(query)
         return True
 
     def select(self, query: str, where: Optional[str] = None) -> list[tuple[Any, ...]]:
@@ -64,10 +52,45 @@ class DBInterface:
         if where:
             query += f" WHERE {where}"
         query += ";"
-        return self._run_query(query)
+        return self.run_query(query)
 
 
-class PgMLInterface(DBInterface):
+class PGInterface(SQLBase):
+    def __init__(self, dbname: str, user: str, password: str, host: str, port: str):
+        self.dbname = dbname
+        self.user = user
+        self.password = password
+        self.host = host
+        self.port = port
+
+        self.connection = None
+        self.cursor = None
+
+    def connect(self):
+        """Connect to the database."""
+        self.connection = psycopg2.connect(
+            dbname=self.dbname,
+            user=self.user,
+            password=self.password,
+            host=self.host,
+            port=self.port,
+        )
+        self.cursor = self.connection.cursor()
+
+
+class SQLiteInterface(SQLBase):
+    def __init__(self, dbname: str, *args, **kwargs):
+        self.db_path = dbname
+        self.connection = None
+        self.cursor = None
+
+    def connect(self):
+        """Connect to the database."""
+        self.connection = sqlite3.connect(self.db_path)
+        self.cursor = self.connection.cursor()
+
+
+class PgMLInterface(PGInterface):
     def train(
         self,
         project_name: str,
@@ -114,7 +137,7 @@ class PgMLInterface(DBInterface):
             args.append(f"preprocessing => '{preprocessing}'::JSONB")
         args.append(");")
         query += "\n".join(args)
-        return self._run_query(query)
+        return self.run_query(query)
 
     def train_joint(
         self,
@@ -171,7 +194,7 @@ class PgMLInterface(DBInterface):
             args.append(f"preprocessing => '{preprocessing}'::JSONB")
         args.append(");")
         query += "\n".join(args)
-        return self._run_query(query)
+        return self.run_query(query)
 
     def load_dataset(
         self, datset: str, kwargs: Optional[dict[str, str]] = None
@@ -182,11 +205,11 @@ class PgMLInterface(DBInterface):
         if kwargs is not None:
             query += f", kwargs => '{kwargs}'"
         query += ");"
-        return self._run_query(query)
+        return self.run_query(query)
 
     def overview(self):
         query = "SELECT * FROM pgml.overview;"
-        return self._run_query(query)
+        return self.run_query(query)
 
     def predict(self, project_name: str, features: Union[str, list[float]]):
         query = f"SELECT pgml.predict('{project_name}', "
@@ -195,11 +218,11 @@ class PgMLInterface(DBInterface):
         else:
             query += f"ARRAY{features}"
         query += ") AS prediction;"
-        return self._run_query(query)
+        return self.run_query(query)
 
     def deployed_models(self):
         query = "SELECT * FROM pgml.deployed_models;"
-        return self._run_query(query)
+        return self.run_query(query)
 
     def deploy(
         self,
@@ -213,13 +236,13 @@ class PgMLInterface(DBInterface):
         if algorithm is not None:
             query += f"algorithm => '{algorithm}',"
         query += ");"
-        return self._run_query(query)
+        return self.run_query(query)
 
     def predict_batch(
         self, project_name: str, features: list[float], relation_name: str
     ):
         query = f"SELECT pgml.predict_batch('{project_name}', array_agg(ARRAY{features})) AS prediction FROM {relation_name};"
-        return self._run_query(query)
+        return self.run_query(query)
 
     def transform(
         self,
@@ -241,7 +264,7 @@ class PgMLInterface(DBInterface):
         if cache:
             query += ", cache => TRUE"
         query += ") AS prediction;"
-        return self._run_query(query)
+        return self.run_query(query)
 
     def tune(
         self,
@@ -264,11 +287,11 @@ class PgMLInterface(DBInterface):
             test_size => {test_size},
             test_sampling => '{test_sampling}
             );"""
-        return self._run_query(query)
+        return self.run_query(query)
 
     def generate(self, project_name: str, string: str):
         query = f"SELECT pgml.generate('{project_name}', '{string}') AS result;"
-        return self._run_query(query)
+        return self.run_query(query)
 
     def predict_proba(self, project_name: str, features: Union[str, list[float]]):
         query = f"SELECT pgml.predict_proba({project_name}, "
@@ -277,7 +300,7 @@ class PgMLInterface(DBInterface):
         else:
             query += f"ARRAY{features}"
         query += ") AS prediction;"
-        return self._run_query(query)
+        return self.run_query(query)
 
     def embed(
         self, transformer: str, text: str, kwargs: Optional[dict[str, Any]] = None
@@ -286,78 +309,81 @@ class PgMLInterface(DBInterface):
         if kwargs is not None:
             query += f", kwargs => '{kwargs}'"
         query += ");"
-        return self._run_query(query)
+        return self.run_query(query)
 
     def cosine_similarity(self, vec1: list[float], vec2: list[float]):
         query = f"""SELECT pgml.cosine_similarity(ARRAY{vec1}, ARRAY{vec2});"""
-        return self._run_query(query)
+        return self.run_query(query)
 
     def add(self, vec1: list[float], vec2: list[float]):
         query = f"""SELECT pgml.add(ARRAY{vec1}, ARRAY{vec2});"""
-        return self._run_query(query)
+        return self.run_query(query)
 
     def subtract(self, vec1: list[float], vec2: list[float]):
         query = f"""SELECT pgml.subtract(ARRAY{vec1}, ARRAY{vec2});"""
-        return self._run_query(query)
+        return self.run_query(query)
 
     def multiply(self, vec1: list[float], vec2: list[float]):
         query = f"""SELECT pgml.multiply(ARRAY{vec1}, ARRAY{vec2});"""
-        return self._run_query(query)
+        return self.run_query(query)
 
     def divide(self, vec1: list[float], vec2: list[float]):
         query = f"""SELECT pgml.divide(ARRAY{vec1}, ARRAY{vec2});"""
-        return self._run_query(query)
+        return self.run_query(query)
 
     def norm_l0(self, vec: list[float]):
         """Dimensions not at origin"""
         query = f"""SELECT pgml.norm_l0(ARRAY{vec});"""
-        return self._run_query(query)
+        return self.run_query(query)
 
     def norm_l1(self, vec: list[float]):
         """Manhattan distance from origin"""
         query = f"""SELECT pgml.norm_l1(ARRAY{vec});"""
-        return self._run_query(query)
+        return self.run_query(query)
 
     def norm_l2(self, vec: list[float]):
         """Euclidean distance from origin"""
         query = f"""SELECT pgml.norm_l2(ARRAY{vec});"""
-        return self._run_query(query)
+        return self.run_query(query)
 
     def norm_max(self, vec: list[float]):
         """Absolute value of largest element"""
         query = f"""SELECT pgml.norm_max(ARRAY{vec});"""
-        return self._run_query(query)
+        return self.run_query(query)
 
     def normalize_l1(self, vec: list[float]):
         """Unit Vector"""
         query = f"""SELECT pgml.normalize_l1(ARRAY{vec});"""
-        return self._run_query(query)
+        return self.run_query(query)
 
     def normalize_l2(self, vec: list[float]):
         """Squared Unit Vector"""
         query = f"""SELECT pgml.normalize_l2(ARRAY{vec});"""
-        return self._run_query(query)
+        return self.run_query(query)
 
     def normalize_max(self, vec: list[float]):
         """-1:1 Values"""
         query = f"""SELECT pgml.normalize_max(ARRAY{vec});"""
-        return self._run_query(query)
+        return self.run_query(query)
 
     def distance_l1(self, vec1: list[float], vec2: list[float]):
         """Manhattan distance between vectors"""
         query = f"""SELECT pgml.distance_l1(ARRAY{vec1}, ARRAY{vec2});"""
-        return self._run_query(query)
+        return self.run_query(query)
 
     def distance_l2(self, vec1: list[float], vec2: list[float]):
         """Euclidean distance between vectors"""
         query = f"""SELECT pgml.distance_l2(ARRAY{vec1}, ARRAY{vec2});"""
-        return self._run_query(query)
+        return self.run_query(query)
 
     def dot_product(self, vec1: list[float], vec2: list[float]):
         """Projection"""
         query = f"""SELECT pgml.dot_product(ARRAY{vec1}, ARRAY{vec2});"""
-        return self._run_query(query)
+        return self.run_query(query)
 
     def projects(self):
         query = "SELECT * from pgml.projects;"
-        return self._run_query(query)
+        return self.run_query(query)
+
+
+interfaces = [PGInterface, SQLiteInterface, PgMLInterface]
