@@ -6,7 +6,7 @@ PromptFlow is a tool that allows you to create executable flowcharts that link L
 
 ![screenshot](screenshots/readme/heroscreenshot.png)
 
-#### Join our Discord: [https://discord.gg/EPfy9nye](https://discord.gg/EPfy9nye)
+#### Join our Discord: [https://discord.gg/5MmV3FNCtN](https://discord.gg/5MmV3FNCtN)
 
 ## How it works
 
@@ -55,4 +55,4 @@ Then open `docs/build/html/index.html` in your browser.
 
 If you are interested in contributing to PromptFlow, you can do so through [building a node](https://www.promptflow.org/en/latest/development.html#starting-point-adding-a-node).
 
-If you find any bugs, do not hesitate to create an issue or open a PR or let us know in [Discord](https://discord.gg/EPfy9nye).
+If you find any bugs, do not hesitate to create an issue or open a PR or let us know in [Discord](https://discord.gg/5MmV3FNCtN).
