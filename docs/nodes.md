@@ -50,6 +50,10 @@ Saves the output of the previous node to a running history. Useful for chatbots 
 
 For a simple example of History Node usage, see [Usage](working-with-llms).
 
+### ManualHistory
+
+Allows the user to manually create an extended conversation history before runtime. Double-click to edit the history.
+
 (Prompt)=
 
 ## Prompt

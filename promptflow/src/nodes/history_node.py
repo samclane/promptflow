@@ -2,8 +2,8 @@
 Manages writing history to state
 """
 import tkinter as tk
-from enum import Enum
 from typing import TYPE_CHECKING, Any, Optional
+from promptflow.src.dialogues.history_editor import HistoryEditor, Role
 
 from promptflow.src.dialogues.node_options import NodeOptions
 from promptflow.src.nodes.node_base import NodeBase
@@ -14,14 +14,6 @@ if TYPE_CHECKING:
     from promptflow.src.flowchart import Flowchart
 
 from promptflow.src.themes import monokai
-
-
-class Role(Enum):
-    """Three types of roles for openai chat"""
-
-    USER = "user"
-    SYSTEM = "system"
-    ASSISTANT = "assistant"
 
 
 class HistoryNode(NodeBase):
@@ -63,7 +55,7 @@ class HistoryNode(NodeBase):
         self.options_popup: Optional[NodeOptions] = None
 
     def run_subclass(
-        self, before_result: Any, state, console: tk.scrolledtext.ScrolledText
+        self, before_result: Any, state: State, console: tk.scrolledtext.ScrolledText
     ) -> str:
         """
         Injects date into state
@@ -93,3 +85,36 @@ class HistoryNode(NodeBase):
         return super().serialize() | {
             "role": self.role_var.get(),
         }
+
+
+class ManualHistoryNode(NodeBase):
+    """
+    Allows the user to specify a long history manually
+    """
+
+    def __init__(
+        self,
+        *args,
+        **kwargs,
+    ):
+        super().__init__(
+            *args,
+            **kwargs,
+        )
+        self.manual_history = kwargs.pop("manual_history", [])
+        self.history_popup = None
+
+    def edit_options(self, event):
+        # show the history editor
+        self.history_popup = HistoryEditor(self.canvas, self.manual_history)
+        self.canvas.wait_window(self.history_popup)
+        self.manual_history = self.history_popup.history
+
+    def run_subclass(
+        self, before_result: Any, state, console: tk.scrolledtext.ScrolledText
+    ) -> str:
+        state.history.extend(self.manual_history)
+        return state.result
+
+    def serialize(self):
+        return super().serialize() | {self.manual_history}

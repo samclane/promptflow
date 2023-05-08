@@ -10,12 +10,12 @@ from queue import Queue
 from typing import Any, Optional
 from promptflow.src.nodes.node_base import NodeBase
 from promptflow.src.nodes.start_node import InitNode, StartNode
-from promptflow.src.nodes.input_node import (InputNode, FileInput)
+from promptflow.src.nodes.input_node import InputNode, FileInput
 from promptflow.src.nodes.func_node import FuncNode
 from promptflow.src.nodes.llm_node import LLMNode
 from promptflow.src.nodes.date_node import DateNode
 from promptflow.src.nodes.random_number import RandomNode
-from promptflow.src.nodes.history_node import HistoryNode
+from promptflow.src.nodes.history_node import HistoryNode, ManualHistoryNode
 from promptflow.src.nodes.dummy_llm_node import DummyNode
 from promptflow.src.nodes.prompt_node import PromptNode
 from promptflow.src.nodes.memory_node import (
