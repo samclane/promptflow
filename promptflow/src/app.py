@@ -42,7 +42,7 @@ from promptflow.src.nodes.prompt_node import PromptNode
 from promptflow.src.nodes.func_node import FuncNode
 from promptflow.src.nodes.llm_node import LLMNode
 from promptflow.src.nodes.random_number import RandomNode
-from promptflow.src.nodes.history_node import HistoryNode
+from promptflow.src.nodes.history_node import HistoryNode, ManualHistoryNode
 from promptflow.src.nodes.memory_node import (
     MemoryNode,
     WindowedMemoryNode,
@@ -185,10 +185,16 @@ class App:
             label="LLM - Pass text to LLM of choice",
             command=self.create_add_node_function(LLMNode, "LLM"),
         )
-        self.add_menu.add_command(
+        self.history_menu = tk.Menu(self.add_menu, tearoff=0)
+        self.history_menu.add_command(
             label="History - Save result to chat history",
             command=self.create_add_node_function(HistoryNode, "History"),
         )
+        self.history_menu.add_command(
+            label="Manual History - Manually set chat history",
+            command=self.create_add_node_function(ManualHistoryNode, "Manual History"),
+        )
+        self.add_menu.add_cascade(label="History", menu=self.history_menu)
         self.add_menu.add_command(
             label="HTTP - Send HTTP request",
             command=self.create_add_node_function(HttpNode, "HTTP"),
