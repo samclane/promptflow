@@ -216,7 +216,7 @@ class SQLiteQueryNode(DBNode):
         self.interface.update(self.dbname)
 
 
-class PGSelectNode(DBNode):
+class PGQueryNode(DBNode):
     def __init__(
         self,
         flowchart: Flowchart,
@@ -231,7 +231,8 @@ class PGSelectNode(DBNode):
         self, before_result: Any, state, console: tkinter.scrolledtext.ScrolledText
     ) -> str:
         super().run_subclass(before_result, state, console)
-        select = self.interface.interface.select(state.result)[0][0]
+        # select = self.interface.interface.select(state.result)[0][0]
+        select = self.interface.interface.run_query(state.result)
         return select
 
 

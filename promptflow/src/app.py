@@ -34,7 +34,7 @@ from promptflow.src.nodes.db_node import (
     PGMLNode,
     PGGenerateNode,
     SQLiteQueryNode,
-    PGSelectNode,
+    PGQueryNode,
 )
 from promptflow.src.nodes.regex_node import RegexNode, TagNode
 from promptflow.src.nodes.start_node import InitNode, StartNode
@@ -235,8 +235,8 @@ class App:
             command=self.create_add_node_function(SQLiteQueryNode, "SQLite Query"),
         )
         self.db_menu.add_command(
-            label="PG Select - Query a PostgreSQL database",
-            command=self.create_add_node_function(PGSelectNode, "PG Select"),
+            label="PG Query - Query a PostgreSQL database",
+            command=self.create_add_node_function(PGQueryNode, "PG Query"),
         )
         self.db_menu.add_command(
             label="Generate - Generate next text from PGML model",
