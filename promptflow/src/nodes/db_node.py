@@ -190,12 +190,8 @@ class PGMLNode(DBNode):
         )
 
 
-class SelectNode(DBNode):
-    def __init__(
-        self,
-        *args,
-        **kwargs,
-    ):
+class SQLiteSelectNode(DBNode):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, SQLiteInterface, **kwargs)
 
     def run_subclass(
@@ -239,7 +235,7 @@ class PGSelectNode(DBNode):
         return select
 
 
-class GenerateNode(PGMLNode):
+class PGGenerateNode(PGMLNode):
     def run_subclass(
         self, before_result: Any, state, console: tkinter.scrolledtext.ScrolledText
     ) -> str:
