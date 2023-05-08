@@ -34,7 +34,13 @@ Sets a single environment variable. Double-click to set the key and value.
 
 ## Input
 
+### User Input
+
 Pauses the flowchart and waits for user input. Useful for chatbots or interactive programs.
+
+### FileInput
+
+Allows the user to preselect a file. The file output is saved to `state.result` on run.
 
 (History)=
 

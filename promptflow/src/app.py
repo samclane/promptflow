@@ -53,7 +53,7 @@ from promptflow.src.nodes.embedding_node import (
     EmbeddingQueryNode,
     EmbeddingsIngestNode,
 )
-from promptflow.src.nodes.input_node import InputNode
+from promptflow.src.nodes.input_node import FileInput, InputNode
 from promptflow.src.nodes.test_nodes import AssertNode, LoggingNode
 from promptflow.src.options import Options
 from promptflow.src.nodes.dummy_llm_node import DummyNode
@@ -163,10 +163,16 @@ class App:
             command=self.create_add_node_function(ManualEnvNode, "Manual"),
         )
         self.add_menu.add_cascade(label="Environment Variables", menu=self.envvars_menu)
-        self.add_menu.add_command(
+        self.input_menu = tk.Menu(self.add_menu, tearoff=0)
+        self.input_menu.add_command(
             label="Input - Pause for user input",
             command=self.create_add_node_function(InputNode, "Input"),
         )
+        self.input_menu.add_command(
+            label="File - Read file from disk",
+            command=self.create_add_node_function(FileInput, "File"),
+        )
+        self.add_menu.add_cascade(label="Input", menu=self.input_menu)
         self.add_menu.add_command(
             label="Prompt - Format custom text",
             command=self.create_add_node_function(PromptNode, "Prompt"),
@@ -195,7 +201,7 @@ class App:
             ),
         )
         self.add_memory_menu.add_command(
-            label="Dynamic Windowed Memory - Save to memory based on last occurance of text",
+            label="Dynamic Windowed Memory - Save to memory based on last occurrence of text",
             command=self.create_add_node_function(
                 DynamicWindowedMemoryNode, "Dynamic Windowed Memory"
             ),
