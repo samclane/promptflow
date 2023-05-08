@@ -10,7 +10,6 @@ from promptflow.src.db_interface.main import (
     SQLiteInterface,
 )
 from promptflow.src.dialogues.node_options import NodeOptions
-from promptflow.src.flowchart import Flowchart
 from promptflow.src.nodes.node_base import NodeBase
 from promptflow.src.themes import monokai
 
@@ -219,7 +218,7 @@ class SQLiteQueryNode(DBNode):
 class PGQueryNode(DBNode):
     def __init__(
         self,
-        flowchart: Flowchart,
+        flowchart: "Flowchart",
         center_x: float,
         center_y: float,
         label: str,
