@@ -199,7 +199,7 @@ class SQLiteQueryNode(DBNode):
     ) -> str:
         super().run_subclass(before_result, state, console)
         select = self.interface.interface.run_query(state.result)
-        return select
+        return str(select)
 
     def edit_options(self, event):
         self.options_popup = NodeOptions(
@@ -231,9 +231,8 @@ class PGQueryNode(DBNode):
         self, before_result: Any, state, console: tkinter.scrolledtext.ScrolledText
     ) -> str:
         super().run_subclass(before_result, state, console)
-        # select = self.interface.interface.select(state.result)[0][0]
         select = self.interface.interface.run_query(state.result)
-        return select
+        return str(select)
 
 
 class PGGenerateNode(PGMLNode):
