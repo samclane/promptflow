@@ -190,7 +190,7 @@ class PGMLNode(DBNode):
         )
 
 
-class SQLiteSelectNode(DBNode):
+class SQLiteQueryNode(DBNode):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, SQLiteInterface, **kwargs)
 
@@ -198,7 +198,7 @@ class SQLiteSelectNode(DBNode):
         self, before_result: Any, state, console: tkinter.scrolledtext.ScrolledText
     ) -> str:
         super().run_subclass(before_result, state, console)
-        select = self.interface.interface.select(state.result)
+        select = self.interface.interface.run_query(state.result)
         return select
 
     def edit_options(self, event):

@@ -33,7 +33,7 @@ from promptflow.src.nodes.node_base import NodeBase
 from promptflow.src.nodes.db_node import (
     PGMLNode,
     PGGenerateNode,
-    SQLiteSelectNode,
+    SQLiteQueryNode,
     PGSelectNode,
 )
 from promptflow.src.nodes.regex_node import RegexNode, TagNode
@@ -231,8 +231,8 @@ class App:
         self.add_menu.add_cascade(label="Embedding", menu=self.embedding_menu)
         self.db_menu = tk.Menu(self.add_menu, tearoff=0)
         self.db_menu.add_command(
-            label="Select - Query a SQLite database",
-            command=self.create_add_node_function(SQLiteSelectNode, "Select"),
+            label="Query - Query a SQLite database",
+            command=self.create_add_node_function(SQLiteQueryNode, "SQLite Query"),
         )
         self.db_menu.add_command(
             label="PG Select - Query a PostgreSQL database",
