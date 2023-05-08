@@ -79,7 +79,7 @@ class PGInterface(SQLBase):
 
 
 class SQLiteInterface(SQLBase):
-    def __init__(self, dbname: str, **kwargs):
+    def __init__(self, dbname: str, *args, **kwargs):
         self.db_path = dbname
         self.connection = None
         self.cursor = None

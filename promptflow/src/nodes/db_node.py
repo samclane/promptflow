@@ -2,7 +2,12 @@ from abc import ABC
 import logging
 import tkinter
 from typing import Any, Callable, Optional, TYPE_CHECKING
-from promptflow.src.db_interface.main import PGInterface, PgMLInterface, SQLBase, SQLiteInterface
+from promptflow.src.db_interface.main import (
+    PGInterface,
+    PgMLInterface,
+    SQLBase,
+    SQLiteInterface,
+)
 from promptflow.src.dialogues.node_options import NodeOptions
 from promptflow.src.flowchart import Flowchart
 from promptflow.src.nodes.node_base import NodeBase
@@ -185,7 +190,7 @@ class SelectNode(DBNode):
         *args,
         **kwargs,
     ):
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, SQLiteInterface, **kwargs)
 
     def run_subclass(
         self, before_result: Any, state, console: tkinter.scrolledtext.ScrolledText
