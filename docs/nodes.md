@@ -42,6 +42,14 @@ Pauses the flowchart and waits for user input. Useful for chatbots or interactiv
 
 Allows the user to preselect a file. The file output is saved to `state.result` on run.
 
+(Output)=
+
+## Output
+
+### FileOutput
+
+Writes the `state.result` to a file. Double-click to edit the file path.
+
 (History)=
 
 ## History
