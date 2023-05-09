@@ -235,6 +235,15 @@ Like the [`Regex`](Regex) node, but extracts text in-between tags. For example, 
 
 Validate JSON against a user-provided schema. Double-click to edit the schema.
 
+(Search)=
+## Search
+
+Nodes that search the web
+
+### SerpApi
+
+Uses [SerpApi](https://serpapi.com/) to search the web using the result of the previous query.
+
 (Test)=
 
 ## Test Nodes
