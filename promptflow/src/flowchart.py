@@ -32,6 +32,7 @@ from promptflow.src.nodes.test_nodes import AssertNode
 from promptflow.src.nodes.env_node import EnvNode, ManualEnvNode
 from promptflow.src.nodes.audio_node import WhispersNode, ElevenLabsNode
 from promptflow.src.nodes.db_node import PGQueryNode, SQLiteQueryNode, PGGenerateNode
+from promptflow.src.nodes.structured_data_node import JsonNode
 from promptflow.src.connectors.connector import Connector
 from promptflow.src.connectors.partial_connector import PartialConnector
 from promptflow.src.state import State
