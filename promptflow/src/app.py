@@ -54,6 +54,7 @@ from promptflow.src.nodes.embedding_node import (
     EmbeddingsIngestNode,
 )
 from promptflow.src.nodes.input_node import FileInput, InputNode
+from promptflow.src.nodes.structured_data_node import JsonNode
 from promptflow.src.nodes.test_nodes import AssertNode, LoggingNode
 from promptflow.src.options import Options
 from promptflow.src.nodes.dummy_llm_node import DummyNode
@@ -223,6 +224,14 @@ class App:
             command=self.create_add_node_function(TagNode, "Tag"),
         )
         self.add_menu.add_cascade(label="Regex", menu=self.regex_menu)
+        self.structured_data_menu = tk.Menu(self.add_menu, tearoff=0)
+        self.structured_data_menu.add_command(
+            label="JSON - Parse and validate JSON",
+            command=self.create_add_node_function(JsonNode, "JSON"),
+        )
+        self.add_menu.add_cascade(
+            label="Structured Data", menu=self.structured_data_menu
+        )
         self.embedding_menu = tk.Menu(self.add_menu, tearoff=0)
         self.embedding_menu.add_command(
             label="Embedding In - Embed result and save to hnswlib",

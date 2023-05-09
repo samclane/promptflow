@@ -227,6 +227,14 @@ Runs a regex on the `state.result`. Double-click the node to edit the regex. Ret
 
 Like the [`Regex`](Regex) node, but extracts text in-between tags. For example, if the `state.result` is `Hello <name>World</name>`, adding `start=<name>` and `end=</name>` would return `World`. Double-click the node to edit the start and end tags.
 
+(StructuredData)=
+
+## Structured Data
+
+### JSON
+
+Validate JSON against a user-provided schema. Double-click to edit the schema.
+
 (Test)=
 
 ## Test Nodes
