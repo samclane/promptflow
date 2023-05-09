@@ -56,6 +56,7 @@ from promptflow.src.nodes.embedding_node import (
 from promptflow.src.nodes.input_node import FileInput, InputNode
 from promptflow.src.nodes.structured_data_node import JsonNode
 from promptflow.src.nodes.test_nodes import AssertNode, LoggingNode
+from promptflow.src.nodes.websearch_node import SerpApiNode
 from promptflow.src.options import Options
 from promptflow.src.nodes.dummy_llm_node import DummyNode
 from promptflow.src.state import State
@@ -232,6 +233,12 @@ class App:
         self.add_menu.add_cascade(
             label="Structured Data", menu=self.structured_data_menu
         )
+        self.search_nodes_menu = tk.Menu(self.add_menu, tearoff=0)
+        self.search_nodes_menu.add_command(
+            label="SerpAPI - Search Google with SerpAPI",
+            command=self.create_add_node_function(SerpApiNode, "SerpAPI"),
+        )
+        self.add_menu.add_cascade(label="Search Nodes", menu=self.search_nodes_menu)
         self.embedding_menu = tk.Menu(self.add_menu, tearoff=0)
         self.embedding_menu.add_command(
             label="Embedding In - Embed result and save to hnswlib",
