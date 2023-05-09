@@ -22,7 +22,7 @@ class SerpApiNode(WebSearchNode):
     def run_subclass(self, before_result: Any, state, console: tk.scrolledtext.ScrolledText) -> str:
         searchParams = {
             "engine": "google",
-            "q": state.result,
+            "q": str(state.result),
             "location": "Austin, Texas, United States",
             "google_domain": "google.com",
             "gl": "us",
