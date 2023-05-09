@@ -36,6 +36,7 @@ from promptflow.src.nodes.db_node import (
     SQLiteQueryNode,
     PGQueryNode,
 )
+from promptflow.src.nodes.output_node import FileOutput
 from promptflow.src.nodes.regex_node import RegexNode, TagNode
 from promptflow.src.nodes.start_node import InitNode, StartNode
 from promptflow.src.nodes.prompt_node import PromptNode
@@ -175,6 +176,12 @@ class App:
             command=self.create_add_node_function(FileInput, "File"),
         )
         self.add_menu.add_cascade(label="Input", menu=self.input_menu)
+        self.output_menu = tk.Menu(self.add_menu, tearoff=0)
+        self.output_menu.add_command(
+            label="File - Write to file on disk",
+            command=self.create_add_node_function(FileOutput, "File"),
+        )
+        self.add_menu.add_cascade(label="Output", menu=self.output_menu)
         self.add_menu.add_command(
             label="Prompt - Format custom text",
             command=self.create_add_node_function(PromptNode, "Prompt"),
