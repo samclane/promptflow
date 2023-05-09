@@ -8,6 +8,7 @@ from typing import Any
 import jsonschema
 from promptflow.src.dialogues.text_input import TextInput
 from promptflow.src.nodes.node_base import NodeBase
+from promptflow.src.text_data import TextData
 
 
 class StructuredDataNode(NodeBase, ABC):
@@ -17,6 +18,10 @@ class StructuredDataNode(NodeBase, ABC):
 
     schema = None
     text_input = None
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.schema = kwargs.get("schema", None)
 
     @abstractmethod
     def validate(self, data):
@@ -30,6 +35,9 @@ class StructuredDataNode(NodeBase, ABC):
         validation: str = self.validate(state.result)
         return validation
 
+    def serialize(self):
+        return super().serialize() | {"schema": self.schema}
+
 
 class JsonNode(StructuredDataNode):
     """
@@ -41,7 +49,10 @@ class JsonNode(StructuredDataNode):
         Allow user to edit the schema.
         """
         # create a text input dialogue
-        self.text_input = TextInput(self.canvas, self.flowchart, self.schema)
+        text_data = TextData(
+            "Schema", json.dumps(self.schema, indent=4), self.flowchart
+        )
+        self.text_input = TextInput(self.canvas, self.flowchart, text_data)
         self.text_input.set_callback(self.save_options)
 
     def validate(self, data):
