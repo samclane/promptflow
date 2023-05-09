@@ -115,6 +115,7 @@ class HistoryEditor(customtkinter.CTkToplevel):
     def add_entry(self, index):
         role = customtkinter.CTkComboBox(self, values=[role.value for role in Role])
         role.grid(row=index, column=0, padx=(10, 5), pady=(5, 5), sticky="e")
+        role.set(self.history[index]["role"])
 
         content = customtkinter.CTkEntry(self)
         content.grid(row=index, column=1, padx=(5, 10), pady=(5, 5), sticky="w")
