@@ -28,7 +28,7 @@ from promptflow.src.flowchart import Flowchart
 from promptflow.src.nodes.audio_node import ElevenLabsNode, WhispersNode
 from promptflow.src.nodes.date_node import DateNode
 from promptflow.src.nodes.env_node import EnvNode, ManualEnvNode
-from promptflow.src.nodes.http_node import HttpNode
+from promptflow.src.nodes.http_node import HttpNode, JSONRequestNode
 from promptflow.src.nodes.node_base import NodeBase
 from promptflow.src.nodes.db_node import (
     PGMLNode,
@@ -36,7 +36,7 @@ from promptflow.src.nodes.db_node import (
     SQLiteQueryNode,
     PGQueryNode,
 )
-from promptflow.src.nodes.output_node import FileOutput
+from promptflow.src.nodes.output_node import FileOutput, JSONFileOutput
 from promptflow.src.nodes.regex_node import RegexNode, TagNode
 from promptflow.src.nodes.start_node import InitNode, StartNode
 from promptflow.src.nodes.prompt_node import PromptNode
@@ -54,7 +54,7 @@ from promptflow.src.nodes.embedding_node import (
     EmbeddingQueryNode,
     EmbeddingsIngestNode,
 )
-from promptflow.src.nodes.input_node import FileInput, InputNode
+from promptflow.src.nodes.input_node import FileInput, InputNode, JSONFileInput
 from promptflow.src.nodes.structured_data_node import JsonNode
 from promptflow.src.nodes.test_nodes import AssertNode, LoggingNode
 from promptflow.src.nodes.websearch_node import SerpApiNode
@@ -175,11 +175,19 @@ class App:
             label="File - Read file from disk",
             command=self.create_add_node_function(FileInput, "File"),
         )
+        self.input_menu.add_command(
+            label="JSON Parsed File - Read file from disk parsed from JSON",
+            command=self.create_add_node_function(JSONFileInput, "JSON Input File"),
+        )
         self.add_menu.add_cascade(label="Input", menu=self.input_menu)
         self.output_menu = tk.Menu(self.add_menu, tearoff=0)
         self.output_menu.add_command(
             label="File - Write to file on disk",
             command=self.create_add_node_function(FileOutput, "File"),
+        )
+        self.output_menu.add_command(
+            label="JSON Parsed File - Write to file on disk parsed from JSON",
+            command=self.create_add_node_function(JSONFileOutput, "JSON Output File"),
         )
         self.add_menu.add_cascade(label="Output", menu=self.output_menu)
         self.add_menu.add_command(
@@ -204,10 +212,18 @@ class App:
             command=self.create_add_node_function(ManualHistoryNode, "Manual History"),
         )
         self.add_menu.add_cascade(label="History", menu=self.history_menu)
-        self.add_menu.add_command(
+        self.requests_menu = tk.Menu(self.add_menu, tearoff=0)
+        self.requests_menu.add_command(
             label="HTTP - Send HTTP request",
             command=self.create_add_node_function(HttpNode, "HTTP"),
         )
+        self.requests_menu.add_command(
+            label="JSON Request - Send HTTP request to a url parsed from JSON",
+            command=self.create_add_node_function(
+                JSONRequestNode, "JSON-Parsed Request"
+            ),
+        )
+        self.add_menu.add_cascade(label="Requests", menu=self.requests_menu)
         self.add_memory_menu = tk.Menu(self.add_menu, tearoff=0)
         self.add_memory_menu.add_command(
             label="Windowed Memory - Save to memory with a window",

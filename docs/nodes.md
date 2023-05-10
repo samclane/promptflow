@@ -42,6 +42,10 @@ Pauses the flowchart and waits for user input. Useful for chatbots or interactiv
 
 Allows the user to preselect a file. The file output is saved to `state.result` on run.
 
+### JSONFileInput
+
+Parses `key` from `state.result` and opens the file. Double-click to edit the key.
+
 (Output)=
 
 ## Output
@@ -49,6 +53,10 @@ Allows the user to preselect a file. The file output is saved to `state.result` 
 ### FileOutput
 
 Writes the `state.result` to a file. Double-click to edit the file path.
+
+### JSONFileOutput
+
+Parses a filename and a data key from `state.result` and writes the data to the file. Double-click to edit the filename and data key.
 
 (History)=
 
@@ -215,6 +223,10 @@ Queries an hnswlib index and returns the result. Double click to edit the number
 Allows the flowchart to make HTTP requests. Double-click the node to edit the request type (GET, POST, etc), the URL, and the request body. **The `state.result` will be put into the `json` parameter.**
 
 ![image](../screenshots/docs/http_options.png)
+
+### JSONHttpRequest
+
+Parses a url from `state.result` and makes a request. Double-click the node to edit the url key.
 
 
 (RandomNumber)=
