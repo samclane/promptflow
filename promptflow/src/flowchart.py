@@ -35,6 +35,7 @@ from promptflow.src.nodes.db_node import PGQueryNode, SQLiteQueryNode, PGGenerat
 from promptflow.src.nodes.structured_data_node import JsonNode
 from promptflow.src.nodes.websearch_node import SerpApiNode
 from promptflow.src.nodes.output_node import FileOutput, JSONFileOutput
+from promptflow.src.nodes.http_node import HttpNode, JSONRequestNode
 from promptflow.src.connectors.connector import Connector
 from promptflow.src.connectors.partial_connector import PartialConnector
 from promptflow.src.state import State
