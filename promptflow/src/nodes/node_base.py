@@ -205,6 +205,7 @@ class NodeBase(Serializable, ABC):
             return
         self.label = self.label_entry.get()
         self.label_entry.destroy()
+        self.label_entry = None
         center_x, center_y = self.get_center()
         self.label_item = self.canvas.create_text(
             center_x,
@@ -245,6 +246,10 @@ class NodeBase(Serializable, ABC):
         delta_y = event.y - self.center_y
         for item in self.items:
             self.canvas.move(item, delta_x, delta_y)
+        if self.label_entry is not None:
+            # destroy the label entry if it exists
+            self.finish_edit_label(event)
+            self.label_entry = None
         self.center_x = event.x
         self.center_y = event.y
         for connector in self.connectors:
@@ -304,6 +309,9 @@ class NodeBase(Serializable, ABC):
         for item in self.items:
             self.logger.debug(f"Deleting item {item}")
             self.canvas.delete(item)
+
+        if self.label_entry is not None:
+            self.label_entry.destroy()
 
         for button in self.buttons:
             button.destroy()

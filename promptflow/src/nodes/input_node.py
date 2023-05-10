@@ -21,7 +21,7 @@ class InputNode(NodeBase):
         return {"input": dialog.get_input()}
 
     def run_subclass(self, before_result, state, console):
-        if before_result['input'] == '':
+        if before_result["input"] == "":
             return None
         return before_result["input"]
 
