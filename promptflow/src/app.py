@@ -30,14 +30,20 @@ from promptflow.src.nodes.date_node import DateNode
 from promptflow.src.nodes.env_node import EnvNode, ManualEnvNode
 from promptflow.src.nodes.http_node import HttpNode
 from promptflow.src.nodes.node_base import NodeBase
-from promptflow.src.nodes.db_node import PGMLNode, GenerateNode, SelectNode
+from promptflow.src.nodes.db_node import (
+    PGMLNode,
+    PGGenerateNode,
+    SQLiteQueryNode,
+    PGQueryNode,
+)
+from promptflow.src.nodes.output_node import FileOutput
 from promptflow.src.nodes.regex_node import RegexNode, TagNode
 from promptflow.src.nodes.start_node import InitNode, StartNode
 from promptflow.src.nodes.prompt_node import PromptNode
 from promptflow.src.nodes.func_node import FuncNode
 from promptflow.src.nodes.llm_node import LLMNode
 from promptflow.src.nodes.random_number import RandomNode
-from promptflow.src.nodes.history_node import HistoryNode
+from promptflow.src.nodes.history_node import HistoryNode, ManualHistoryNode
 from promptflow.src.nodes.memory_node import (
     MemoryNode,
     WindowedMemoryNode,
@@ -48,8 +54,10 @@ from promptflow.src.nodes.embedding_node import (
     EmbeddingQueryNode,
     EmbeddingsIngestNode,
 )
-from promptflow.src.nodes.input_node import InputNode
+from promptflow.src.nodes.input_node import FileInput, InputNode
+from promptflow.src.nodes.structured_data_node import JsonNode
 from promptflow.src.nodes.test_nodes import AssertNode, LoggingNode
+from promptflow.src.nodes.websearch_node import SerpApiNode
 from promptflow.src.options import Options
 from promptflow.src.nodes.dummy_llm_node import DummyNode
 from promptflow.src.state import State
@@ -158,10 +166,22 @@ class App:
             command=self.create_add_node_function(ManualEnvNode, "Manual"),
         )
         self.add_menu.add_cascade(label="Environment Variables", menu=self.envvars_menu)
-        self.add_menu.add_command(
+        self.input_menu = tk.Menu(self.add_menu, tearoff=0)
+        self.input_menu.add_command(
             label="Input - Pause for user input",
             command=self.create_add_node_function(InputNode, "Input"),
         )
+        self.input_menu.add_command(
+            label="File - Read file from disk",
+            command=self.create_add_node_function(FileInput, "File"),
+        )
+        self.add_menu.add_cascade(label="Input", menu=self.input_menu)
+        self.output_menu = tk.Menu(self.add_menu, tearoff=0)
+        self.output_menu.add_command(
+            label="File - Write to file on disk",
+            command=self.create_add_node_function(FileOutput, "File"),
+        )
+        self.add_menu.add_cascade(label="Output", menu=self.output_menu)
         self.add_menu.add_command(
             label="Prompt - Format custom text",
             command=self.create_add_node_function(PromptNode, "Prompt"),
@@ -174,10 +194,16 @@ class App:
             label="LLM - Pass text to LLM of choice",
             command=self.create_add_node_function(LLMNode, "LLM"),
         )
-        self.add_menu.add_command(
+        self.history_menu = tk.Menu(self.add_menu, tearoff=0)
+        self.history_menu.add_command(
             label="History - Save result to chat history",
             command=self.create_add_node_function(HistoryNode, "History"),
         )
+        self.history_menu.add_command(
+            label="Manual History - Manually set chat history",
+            command=self.create_add_node_function(ManualHistoryNode, "Manual History"),
+        )
+        self.add_menu.add_cascade(label="History", menu=self.history_menu)
         self.add_menu.add_command(
             label="HTTP - Send HTTP request",
             command=self.create_add_node_function(HttpNode, "HTTP"),
@@ -190,7 +216,7 @@ class App:
             ),
         )
         self.add_memory_menu.add_command(
-            label="Dynamic Windowed Memory - Save to memory based on last occurance of text",
+            label="Dynamic Windowed Memory - Save to memory based on last occurrence of text",
             command=self.create_add_node_function(
                 DynamicWindowedMemoryNode, "Dynamic Windowed Memory"
             ),
@@ -206,6 +232,20 @@ class App:
             command=self.create_add_node_function(TagNode, "Tag"),
         )
         self.add_menu.add_cascade(label="Regex", menu=self.regex_menu)
+        self.structured_data_menu = tk.Menu(self.add_menu, tearoff=0)
+        self.structured_data_menu.add_command(
+            label="JSON - Parse and validate JSON",
+            command=self.create_add_node_function(JsonNode, "JSON"),
+        )
+        self.add_menu.add_cascade(
+            label="Structured Data", menu=self.structured_data_menu
+        )
+        self.search_nodes_menu = tk.Menu(self.add_menu, tearoff=0)
+        self.search_nodes_menu.add_command(
+            label="SerpAPI - Search Google with SerpAPI",
+            command=self.create_add_node_function(SerpApiNode, "SerpAPI"),
+        )
+        self.add_menu.add_cascade(label="Search Nodes", menu=self.search_nodes_menu)
         self.embedding_menu = tk.Menu(self.add_menu, tearoff=0)
         self.embedding_menu.add_command(
             label="Embedding In - Embed result and save to hnswlib",
@@ -226,12 +266,16 @@ class App:
         self.add_menu.add_cascade(label="Embedding", menu=self.embedding_menu)
         self.db_menu = tk.Menu(self.add_menu, tearoff=0)
         self.db_menu.add_command(
-            label="Select - Query the PGML database",
-            command=self.create_add_node_function(SelectNode, "Select"),
+            label="Query - Query a SQLite database",
+            command=self.create_add_node_function(SQLiteQueryNode, "SQLite Query"),
+        )
+        self.db_menu.add_command(
+            label="PG Query - Query a PostgreSQL database",
+            command=self.create_add_node_function(PGQueryNode, "PG Query"),
         )
         self.db_menu.add_command(
             label="Generate - Generate next text from PGML model",
-            command=self.create_add_node_function(GenerateNode, "Generate"),
+            command=self.create_add_node_function(PGGenerateNode, "Generate"),
         )
         self.add_menu.add_cascade(label="Database", menu=self.db_menu)
         self.add_menu.add_command(

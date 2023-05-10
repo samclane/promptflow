@@ -34,7 +34,21 @@ Sets a single environment variable. Double-click to set the key and value.
 
 ## Input
 
+### User Input
+
 Pauses the flowchart and waits for user input. Useful for chatbots or interactive programs.
+
+### FileInput
+
+Allows the user to preselect a file. The file output is saved to `state.result` on run.
+
+(Output)=
+
+## Output
+
+### FileOutput
+
+Writes the `state.result` to a file. Double-click to edit the file path.
 
 (History)=
 
@@ -43,6 +57,10 @@ Pauses the flowchart and waits for user input. Useful for chatbots or interactiv
 Saves the output of the previous node to a running history. Useful for chatbots or interactive programs. Follows OpenAI's history scheme, with 3 roles: `assistant`, `user`, and `system`. Double-click the node to edit which role the node will save to.
 
 For a simple example of History Node usage, see [Usage](working-with-llms).
+
+### ManualHistory
+
+Allows the user to manually create an extended conversation history before runtime. Double-click to edit the history.
 
 (Prompt)=
 
@@ -141,11 +159,12 @@ Connects to a database and runs a query. Double-click the node to edit the datab
 
 ![image](../screenshots/docs/db_options.png)
 
-(Select)=
+(Query)=
 
-### Select
+### Query
 
-The Select node selects a single row from the database. The query is `state.result`, so you can use the result of a previous node to select a row. 
+The query node allows you to run a query against a database. The query is `state.result`, so you can use the result of a previous node to generate a query. There are 2 types of queries: `SQLiteQuery` and `PGQuery`, for the 2 supported databases.
+
 
 (PGML)=
 
@@ -215,6 +234,23 @@ Runs a regex on the `state.result`. Double-click the node to edit the regex. Ret
 ### Tag
 
 Like the [`Regex`](Regex) node, but extracts text in-between tags. For example, if the `state.result` is `Hello <name>World</name>`, adding `start=<name>` and `end=</name>` would return `World`. Double-click the node to edit the start and end tags.
+
+(StructuredData)=
+
+## Structured Data
+
+### JSON
+
+Validate JSON against a user-provided schema. Double-click to edit the schema.
+
+(Search)=
+## Search
+
+Nodes that search the web
+
+### SerpApi
+
+Uses [SerpApi](https://serpapi.com/) to search the web using the result of the previous query.
 
 (Test)=
 

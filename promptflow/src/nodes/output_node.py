@@ -1,38 +1,18 @@
 """
-Nodes that get run time input from the user
+Nodes that output data to the user, such as text or files
 """
+
 import tkinter as tk
 from typing import Any
-import customtkinter
 from promptflow.src.dialogues.multi_file import MultiFileInput
 
 from promptflow.src.nodes.node_base import NodeBase
 
 
-class InputNode(NodeBase):
+class FileOutput(NodeBase):
     """
-    Node that prompts the user for input
+    Outputs data to a file
     """
-
-    def before(self, state, console):
-        dialog = customtkinter.CTkInputDialog(
-            text="Enter a value for this input:", title=self.label
-        )
-        return {"input": dialog.get_input()}
-
-    def run_subclass(self, before_result, state, console):
-        if before_result['input'] == '':
-            return None
-        return before_result["input"]
-
-
-class FileInput(NodeBase):
-    """
-    Reads a file and returns its contents
-    """
-
-    options_popup: MultiFileInput = None
-    filename: str = ""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -52,6 +32,7 @@ class FileInput(NodeBase):
 
     def run_subclass(
         self, before_result: Any, state, console: tk.scrolledtext.ScrolledText
-    ) -> str:
-        with open(self.filename, "r", encoding="utf-8") as f:
-            return f.read()
+    ):
+        with open(self.filename, "w", encoding="utf-8") as f:
+            f.write(state.result)
+        return state.result
