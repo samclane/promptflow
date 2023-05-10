@@ -38,6 +38,8 @@ export PYTHONPATH=$PYTHONPATH:.
 
 ## Documentation
 
+[![Documentation Status](https://readthedocs.org/projects/promptflow/badge/?version=latest)](https://www.promptflow.org/en/latest/?badge=latest)
+
 Official docs website:
 
 #### [promptflow.org](https://www.promptflow.org/en/latest/)
