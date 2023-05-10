@@ -20,7 +20,7 @@ Install the required dependencies. Python 3.8+ is required to run PromptFlow.
 
 `python -m pip install -r requirements.txt`
 
-(If you're on a mac: `python -m pip install -r requirements-mac.txt`)
+(If that fails try: `python -m pip install -r requirements-no-nvidia.txt`)
 
 ## Launching
 
