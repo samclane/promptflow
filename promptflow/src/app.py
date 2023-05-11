@@ -5,6 +5,7 @@ flowcharts.
 """
 import json
 import logging
+import sys
 import tkinter as tk
 from tkinter import ttk
 import customtkinter
@@ -77,8 +78,20 @@ class App:
         self.root.title("PromptFlow")
         self.options = options
         customtkinter.set_appearance_mode("dark")
-        ico_dir = os.path.dirname(__file__)
-        ico_path = os.path.join(ico_dir, "../res/Logo_2.png")
+
+        self.initial_state = initial_state
+        self.logging_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+        self.logger = logging.getLogger(__name__)
+
+        logging.basicConfig(level=logging.DEBUG, format=self.logging_fmt)
+        self.logger.info("Creating app")
+        if getattr(sys, "frozen", False):
+            ico_dir = sys._MEIPASS
+        else:
+            ico_dir = os.path.dirname(__file__) + "/../"
+        # debug file path
+        self.logger.info(f"ico_dir: {ico_dir}")
+        ico_path = os.path.join(ico_dir, "res/Logo_2.png")
         ico = Image.open(ico_path)
         photo = ImageTk.PhotoImage(ico)
         self.root.wm_iconphoto(False, photo)
@@ -88,12 +101,6 @@ class App:
         self.zoom_level = 1.0
 
         self.loading_popup = self.show_loading_popup("Starting app...")
-
-        self.initial_state = initial_state
-        self.logging_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-        self.logger = logging.getLogger(__name__)
-        logging.basicConfig(level=logging.DEBUG, format=self.logging_fmt)
-        self.logger.info("Creating app")
 
         # Build the core components
 
