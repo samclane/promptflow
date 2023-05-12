@@ -92,11 +92,20 @@ Connecting the following flowchart would allow the user to program any "personal
 
 (LLM)=
 
-## LLM
+## LLMs
 
-Call to a Large Language Model. Currently restricted to OpenAI's API. Double-click to edit the LLM parameters.
+Call to a Large Language Model. Double-click to edit the LLM parameters.
 
 ![image](../screenshots/docs/llm_options.png)
+
+### OpenAI
+
+Call to one of OpenAI's GPT LLMs (`text-davinci-003`, `gpt3.5-turbo`, `gpt4`, etc.).
+
+
+### Claude
+
+Call to Anthropic's Claude LLM.
 
 
 (Function)=
