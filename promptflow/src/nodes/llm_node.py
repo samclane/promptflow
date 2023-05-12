@@ -15,11 +15,12 @@ from promptflow.src.themes import monokai
 
 import tkinter as tk
 import openai
+import anthropic
 import os
 import enum
 
 
-class Model(enum.Enum):
+class OpenAIModel(enum.Enum):
     # manually add these as they become available
     # https://platform.openai.com/docs/models
     textdavinci = "text-davinci-003"
@@ -29,32 +30,47 @@ class Model(enum.Enum):
     gpt40314 = "gpt-4-0314"
 
 
+class AnthropicModel(enum.Enum):
+    claude_v1 = "claude-v1"
+    claude_v1_100k = "claude-v1-100k"
+    claude_instant_v1 = "claude-instant-v1"
+    claude_instant_v1_100k = "claude-instant-v1-100k"
+
+
 chat_models = [
-    Model.gpt35turbo.value,
-    Model.gpt35turbo0301.value,
-    Model.gpt4.value,
-    Model.gpt40314.value,
+    OpenAIModel.gpt35turbo.value,
+    OpenAIModel.gpt35turbo0301.value,
+    OpenAIModel.gpt4.value,
+    OpenAIModel.gpt40314.value,
 ]
 
 
 # https://openai.com/pricing
 prompt_cost_1k = {
-    Model.textdavinci.value: 0.02,
-    Model.gpt35turbo.value: 0.002,
-    Model.gpt35turbo0301.value: 0.002,
-    Model.gpt4.value: 0.03,
-    Model.gpt40314.value: 0.03,
+    OpenAIModel.textdavinci.value: 0.02,
+    OpenAIModel.gpt35turbo.value: 0.002,
+    OpenAIModel.gpt35turbo0301.value: 0.002,
+    OpenAIModel.gpt4.value: 0.03,
+    OpenAIModel.gpt40314.value: 0.03,
+    AnthropicModel.claude_instant_v1.value: 0.00163,
+    AnthropicModel.claude_instant_v1_100k.value: 0.00163,
+    AnthropicModel.claude_v1.value: 0.01102,
+    AnthropicModel.claude_v1_100k.value: 0.01102,
 }
 completion_cost_1k = {
-    Model.textdavinci.value: 0.02,
-    Model.gpt35turbo.value: 0.002,
-    Model.gpt35turbo0301.value: 0.002,
-    Model.gpt4.value: 0.06,
-    Model.gpt40314.value: 0.06,
+    OpenAIModel.textdavinci.value: 0.02,
+    OpenAIModel.gpt35turbo.value: 0.002,
+    OpenAIModel.gpt35turbo0301.value: 0.002,
+    OpenAIModel.gpt4.value: 0.06,
+    OpenAIModel.gpt40314.value: 0.06,
+    AnthropicModel.claude_instant_v1.value: 0.00551,
+    AnthropicModel.claude_instant_v1_100k.value: 0.00551,
+    AnthropicModel.claude_v1.value: 0.03268,
+    AnthropicModel.claude_v1_100k.value: 0.03268,
 }
 
 
-class LLMNode(NodeBase):
+class OpenAINode(NodeBase):
     """
     Node that uses the OpenAI API to generate text.
     """
@@ -67,7 +83,7 @@ class LLMNode(NodeBase):
         center_x: float,
         center_y: float,
         label: str,
-        model: str = Model.gpt35turbo.value,
+        model: str = OpenAIModel.gpt35turbo.value,
         **kwargs,
     ):
         self.temperature = 0.0
@@ -105,7 +121,7 @@ class LLMNode(NodeBase):
                 "frequency_penalty": self.frequency_penalty,
             },
             {
-                "Model": [model.value for model in Model],
+                "Model": [model.value for model in OpenAIModel],
             },
         )
         self.canvas.wait_window(self.options_popup)
@@ -200,9 +216,84 @@ class LLMNode(NodeBase):
         Callback for when the OpenAI model is changed.
         """
         self.model = self.model_var.get()
-        if self.model in [Model.gpt4.value, Model.gpt40314.value]:
+        if self.model in [OpenAIModel.gpt4.value, OpenAIModel.gpt40314.value]:
             self.logger.warning("You're using a GPT-4 model. This is costly.")
         self.logger.info(f"Selected model: {self.model}")
+
+    def cost(self, state: State) -> float:
+        """
+        Return the cost of running this node.
+        """
+        # count the number of tokens
+        enc = tiktoken.encoding_for_model(self.model)
+        prompt_tokens = enc.encode(state.result.format(state=state))
+        max_completion_tokens = self.max_tokens - len(prompt_tokens)
+        prompt_cost = prompt_cost_1k[self.model] * len(prompt_tokens) / 1000
+        completion_cost = completion_cost_1k[self.model] * max_completion_tokens / 1000
+        total = prompt_cost + completion_cost
+        return total
+
+
+class ClaudeNode(NodeBase):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.model = kwargs.get("model", AnthropicModel.claude_v1.value)
+        self.model_var = tk.StringVar(value=self.model)
+        self.max_tokens = kwargs.get("max_tokens", 256)
+
+    def _build_history(self, state: State) -> str:
+        history = ""
+        for message in state.history:
+            if message["role"] == "user":
+                prompt = anthropic.HUMAN_PROMPT
+            else:
+                prompt = anthropic.AI_PROMPT
+            history += f"{prompt}: {message['content']}\n"
+        # finally add the current prompt
+        history += f"{anthropic.HUMAN_PROMPT}: {state.result}\n"
+        return history
+
+    def run_subclass(
+        self, before_result: Any, state, console: tk.scrolledtext.ScrolledText
+    ) -> str:
+        """
+        Format the prompt and run the Anthropics API
+        """
+        c = anthropic.Client(os.environ["ANTHROPIC_API_KEY"])
+        resp = c.completion(
+            prompt=self._build_history(state) + "\n" + anthropic.AI_PROMPT,
+            stop_sequences=[anthropic.HUMAN_PROMPT],
+            model=self.model,
+            max_tokens_to_sample=self.max_tokens,
+        )
+        return resp["completion"]
+
+    def serialize(self):
+        return super().serialize() | {
+            "model": self.model_var.get(),
+            "max_tokens": self.max_tokens,
+        }
+
+    def edit_options(self, event: tk.Event):
+        """
+        Create a menu to edit the prompt.
+        """
+        self.options_popup = NodeOptions(
+            self.canvas,
+            {
+                "Model": self.model_var.get(),
+                "Max Tokens": self.max_tokens,
+            },
+            {
+                "Model": [model.value for model in AnthropicModel],
+            },
+        )
+        self.canvas.wait_window(self.options_popup)
+        result = self.options_popup.result
+        # check if cancel
+        if self.options_popup.cancelled:
+            return
+        self.model_var.set(result["Model"])
 
     def cost(self, state: State) -> float:
         """
