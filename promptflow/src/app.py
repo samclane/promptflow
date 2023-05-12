@@ -88,10 +88,10 @@ class App:
         if getattr(sys, "frozen", False):
             ico_dir = sys._MEIPASS
         else:
-            ico_dir = os.path.dirname(__file__) + "/../"
+            ico_dir = os.path.dirname(__file__) + "/../res/"
         # debug file path
         self.logger.info(f"ico_dir: {ico_dir}")
-        ico_path = os.path.join(ico_dir, "res/Logo_2.png")
+        ico_path = os.path.join(ico_dir, "Logo_2.png")
         ico = Image.open(ico_path)
         photo = ImageTk.PhotoImage(ico)
         self.root.wm_iconphoto(False, photo)
