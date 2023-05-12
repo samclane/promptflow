@@ -12,7 +12,7 @@ from promptflow.src.nodes.node_base import NodeBase
 from promptflow.src.nodes.start_node import InitNode, StartNode
 from promptflow.src.nodes.input_node import InputNode, FileInput, JSONFileInput
 from promptflow.src.nodes.func_node import FuncNode
-from promptflow.src.nodes.llm_node import LLMNode
+from promptflow.src.nodes.llm_node import OpenAINode, ClaudeNode
 from promptflow.src.nodes.date_node import DateNode
 from promptflow.src.nodes.random_number import RandomNode
 from promptflow.src.nodes.history_node import HistoryNode, ManualHistoryNode

@@ -42,7 +42,7 @@ from promptflow.src.nodes.regex_node import RegexNode, TagNode
 from promptflow.src.nodes.start_node import InitNode, StartNode
 from promptflow.src.nodes.prompt_node import PromptNode
 from promptflow.src.nodes.func_node import FuncNode
-from promptflow.src.nodes.llm_node import LLMNode
+from promptflow.src.nodes.llm_node import ClaudeNode, OpenAINode
 from promptflow.src.nodes.random_number import RandomNode
 from promptflow.src.nodes.history_node import HistoryNode, ManualHistoryNode
 from promptflow.src.nodes.memory_node import (
@@ -205,10 +205,17 @@ class App:
             label="Function - Custom Python Function",
             command=self.create_add_node_function(FuncNode, "Function"),
         )
-        self.add_menu.add_command(
-            label="LLM - Pass text to LLM of choice",
-            command=self.create_add_node_function(LLMNode, "LLM"),
+        self.llm_menu = tk.Menu(self.add_menu, tearoff=0)
+
+        self.llm_menu.add_command(
+            label="OpenAI - Pass text to OpenAI model of choice",
+            command=self.create_add_node_function(OpenAINode, "OpenAI"),
         )
+        self.llm_menu.add_command(
+            label="Claude - Pass text to Anthropic Claude",
+            command=self.create_add_node_function(ClaudeNode, "Claude"),
+        )
+        self.add_menu.add_cascade(label="LLM", menu=self.llm_menu)
         self.history_menu = tk.Menu(self.add_menu, tearoff=0)
         self.history_menu.add_command(
             label="History - Save result to chat history",

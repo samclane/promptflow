@@ -2,11 +2,11 @@
 Simulates an LLMNode, but does not actually send any data to the LLM.
 """
 from promptflow.src.dialogues.node_options import NodeOptions
-from promptflow.src.nodes.llm_node import LLMNode
+from promptflow.src.nodes.llm_node import OpenAINode
 from promptflow.src.state import State
 
 
-class DummyNode(LLMNode):
+class DummyNode(OpenAINode):
     """
     Simulates an LLMNode, but does not actually send any data to the LLM.
     """
