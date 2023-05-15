@@ -26,6 +26,7 @@ class AppOptions(customtkinter.CTkToplevel):
             self, text="Cancel", command=self.on_cancel
         )
         self.cancel.grid(row=2, column=1, padx=(5, 10), pady=(5, 5), sticky="w")
+        self.grab_set()
 
     def build_label_option(self, index, label, value):
         """

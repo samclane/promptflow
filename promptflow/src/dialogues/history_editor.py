@@ -38,6 +38,7 @@ class HistoryEditor(customtkinter.CTkToplevel):
         self.file_menu.add_command(label="Exit", command=self.cancel)
         self.menu.add_cascade(label="File", menu=self.file_menu)
         self.config(menu=self.menu)
+        self.grab_set()
 
         self.build_gui()
 

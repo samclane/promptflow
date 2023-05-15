@@ -86,6 +86,7 @@ class TextInput(customtkinter.CTkToplevel):
         self.text_entry.bind("<KeyRelease>", self.on_text_modified)
         self.label_entry.bind("<KeyRelease>", self.on_label_modified)
         self.callback = lambda: None
+        self.grab_set()
 
     def get_text(self) -> TextData:
         """

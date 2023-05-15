@@ -68,6 +68,7 @@ class NodeOptions(customtkinter.CTkToplevel):
 
         self.protocol("WM_DELETE_WINDOW", self.cancel)
         self.cancelled = False
+        self.grab_set()
 
     def save(self):
         """

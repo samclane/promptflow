@@ -37,6 +37,7 @@ class CodeInput(TextInput):
         self.text_entry.bind("<KeyRelease>", self.on_text_modified)
 
         self.syntax_highlighting(None)
+        self.grab_set()
 
     def on_text_modified(self, event: Optional[tk.Event]):
         super().on_text_modified(event)

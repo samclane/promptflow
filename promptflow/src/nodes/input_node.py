@@ -20,6 +20,7 @@ class InputNode(NodeBase):
         dialog = customtkinter.CTkInputDialog(
             text="Enter a value for this input:", title=self.label
         )
+        dialog.grab_set()
         return {"input": dialog.get_input()}
 
     def run_subclass(self, before_result, state, console):
