@@ -99,10 +99,11 @@ class App:
         ico_path = os.path.join(ico_dir, "Logo_2.ico")
         self.root.wm_iconbitmap(default=ico_path)
 
-
         self.command_manager = CommandManager()  # todo
 
         self.zoom_level = 1.0
+        self.pan_x = 0
+        self.pan_y = 0
 
         # Build the core components
 
@@ -457,12 +458,15 @@ class App:
         init_state = self.flowchart.initialize(init_state, self.output_console)
         final_state = self.flowchart.run(init_state, self.output_console)
         self.logger.info("Finished running flowchart")
+        self.initial_state.reset()
         return final_state
 
     def stop_flowchart(self):
         """Stop the flowchart."""
         self.logger.info("Stopping flowchart")
         self.flowchart.is_running = False
+        self.flowchart.is_dirty = True
+        self.initial_state.reset()
 
     def serialize_flowchart(self):
         """Serialize the flowchart to JSON."""
@@ -488,6 +492,7 @@ class App:
                 self.save_as()
         self.logger.info("Clearing flowchart")
         self.flowchart.clear()
+        self.initial_state.reset()
         self.output_console.delete("1.0", tk.END)
 
     def edit_options(self):
@@ -570,7 +575,9 @@ class App:
                             )
                             node["label_file"] = label_file
                     self.clear_flowchart()
-                    self.flowchart = Flowchart.deserialize(self.canvas, data)
+                    self.flowchart = Flowchart.deserialize(
+                        self.canvas, data, (self.pan_x, self.pan_y), self.zoom_level
+                    )
                     self.current_file = filename
                     self.loading_popup.destroy()
         else:
@@ -665,6 +672,8 @@ class App:
     def pan(self, event):
         """Dragging to scroll canvas"""
         self.canvas.scan_dragto(event.x, event.y, gain=1)
+        self.pan_x = self.canvas.canvasx(event.x)
+        self.pan_y = self.canvas.canvasy(event.y)
 
     def show_loading_popup(self, message: str):
         """Show the loading popup"""

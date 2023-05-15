@@ -3,12 +3,10 @@ Base class for all nodes
 """
 from typing import TYPE_CHECKING, Any, Optional
 import tkinter as tk
-import os
 from abc import ABC, abstractmethod
 import logging
 import uuid
 import customtkinter
-import openai
 from promptflow.src.state import State
 from promptflow.src.serializable import Serializable
 from promptflow.src.themes import monokai

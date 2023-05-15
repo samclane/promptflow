@@ -64,14 +64,16 @@ class Flowchart:
             self.add_node(StartNode(self, 70, 300, "Start"))
 
     @classmethod
-    def deserialize(cls, canvas: tk.Canvas, data: dict[str, Any]):
+    def deserialize(cls, canvas: tk.Canvas, data: dict[str, Any], pan=(0, 0), zoom=1.0):
         """
         Deserialize a flowchart from a dict onto a canvas
         """
         flowchart = cls(canvas, init_nodes=False)
         for node_data in data["nodes"]:
             node = eval(node_data["classname"]).deserialize(flowchart, node_data)
-            flowchart.add_node(node)
+            x_offset = pan[0]
+            y_offset = pan[1]
+            flowchart.add_node(node, (x_offset, y_offset))
         for connector_data in data["connectors"]:
             node1 = flowchart.find_node(connector_data["node1"])
             node2 = flowchart.find_node(connector_data["node2"])
@@ -138,13 +140,14 @@ class Flowchart:
                 return node
         raise ValueError(f"No node with id {node_id} found")
 
-    def add_node(self, node: NodeBase):
+    def add_node(self, node: NodeBase, offset: tuple[int, int] = (0, 0)):
         """
         Safely insert a node into the flowchart
         """
         while node in self.nodes:
             self.logger.debug("Duplicate node found, adding (copy) to label...")
             node.label += " (copy)"
+        # todo handle offset
         self.nodes.append(node)
         self.selected_element = node
         self.is_dirty = True
