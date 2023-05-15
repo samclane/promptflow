@@ -1,62 +1,75 @@
-![](promptflow/res/Logo_full_1.png)
+
+<p align="center">
+  <img src="promptflow/res/Logo_full_1.png" alt="PromptFlow logo"/>
+</p>
+
 ---
-# PromptFlow
 
-PromptFlow is a tool that allows you to create executable flowcharts that link LLMs (Large Language Models), Prompts, Python functions, and conditional logic together. With PromptFlow, you can create complex workflows in a visual way, without having to write too much code or deal with complicated logic.
+# 🧩💡 PromptFlow
 
-![screenshot](screenshots/readme/heroscreenshot.png)
+Want to quickly prototype your Large Language Model (LLM) application without a ton of code? Unleash your creativity with **PromptFlow**, a low-code tool that empowers you to craft executable flowcharts. Seamlessly integrate LLMs, prompts, Python functions, and conditional logic to create intricate workflows. With PromptFlow, you can visualize your ideas and bring them to life, all without getting tangled in code or complex logic.
 
-#### Join our Discord: [https://discord.gg/5MmV3FNCtN](https://discord.gg/5MmV3FNCtN)
+<p align="center">
+  <img src="screenshots/readme/heroscreenshot.png" alt="PromptFlow screenshot"/>
+</p>
 
-## How it works
+#### 🎮 Join the conversation on our [Discord Server](https://discord.gg/5MmV3FNCtN)
 
-PromptFlow is based on a visual flowchart editor that allows you to create nodes and connections between them. Each node can be a Prompt, a Python function, or an LLM. Connections between nodes represent conditional logic, and allow you to specify the flow of your program.
+## 🔗 How it works
 
-When you run your flowchart, PromptFlow will execute each node in the order specified by the connections, passing data between nodes as needed. If a node returns a value, that value will be passed to the next node in the flow.
+The core of PromptFlow is a visual flowchart editor that lets you design nodes and establish Connections between them. Each node can represent a Prompt, a Python function, or an LLM. The connections between nodes embody conditional logic, dictating the flow of your program.
 
-## Initial Setup 
+When run your flowchart, PromptFlow executes each node in the sequence defined by the connections, transferring text data between nodes as required. If a node returns a value, that value is forwarded to the next node in the flow as a string. More information on the inner workings of PromptFlow can be found in our [documentation](https://www.promptflow.org/en/latest/).
 
-Install the required dependencies. Python 3.8+ is required to run PromptFlow.
+## 🛠️ Initial Setup 
 
-`python -m pip install -r requirements.txt`
+Kickstart your PromptFlow journey by installing the required dependencies. Python 3.8+ is required to run PromptFlow.
 
-(If that fails try: `python -m pip install -r requirements-no-nvidia.txt`)
+```bash
+python -m pip install -r requirements.txt
+```
 
-## Launching
+Encountered a hiccup? Try this instead:
 
-Promptflow can be run with Python from the commandline:
+```bash
+python -m pip install -r requirements-no-nvidia.txt
+```
+
+## 🚀 Launching
+
+Fire up PromptFlow with Python from the command line:
 
 ```bash
 python run.py 
 ```
 
-If you're having trouble ensure your `PYTHONPATH` is set correctly:
+If you're hitting a roadblock, ensure your `PYTHONPATH` is set correctly:
 
 ```bash
 export PYTHONPATH=$PYTHONPATH:.
 ```
 
-## Documentation
+## 📚 Documentation
 
 [![Documentation Status](https://readthedocs.org/projects/promptflow/badge/?version=latest)](https://www.promptflow.org/en/latest/?badge=latest)
 
-Official docs website:
+Check out our official docs:
 
-#### [promptflow.org](https://www.promptflow.org/en/latest/)
+#### 🌐 [promptflow.org](https://www.promptflow.org/en/latest/)
 
-### Building from source
+### 🏗️ Building from source
 
-To build the sphinx documentation, run:
+To compile the Sphinx documentation, execute:
 
 ```bash
 cd docs
 make html
 ```
 
-Then open `docs/build/html/index.html` in your browser.
+Then, navigate to `docs/build/html/index.html` in your browser.
 
-## Contributing
+## 🤝 Contributing
 
-If you are interested in contributing to PromptFlow, you can do so through [building a node](https://www.promptflow.org/en/latest/development.html#starting-point-adding-a-node).
+Want to contribute to PromptFlow? Get started by [building a node](https://www.promptflow.org/en/latest/development.html#starting-point-adding-a-node).
 
-If you find any bugs, do not hesitate to create an issue or open a PR or let us know in [Discord](https://discord.gg/5MmV3FNCtN).
+Stumbled upon a bug? Don't hesitate to create an issue, open a PR, or let us know on [Discord](https://discord.gg/5MmV3FNCtN).
