@@ -222,7 +222,9 @@ class Flowchart:
                 thread.join()
                 output = state.result
             except Exception as node_err:
-                self.logger.error(f"Error running node {cur_node.label}: {node_err}")
+                self.logger.error(
+                    f"Error running node {cur_node.label}: {node_err}", exc_info=True
+                )
                 if console:
                     console.insert(
                         tk.END, f"[ERROR]{cur_node.label}: {node_err}" + "\n"
@@ -257,7 +259,12 @@ class Flowchart:
                     try:
                         cond = state.snapshot["main"](state)  # type: ignore
                     except Exception as node_err:
-                        self.logger.error(f"Error evaluating condition: {node_err}")
+                        # log complete error traceback
+                        # self.logger.error(f"Error evaluating condition: {node_err}")
+                        self.logger.error(
+                            f"Error evaluating condition: {node_err}",
+                            exc_info=True,
+                        )
                         if console:
                             console.insert(
                                 tk.END, f"[ERROR]{cur_node.label}: {node_err}" + "\n"
