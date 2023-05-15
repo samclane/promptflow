@@ -75,6 +75,7 @@ class App:
 
     def __init__(self, initial_state: State, options: Options):
         self.root = customtkinter.CTk(className="PromptFlow")
+        self.loading_popup = self.show_loading_popup("Starting app...")
         self.root.title("PromptFlow")
         self.options = options
         customtkinter.set_appearance_mode("dark")
@@ -91,16 +92,17 @@ class App:
             ico_dir = os.path.dirname(__file__) + "/../res/"
         # debug file path
         self.logger.info(f"ico_dir: {ico_dir}")
-        ico_path = os.path.join(ico_dir, "Logo_2.png")
-        ico = Image.open(ico_path)
-        photo = ImageTk.PhotoImage(ico)
+        png_path = os.path.join(ico_dir, "Logo_2.png")
+        png = Image.open(png_path)
+        photo = ImageTk.PhotoImage(png)
         self.root.wm_iconphoto(False, photo)
+        ico_path = os.path.join(ico_dir, "Logo_2.ico")
+        self.root.wm_iconbitmap(default=ico_path)
+
 
         self.command_manager = CommandManager()  # todo
 
         self.zoom_level = 1.0
-
-        self.loading_popup = self.show_loading_popup("Starting app...")
 
         # Build the core components
 
