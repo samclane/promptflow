@@ -161,6 +161,8 @@ class JSONRequestNode(NodeBase):
         """
         try:
             data = json.loads(state.result)
+            if not data[self.key].startswith("https://"):
+                data[self.key] = "https://" + data[self.key]
         except json.decoder.JSONDecodeError:
             return "Invalid JSON"
         response = request_functions[self.request_type](data[self.key], json=data)
