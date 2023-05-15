@@ -388,3 +388,12 @@ class Flowchart:
                 mermaid_str += f"{connector.node1.id} --> {connector.node2.id}\n"
 
         return mermaid_str
+
+    def arrange_nodes(self):
+        """
+        Arrange all nodes in a grid.
+        """
+        for i, node in enumerate(self.nodes):
+            node.move_to(100 + 300 * (i % 5), 100 + 200 * (i // 5))
+        for connector in self.connectors:
+            connector.update()

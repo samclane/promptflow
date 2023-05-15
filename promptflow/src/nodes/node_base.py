@@ -380,3 +380,14 @@ class NodeBase(Serializable, ABC):
         """
         state.snapshot[self.label] = ""
         return 0.0
+
+    def move_to(self, x: float, y: float):
+        """
+        Move the node to the given coordinates.
+        """
+        delta_x = x - self.center_x
+        delta_y = y - self.center_y
+        for item in self.items:
+            self.canvas.move(item, delta_x, delta_y)
+        self.center_x = x
+        self.center_y = y

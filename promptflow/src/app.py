@@ -391,12 +391,20 @@ class App:
             border_width=2,
             border_color="black",
         )
+        self.arrange_button = customtkinter.CTkButton(
+            self.toolbar,
+            text="Arrange",
+            command=self.arrange,
+            border_width=2,
+            border_color="black",
+        )
         self.toolbar_buttons = [
             self.run_button,
             self.stop_button,
             self.serialize_button,
             self.screenshot_button,
             self.cost_button,
+            self.arrange_button,
         ]
 
         # pack the components
@@ -715,3 +723,6 @@ class App:
         if filedialog:
             filedialog.write(self.output_console.get("1.0", tk.END))
             filedialog.close()
+
+    def arrange(self):
+        self.flowchart.arrange_nodes()
