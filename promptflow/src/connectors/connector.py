@@ -194,8 +194,11 @@ class Connector(Serializable):
         )
         self.canvas.tag_lower(filled_box, self.condition_label)
         self.canvas.tag_bind(self.condition_label, "<Button-3>", self.delete)
-        self.canvas.tag_bind(self.condition_label, "<Button-1>", self.edit_condition)
-        self.canvas.tag_bind(filled_box, "<Button-1>", self.edit_condition)
+        self.canvas.tag_bind(
+            self.condition_label, "<Double-Button-1>", self.edit_condition
+        )
+        self.canvas.tag_bind(filled_box, "<Double-Button-1>", self.edit_condition)
+        self.canvas.tag_bind(self.condition_label, "<Button-1>", self.select)
         self.canvas.tag_bind(filled_box, "<Enter>", self.on_mouseover)
         self.canvas.tag_bind(self.condition_label, "<Enter>", self.on_mouseover)
         self.canvas.tag_bind(filled_box, "<Leave>", self.on_mouseleave)
