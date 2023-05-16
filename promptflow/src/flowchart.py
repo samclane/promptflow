@@ -389,11 +389,21 @@ class Flowchart:
 
         return mermaid_str
 
-    def arrange_nodes(self):
+    def arrange_nodes(self, root: NodeBase, x=0.0, y=0.0, x_gap=60.0, y_gap=60.0):
         """
         Arrange all nodes in a grid.
         """
-        for i, node in enumerate(self.nodes):
-            node.move_to(100 + 300 * (i % 5), 100 + 200 * (i // 5))
+        root.visited = True
+        root.move_to(x, y)
+        if root.get_children():
+            next_y = y + root.size_px + y_gap
+            total_width = (
+                sum(child.size_px + x_gap for child in root.get_children()) - x_gap
+            )
+            next_x = x + (root.size_px - total_width) / 2
+            for child in root.get_children():
+                if not child.visited:
+                    self.arrange_nodes(child, next_x, next_y, x_gap, y_gap)
+                    next_x += child.size_px + x_gap
         for connector in self.connectors:
             connector.update()

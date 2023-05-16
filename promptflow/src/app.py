@@ -725,4 +725,9 @@ class App:
             filedialog.close()
 
     def arrange(self):
-        self.flowchart.arrange_nodes()
+        self.flowchart.arrange_nodes(self.flowchart.init_node)
+        for node in self.flowchart.nodes:
+            node.visited = False
+        self.flowchart.arrange_nodes(self.flowchart.start_node)
+        for node in self.flowchart.nodes:
+            node.visited = False
