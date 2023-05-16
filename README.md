@@ -23,7 +23,13 @@ When run your flowchart, PromptFlow executes each node in the sequence defined b
 
 ## 🛠️ Initial Setup 
 
-Kickstart your PromptFlow journey by installing the required dependencies. Python 3.8+ is required to run PromptFlow.
+You can install PromptFlow via pip with
+
+```bash
+pip install promptflow-gui
+```
+
+If you want to install PromptFlow from source, clone this repository and install the dependencies with
 
 ```bash
 python -m pip install -r requirements.txt
@@ -37,7 +43,13 @@ python -m pip install -r requirements-no-nvidia.txt
 
 ## 🚀 Launching
 
-Fire up PromptFlow with Python from the command line:
+If you installed from `pip`, you can launch PromptFlow with
+
+```bash
+promptflow
+```
+
+Otherwise, run PromptFlow with Python from the command line:
 
 ```bash
 python run.py 
