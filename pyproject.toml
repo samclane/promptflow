@@ -148,6 +148,7 @@ requires-python = ">=3.10"
 
 [project.urls]
 Documentation = "https://www.promptflow.org/en/latest/"
+Homepage = "https://github.com/InsuranceToolkits/promptflow"
 
 [project.scripts]
 promptflow = "promptflow.__main__:main"
