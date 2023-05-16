@@ -449,3 +449,16 @@ class Flowchart:
                     next_x += child.size_px + x_gap
         for connector in self.connectors:
             connector.update()
+
+    def arrange_networkx(self, algorithm):
+        """
+        Arrange all nodes using a networkx algorithm.
+        """
+        kwargs = {}
+        if algorithm == nx.layout.bipartite_layout:
+            kwargs["nodes"] = self.graph.nodes
+        pos = algorithm(self.graph, scale=self.nodes[0].size_px * 10, **kwargs)
+        for node in self.nodes:
+            node.move_to(pos[node][0], pos[node][1])
+        for connector in self.connectors:
+            connector.update()

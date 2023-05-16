@@ -13,6 +13,7 @@ import tkinter.filedialog
 import tkinter.scrolledtext
 import tkinter.messagebox
 from PIL import Image, ImageTk
+import networkx as nx
 import os
 from typing import Optional
 import zipfile
@@ -354,6 +355,47 @@ class App:
         )
         self.add_menu.add_cascade(label="Audio", menu=self.audio_menu)
 
+        # Create the "Arrange" menu
+        self.arrange_menu = tk.Menu(self.menubar, tearoff=0)
+        self.arrange_menu.add_command(label="Tree Layout", command=self.arrange_tree)
+        self.arrange_menu.add_command(
+            label="Bipartite Layout",
+            command=lambda: self.arrange_networkx(nx.layout.bipartite_layout),
+        )
+        self.arrange_menu.add_command(
+            label="Circular Layout",
+            command=lambda: self.arrange_networkx(nx.layout.circular_layout),
+        )
+        self.arrange_menu.add_command(
+            label="Kamada Kawai Layout",
+            command=lambda: self.arrange_networkx(nx.layout.kamada_kawai_layout),
+        )
+        self.arrange_menu.add_command(
+            label="Planar Layout",
+            command=lambda: self.arrange_networkx(nx.layout.planar_layout),
+        )
+        self.arrange_menu.add_command(
+            label="Random Layout",
+            command=lambda: self.arrange_networkx(nx.layout.random_layout),
+        )
+        self.arrange_menu.add_command(
+            label="Shell Layout",
+            command=lambda: self.arrange_networkx(nx.layout.shell_layout),
+        )
+        self.arrange_menu.add_command(
+            label="Spring Layout",
+            command=lambda: self.arrange_networkx(nx.layout.spring_layout),
+        )
+        self.arrange_menu.add_command(
+            label="Spectral Layout",
+            command=lambda: self.arrange_networkx(nx.layout.spectral_layout),
+        )
+        self.arrange_menu.add_command(
+            label="Spiral Layout",
+            command=lambda: self.arrange_networkx(nx.layout.spiral_layout),
+        )
+        self.menubar.add_cascade(label="Arrange", menu=self.arrange_menu)
+
         # create a help menu
         self.help_menu = tk.Menu(self.menubar, tearoff=0)
         self.help_menu.add_command(label="About PromptFlow...", command=self.show_about)
@@ -396,20 +438,13 @@ class App:
             border_width=2,
             border_color="black",
         )
-        self.arrange_button = customtkinter.CTkButton(
-            self.toolbar,
-            text="Arrange Tree",
-            command=self.arrange_tree,
-            border_width=2,
-            border_color="black",
-        )
+
         self.toolbar_buttons = [
             self.run_button,
             self.stop_button,
             self.serialize_button,
             self.screenshot_button,
             self.cost_button,
-            self.arrange_button,
         ]
 
         # pack the components
@@ -762,3 +797,6 @@ class App:
         self.flowchart.arrange_tree(self.flowchart.start_node, NodeBase.size_px + 60)
         for node in self.flowchart.nodes:
             node.visited = False
+
+    def arrange_networkx(self, algorithm):
+        self.flowchart.arrange_networkx(algorithm)
