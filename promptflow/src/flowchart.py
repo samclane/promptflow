@@ -64,7 +64,9 @@ class Flowchart:
             self.add_node(StartNode(self, 70, 300, "Start"))
 
     @classmethod
-    def deserialize(cls, canvas: tk.Canvas, data: dict[str, Any], pan=(0, 0), zoom=1.0):
+    def deserialize(
+        cls, canvas: tk.Canvas, data: dict[str, Any], pan=(0, 0), zoom=1.0
+    ) -> Flowchart:
         """
         Deserialize a flowchart from a dict onto a canvas
         """
@@ -140,7 +142,7 @@ class Flowchart:
                 return node
         raise ValueError(f"No node with id {node_id} found")
 
-    def add_node(self, node: NodeBase, offset: tuple[int, int] = (0, 0)):
+    def add_node(self, node: NodeBase, offset: tuple[int, int] = (0, 0)) -> None:
         """
         Safely insert a node into the flowchart
         """
@@ -152,7 +154,7 @@ class Flowchart:
         self.selected_element = node
         self.is_dirty = True
 
-    def add_connector(self, connector: Connector):
+    def add_connector(self, connector: Connector) -> None:
         """
         Safely insert a connector into the flowchart
         """
@@ -301,7 +303,7 @@ class Flowchart:
         self.canvas.bind("<Button-1>", self._partial_connector.finish)
         self.canvas.bind("<Escape>", self._partial_connector.delete)
 
-    def serialize(self):
+    def serialize(self) -> dict[str, Any]:
         """
         Write the flowchart to a dictionary
         """
@@ -314,7 +316,7 @@ class Flowchart:
             data["connectors"].append(connector.serialize())
         return data
 
-    def remove_node(self, node: NodeBase):
+    def remove_node(self, node: NodeBase) -> None:
         """
         Remove a node and all connectors connected to it.
         """
@@ -335,7 +337,7 @@ class Flowchart:
                 connector.delete()
         self.is_dirty = True
 
-    def clear(self):
+    def clear(self) -> None:
         """
         Clear the flowchart.
         """
@@ -350,14 +352,14 @@ class Flowchart:
         self.canvas.update()
         self.is_dirty = True
 
-    def reset_node_colors(self):
+    def reset_node_colors(self) -> None:
         """
         Set all node colors to their default color.
         """
         for node in self.nodes:
             self.canvas.itemconfig(node.item, fill=node.node_color)
 
-    def register_text_data(self, text_data: TextData):
+    def register_text_data(self, text_data: TextData) -> None:
         """
         On creation of a TextData object, register it with the flowchart.
         """
@@ -365,7 +367,7 @@ class Flowchart:
             self.logger.debug(f"Registering text data {text_data.label}")
             self.text_data_registry[text_data.label] = text_data
 
-    def cost(self, state: State):
+    def cost(self, state: State) -> float:
         """
         Return the cost of the flowchart.
         """
@@ -374,7 +376,7 @@ class Flowchart:
             cost += node.cost(state)
         return cost
 
-    def to_mermaid(self):
+    def to_mermaid(self) -> str:
         """
         Return a mermaid string representation of the flowchart.
         """
@@ -389,9 +391,33 @@ class Flowchart:
 
         return mermaid_str
 
+    def to_graph_ml(self) -> str:
+        """
+        Convert the flowchart to graphml
+        """
+        graphml_string = """<?xml version="1.0" encoding="UTF-8"?>
+        <graphml xmlns="http://graphml.graphdrawing.org/xmlns">
+        """
+        for node in self.nodes:
+            graphml_string += f"""<node id="{node.id}">
+            <data key="d0">{node.label}</data>
+            </node>
+            """
+        for connector in self.connectors:
+            if connector.condition_label:
+                graphml_string += f"""<edge source="{connector.node1.id}" target="{connector.node2.id}">
+                <data key="d0">{connector.condition_label}</data>
+                </edge>
+                """
+            else:
+                graphml_string += f"""<edge source="{connector.node1.id}" target="{connector.node2.id}"/>
+                """
+        graphml_string += "\r</graphml>"
+        return graphml_string
+
     def arrange_nodes(self, root: NodeBase, x=0.0, y=0.0, x_gap=60.0, y_gap=60.0):
         """
-        Arrange all nodes in a grid.
+        Arrange all nodes in a tree-like structure.
         """
         root.visited = True
         root.move_to(x, y)

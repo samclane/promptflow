@@ -135,6 +135,7 @@ class App:
         self.file_menu.add_command(label="Save Console...", command=self.export_console)
         self.export_menu = tk.Menu(self.file_menu, tearoff=0)
         self.export_menu.add_command(label="To Mermaid", command=self.export_to_mermaid)
+        self.export_menu.add_command(label="To GraphML", command=self.export_to_graphml)
         self.file_menu.add_cascade(label="Export", menu=self.export_menu)
         self.menubar.add_cascade(label="File", menu=self.file_menu)
 
@@ -713,6 +714,13 @@ class App:
         self.logger.info("Exporting flowchart")
         self.output_console.insert(tk.END, self.flowchart.to_mermaid())
 
+    def export_to_graphml(self):
+        """
+        Print the flowchart in the graphml format
+        """
+        self.logger.info("Exporting flowchart")
+        self.output_console.insert(tk.END, self.flowchart.to_graph_ml())
+
     def export_console(self):
         """
         Write the contents console to a file
@@ -728,6 +736,6 @@ class App:
         self.flowchart.arrange_nodes(self.flowchart.init_node)
         for node in self.flowchart.nodes:
             node.visited = False
-        self.flowchart.arrange_nodes(self.flowchart.start_node)
+        self.flowchart.arrange_nodes(self.flowchart.start_node, NodeBase.size_px + 60)
         for node in self.flowchart.nodes:
             node.visited = False
