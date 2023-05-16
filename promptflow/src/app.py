@@ -398,8 +398,8 @@ class App:
         )
         self.arrange_button = customtkinter.CTkButton(
             self.toolbar,
-            text="Arrange",
-            command=self.arrange,
+            text="Arrange Tree",
+            command=self.arrange_tree,
             border_width=2,
             border_color="black",
         )
@@ -755,10 +755,10 @@ class App:
             filedialog.write(self.output_console.get("1.0", tk.END))
             filedialog.close()
 
-    def arrange(self):
-        self.flowchart.arrange_nodes(self.flowchart.init_node)
+    def arrange_tree(self):
+        self.flowchart.arrange_tree(self.flowchart.init_node)
         for node in self.flowchart.nodes:
             node.visited = False
-        self.flowchart.arrange_nodes(self.flowchart.start_node, NodeBase.size_px + 60)
+        self.flowchart.arrange_tree(self.flowchart.start_node, NodeBase.size_px + 60)
         for node in self.flowchart.nodes:
             node.visited = False

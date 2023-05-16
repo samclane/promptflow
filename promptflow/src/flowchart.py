@@ -431,7 +431,7 @@ class Flowchart:
         with open(filename, "r") as f:
             return f.read()
 
-    def arrange_nodes(self, root: NodeBase, x=0.0, y=0.0, x_gap=60.0, y_gap=60.0):
+    def arrange_tree(self, root: NodeBase, x=0.0, y=0.0, x_gap=60.0, y_gap=60.0):
         """
         Arrange all nodes in a tree-like structure.
         """
@@ -445,7 +445,7 @@ class Flowchart:
             next_x = x + (root.size_px - total_width) / 2
             for child in root.get_children():
                 if not child.visited:
-                    self.arrange_nodes(child, next_x, next_y, x_gap, y_gap)
+                    self.arrange_tree(child, next_x, next_y, x_gap, y_gap)
                     next_x += child.size_px + x_gap
         for connector in self.connectors:
             connector.update()
