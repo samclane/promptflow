@@ -8,6 +8,7 @@ import tkinter.scrolledtext
 import threading
 from queue import Queue
 from typing import Any, Optional
+import networkx as nx
 from promptflow.src.nodes.node_base import NodeBase
 from promptflow.src.nodes.start_node import InitNode, StartNode
 from promptflow.src.nodes.input_node import InputNode, FileInput, JSONFileInput
@@ -49,6 +50,7 @@ class Flowchart:
 
     def __init__(self, canvas: tk.Canvas, init_nodes: bool = True):
         self.canvas = canvas
+        self.graph = nx.DiGraph()
         self.nodes: list[NodeBase] = []
         self.connectors: list[Connector] = []
         self.text_data_registry: dict[str, TextData] = {}
@@ -151,6 +153,7 @@ class Flowchart:
             node.label += " (copy)"
         # todo handle offset
         self.nodes.append(node)
+        self.graph.add_node(node)
         self.selected_element = node
         self.is_dirty = True
 
@@ -161,6 +164,7 @@ class Flowchart:
         # check for duplicate connectors
         self.logger.debug(f"Adding connector {connector}")
         self.connectors.append(connector)
+        self.graph.add_edge(connector.node1, connector.node2)
         self.selected_element = connector
         self.is_dirty = True
 
@@ -320,7 +324,7 @@ class Flowchart:
         """
         Remove a node and all connectors connected to it.
         """
-        self.logger.info("Removing node {node}")
+        self.logger.info(f"Removing node {node}")
         if node in self.nodes:
             self.nodes.remove(node)
         # remove all connectors connected to this node
@@ -328,6 +332,7 @@ class Flowchart:
             for connector in other_node.connectors:
                 if connector.node1 == node or connector.node2 == node:
                     connector.delete()
+                    self.graph.remove_edge(connector.node1, connector.node2)
                     if connector in other_node.input_connectors:
                         other_node.input_connectors.remove(connector)
                     if connector in other_node.output_connectors:
@@ -335,6 +340,8 @@ class Flowchart:
         for connector in self.connectors:
             if connector.node1 == node or connector.node2 == node:
                 connector.delete()
+                self.graph.remove_edge(connector.node1, connector.node2)
+        self.graph.remove_node(node)
         self.is_dirty = True
 
     def clear(self) -> None:
@@ -350,6 +357,7 @@ class Flowchart:
         self.connectors = []
         self.canvas.delete("all")
         self.canvas.update()
+        self.graph.clear()
         self.is_dirty = True
 
     def reset_node_colors(self) -> None:

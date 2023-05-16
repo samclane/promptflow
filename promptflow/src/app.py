@@ -24,6 +24,7 @@ from promptflow.src.command import (
     AddNodeCommand,
     RemoveNodeCommand,
 )
+from promptflow.src.connectors.connector import Connector
 
 from promptflow.src.flowchart import Flowchart
 from promptflow.src.nodes.audio_node import ElevenLabsNode, WhispersNode
@@ -645,6 +646,13 @@ class App:
                 f"Deleting selected element {self.flowchart.selected_element.label}"
             )
             self.flowchart.selected_element.delete()
+            if isinstance(self.flowchart.selected_element, NodeBase):
+                self.flowchart.graph.remove_node(self.flowchart.selected_element)
+            elif isinstance(self.flowchart.selected_element, Connector):
+                self.flowchart.graph.remove_edge(
+                    self.flowchart.selected_element.node1,
+                    self.flowchart.selected_element.node2,
+                )
 
     def handle_zoom(self, event):
         """
