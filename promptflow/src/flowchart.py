@@ -415,6 +415,14 @@ class Flowchart:
         graphml_string += "\r</graphml>"
         return graphml_string
 
+    def to_postscript(self, filename: str = "flowchart.ps"):
+        """
+        Convert the flowchart to postscript
+        """
+        self.canvas.postscript(file=filename, colormode="color")
+        with open(filename, "r") as f:
+            return f.read()
+
     def arrange_nodes(self, root: NodeBase, x=0.0, y=0.0, x_gap=60.0, y_gap=60.0):
         """
         Arrange all nodes in a tree-like structure.

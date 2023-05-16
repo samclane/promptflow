@@ -136,6 +136,9 @@ class App:
         self.export_menu = tk.Menu(self.file_menu, tearoff=0)
         self.export_menu.add_command(label="To Mermaid", command=self.export_to_mermaid)
         self.export_menu.add_command(label="To GraphML", command=self.export_to_graphml)
+        self.export_menu.add_command(
+            label="To Postscript", command=self.export_to_postscript
+        )
         self.file_menu.add_cascade(label="Export", menu=self.export_menu)
         self.menubar.add_cascade(label="File", menu=self.file_menu)
 
@@ -720,6 +723,18 @@ class App:
         """
         self.logger.info("Exporting flowchart")
         self.output_console.insert(tk.END, self.flowchart.to_graph_ml())
+
+    def export_to_postscript(self):
+        """
+        Print the flowchart in the postscript format
+        """
+        self.logger.info("Exporting flowchart")
+        # open file dialog
+        file_dialog = tkinter.filedialog.asksaveasfile(mode="w", defaultextension=".ps")
+        if file_dialog:
+            self.output_console.insert(
+                tk.END, self.flowchart.to_postscript(file_dialog.name)
+            )
 
     def export_console(self):
         """
