@@ -28,7 +28,7 @@ class FuncNode(NodeBase, ABC):
     """
 
     node_color = monokai.YELLOW
-    func: TextData
+    func: Optional[TextData] = None
 
     def __init__(
         self,
