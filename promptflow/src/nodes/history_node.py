@@ -2,6 +2,7 @@
 Manages writing history to state
 """
 import tkinter as tk
+import customtkinter
 from typing import TYPE_CHECKING, Any, Optional
 from promptflow.src.dialogues.history_editor import HistoryEditor, Role
 
@@ -55,7 +56,7 @@ class HistoryNode(NodeBase):
         self.options_popup: Optional[NodeOptions] = None
 
     def run_subclass(
-        self, before_result: Any, state: State, console: tk.scrolledtext.ScrolledText
+        self, before_result: Any, state: State, console: customtkinter.CTkTextbox
     ) -> str:
         """
         Injects date into state
@@ -111,10 +112,10 @@ class ManualHistoryNode(NodeBase):
         self.manual_history = self.history_popup.history
 
     def run_subclass(
-        self, before_result: Any, state, console: tk.scrolledtext.ScrolledText
+        self, before_result: Any, state, console: customtkinter.CTkTextbox
     ) -> str:
         state.history.extend(self.manual_history)
         return state.result
 
     def serialize(self):
-        return super().serialize() | {self.manual_history}
+        return super().serialize() | {"manual_history": self.manual_history}

@@ -260,19 +260,19 @@ class NodeBase(Serializable, ABC):
 
     @abstractmethod
     def run_subclass(
-        self, before_result: Any, state, console: tk.scrolledtext.ScrolledText
+        self, before_result: Any, state, console: customtkinter.CTkTextbox
     ) -> str:
         """
         Code that will be run when the node is executed.
         """
 
-    def before(self, state: State, console: tk.scrolledtext.ScrolledText) -> Any:
+    def before(self, state: State, console: customtkinter.CTkTextbox) -> Any:
         """
         Blocking method called before main node execution.
         """
 
     def run_node(
-        self, before_result: Any, state: State, console: tk.scrolledtext.ScrolledText
+        self, before_result: Any, state: State, console: customtkinter.CTkTextbox
     ) -> str:
         """
         Run the node and all nodes connected to it
@@ -284,7 +284,7 @@ class NodeBase(Serializable, ABC):
         state.result = output
         return output
 
-    def serialize(self):
+    def serialize(self) -> dict[str, Any]:
         return {
             "id": self.id,
             "label": self.label,

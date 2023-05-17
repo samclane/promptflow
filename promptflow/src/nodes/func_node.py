@@ -5,6 +5,7 @@ Node to run arbitrary Python code.
 from typing import Any, TYPE_CHECKING, Optional
 from abc import ABC
 import tkinter as tk
+import customtkinter
 
 from promptflow.src.nodes.node_base import NodeBase
 from promptflow.src.state import State
@@ -27,6 +28,7 @@ class FuncNode(NodeBase, ABC):
     """
 
     node_color = monokai.YELLOW
+    func: TextData
 
     def __init__(
         self,
@@ -38,7 +40,6 @@ class FuncNode(NodeBase, ABC):
         **kwargs,
     ):
         super().__init__(flowchart, center_x, center_y, label, **kwargs)
-        self.func = func
         if not self.func:
             self.func = TextData("func.py", DEFAULT_FUNC_TEMPLATE, flowchart)
         if isinstance(func, dict):
@@ -62,7 +63,7 @@ class FuncNode(NodeBase, ABC):
         self.text_window: Optional[CodeInput] = None
 
     def run_subclass(
-        self, before_result: Any, state, console: tk.scrolledtext.ScrolledText
+        self, before_result: Any, state, console: customtkinter.CTkTextbox
     ) -> str:
         """
         Evaluate the Python function and return the result.

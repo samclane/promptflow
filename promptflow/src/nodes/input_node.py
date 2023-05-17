@@ -2,8 +2,7 @@
 Nodes that get run time input from the user
 """
 import json
-import tkinter as tk
-from typing import Any
+from typing import Any, Optional
 import customtkinter
 from promptflow.src.dialogues.multi_file import MultiFileInput
 from promptflow.src.dialogues.node_options import NodeOptions
@@ -34,7 +33,7 @@ class FileInput(NodeBase):
     Reads a file and returns its contents
     """
 
-    options_popup: MultiFileInput = None
+    options_popup: Optional[MultiFileInput] = None
     filename: str = ""
 
     def __init__(self, *args, **kwargs):
@@ -54,7 +53,7 @@ class FileInput(NodeBase):
         self.filename = self.options_popup.result["filename"]
 
     def run_subclass(
-        self, before_result: Any, state, console: tk.scrolledtext.ScrolledText
+        self, before_result: Any, state, console: customtkinter.CTkTextbox
     ) -> str:
         with open(self.filename, "r", encoding="utf-8") as f:
             return f.read()
@@ -66,7 +65,7 @@ class JSONFileInput(NodeBase):
     """
 
     key: str = "filename"
-    options_popup: NodeOptions = None
+    options_popup: Optional[NodeOptions] = None
 
     def __init__(
         self,
@@ -89,7 +88,7 @@ class JSONFileInput(NodeBase):
         self.key = self.options_popup.result["key"]
 
     def run_subclass(
-        self, before_result: Any, state, console: tk.scrolledtext.ScrolledText
+        self, before_result: Any, state, console: customtkinter.CTkTextbox
     ) -> str:
         data = json.loads(state.result)
         with open(data[self.key], "r", encoding="utf-8") as f:

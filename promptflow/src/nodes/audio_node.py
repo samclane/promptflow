@@ -5,7 +5,6 @@ from abc import ABC
 import os
 from typing import Any, Optional
 import wave
-import tkinter as tk
 import customtkinter
 import openai
 import elevenlabs
@@ -141,15 +140,15 @@ class AudioInputNode(AudioNode, ABC):
     audio_input_interface: Optional[AudioInputInterface] = None
     data: Optional[list[float]] = None
 
-    def before(self, state: State, console: tk.scrolledtext.ScrolledText) -> Any:
+    def before(self, state: State, console: customtkinter.CTkTextbox) -> Any:
         self.audio_input_interface = AudioInputInterface(self.canvas)
         self.canvas.wait_window(self.audio_input_interface)
         self.data = self.audio_input_interface.audio_data
 
     def run_subclass(
-        self, before_result: Any, state, console: tk.scrolledtext.ScrolledText
+        self, before_result: Any, state, console: customtkinter.CTkTextbox
     ) -> str:
-        pass
+        return state.result
 
 
 class AudioOutputNode(AudioNode, ABC):
@@ -203,7 +202,7 @@ class WhispersNode(AudioInputNode):
         self.text_window.destroy()
 
     def run_subclass(
-        self, before_result: Any, state, console: tk.scrolledtext.ScrolledText
+        self, before_result: Any, state, console: customtkinter.CTkTextbox
     ) -> str:
         super().run_subclass(before_result, state, console)
         transcript = openai.Audio.translate(
@@ -244,7 +243,7 @@ class ElevenLabsNode(AudioOutputNode):
         self.model = kwargs.get("model", self.model)
 
     def run_subclass(
-        self, before_result: Any, state, console: tk.scrolledtext.ScrolledText
+        self, before_result: Any, state, console: customtkinter.CTkTextbox
     ) -> str:
         audio = elevenlabs.generate(
             text=state.result, voice="Bella", model="eleven_monolingual_v1"

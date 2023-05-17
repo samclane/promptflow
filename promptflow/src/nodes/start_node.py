@@ -2,7 +2,7 @@
 Special node that prompts the user for input
 Also signals the start of the flowchart
 """
-import tkinter
+import customtkinter
 from typing import TYPE_CHECKING, Any
 import uuid
 from promptflow.src.nodes.node_base import NodeBase
@@ -45,7 +45,7 @@ class StartNode(NodeBase):
         )
 
     def run_subclass(
-        self, before_result: Any, state, console: tkinter.scrolledtext.ScrolledText
+        self, before_result: Any, state, console: customtkinter.CTkTextbox
     ) -> str:
         return ""
 
@@ -84,7 +84,7 @@ class InitNode(NodeBase):
         self.run_once = False
 
     def run_subclass(
-        self, before_result: Any, state, console: tkinter.scrolledtext.ScrolledText
+        self, before_result: Any, state, console: customtkinter.CTkTextbox
     ) -> str:
         if not self.run_once:
             self.run_once = True

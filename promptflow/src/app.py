@@ -358,6 +358,7 @@ class App:
         # Create the "Arrange" menu
         self.arrange_menu = tk.Menu(self.menubar, tearoff=0)
         self.arrange_menu.add_command(label="Tree Layout", command=self.arrange_tree)
+        # for some reason a for loop with lambda doesn't work here
         self.arrange_menu.add_command(
             label="Bipartite Layout",
             command=lambda: self.arrange_networkx(nx.layout.bipartite_layout),
@@ -499,7 +500,7 @@ class App:
         self.root.title(f"PromptFlow - {value}")
         self._current_file = value
 
-    def run_flowchart(self) -> State:
+    def run_flowchart(self) -> None:
         """Execute the flowchart."""
         self.logger.info("Running flowchart")
         init_state = self.initial_state.copy()
@@ -507,7 +508,6 @@ class App:
         final_state = self.flowchart.run(init_state, self.output_console)
         self.logger.info("Finished running flowchart")
         self.initial_state.reset()
-        return final_state
 
     def stop_flowchart(self):
         """Stop the flowchart."""
@@ -516,14 +516,13 @@ class App:
         self.flowchart.is_dirty = True
         self.initial_state.reset()
 
-    def serialize_flowchart(self):
+    def serialize_flowchart(self) -> None:
         """Serialize the flowchart to JSON."""
         self.logger.info("Serializing flowchart")
         chart_json = json.dumps(self.flowchart.serialize(), indent=4)
         self.logger.info(chart_json)
         self.output_console.insert(tk.INSERT, chart_json)
         self.output_console.see(tk.END)
-        return chart_json
 
     def clear_flowchart(self):
         """Clear the flowchart."""
@@ -791,9 +790,10 @@ class App:
             filedialog.close()
 
     def arrange_tree(self):
-        self.flowchart.arrange_tree(self.flowchart.init_node)
-        for node in self.flowchart.nodes:
-            node.visited = False
+        if self.flowchart.init_node:
+            self.flowchart.arrange_tree(self.flowchart.init_node)
+            for node in self.flowchart.nodes:
+                node.visited = False
         self.flowchart.arrange_tree(self.flowchart.start_node, NodeBase.size_px + 60)
         for node in self.flowchart.nodes:
             node.visited = False

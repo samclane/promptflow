@@ -1,10 +1,10 @@
 import random
-import tkinter
+import customtkinter
 from promptflow.src.dialogues.node_options import NodeOptions
 from promptflow.src.nodes.node_base import NodeBase
 from promptflow.src.themes import monokai
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Optional
 
 if TYPE_CHECKING:
     from promptflow.src.flowchart import Flowchart
@@ -18,10 +18,10 @@ class RandomNode(NodeBase):
     node_color = monokai.PINK
     min: int = 0
     max: int = 100
-    option_popup: NodeOptions = None
+    option_popup: Optional[NodeOptions] = None
 
     def run_subclass(
-        self, before_result: Any, state, console: tkinter.scrolledtext.ScrolledText
+        self, before_result: Any, state, console: customtkinter.CTkTextbox
     ) -> str:
         r = random.randint(self.min, self.max)
         return str(r)

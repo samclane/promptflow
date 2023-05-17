@@ -3,7 +3,7 @@ Nodes that handle regular expressions and parsing text, usually
 from LLM output (but not always)
 """
 import re
-import tkinter
+import customtkinter
 from typing import Any
 from promptflow.src.dialogues.node_options import NodeOptions
 from promptflow.src.nodes.node_base import NodeBase
@@ -40,13 +40,16 @@ class RegexNode(NodeBase):
         self.options_popup = None
 
     def run_subclass(
-        self, before_result: Any, state, console: tkinter.scrolledtext.ScrolledText
+        self, before_result: Any, state, console: customtkinter.CTkTextbox
     ) -> str:
         """
         Runs the regex on the state
         """
         self.logger.info("Regex node %s has state %s", self.label, state)
-        return re.search(self.regex, state.result).group(1)
+        search = re.search(self.regex, state.result)
+        if search is None:
+            return ""
+        return search.group(0)
 
     def edit_options(self, event):
         self.options_popup = NodeOptions(
@@ -89,7 +92,7 @@ class TagNode(NodeBase):
         self.options_popup = None
 
     def run_subclass(
-        self, before_result: Any, state, console: tkinter.scrolledtext.ScrolledText
+        self, before_result: Any, state, console: customtkinter.CTkTextbox
     ) -> str:
         """
         Extracts the text in-between the start and end tags from the state

@@ -3,7 +3,7 @@ Nodes that output data to the user, such as text or files
 """
 
 import json
-import tkinter as tk
+import customtkinter
 from typing import Any
 from promptflow.src.dialogues.multi_file import MultiFileInput
 from promptflow.src.dialogues.node_options import NodeOptions
@@ -33,7 +33,7 @@ class FileOutput(NodeBase):
         self.filename = self.options_popup.result["filename"]
 
     def run_subclass(
-        self, before_result: Any, state, console: tk.scrolledtext.ScrolledText
+        self, before_result: Any, state, console: customtkinter.CTkTextbox
     ):
         with open(self.filename, "w", encoding="utf-8") as f:
             f.write(state.result)
@@ -73,7 +73,7 @@ class JSONFileOutput(NodeBase):
         self.data_key = self.options_popup.result["data_key"]
 
     def run_subclass(
-        self, before_result: Any, state, console: tk.scrolledtext.ScrolledText
+        self, before_result: Any, state, console: customtkinter.CTkTextbox
     ):
         data = json.loads(state.result)
         filename = data[self.filename_key]

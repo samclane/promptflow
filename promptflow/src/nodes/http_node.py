@@ -2,8 +2,8 @@
 Interface for http requests
 """
 from enum import Enum
-import tkinter
-from typing import Any, Callable
+import customtkinter
+from typing import Any, Callable, Optional
 import json
 import requests
 from promptflow.src.dialogues.node_options import NodeOptions
@@ -38,7 +38,7 @@ class HttpNode(NodeBase):
 
     url: str
     request_type: str
-    options_popup: NodeOptions
+    options_popup: Optional[NodeOptions]
 
     def __init__(
         self,
@@ -51,7 +51,7 @@ class HttpNode(NodeBase):
         )
         self.url = kwargs.get("url", "")
         self.request_type = kwargs.get("request_type", RequestType.GET.value)
-        self.options_popup: NodeOptions = None
+        self.options_popup: Optional[NodeOptions] = None
         self.request_type_item = self.canvas.create_text(
             self.center_x,
             self.center_y + 30,
@@ -69,7 +69,7 @@ class HttpNode(NodeBase):
         self.bind_mouseover()
 
     def run_subclass(
-        self, before_result: Any, state, console: tkinter.scrolledtext.ScrolledText
+        self, before_result: Any, state, console: customtkinter.CTkTextbox
     ) -> str:
         """
         Sends a http request
@@ -120,7 +120,7 @@ class JSONRequestNode(NodeBase):
 
     key: str = "url"
     request_type: str
-    options_popup: NodeOptions
+    options_popup: Optional[NodeOptions]
 
     def __init__(
         self,
@@ -133,7 +133,7 @@ class JSONRequestNode(NodeBase):
         )
         self.request_type = kwargs.get("request_type", RequestType.GET.value)
         self.key = kwargs.get("key", "url")
-        self.options_popup: NodeOptions = None
+        self.options_popup: Optional[NodeOptions] = None
         self.request_type_item = self.canvas.create_text(
             self.center_x,
             self.center_y + 30,
@@ -154,7 +154,7 @@ class JSONRequestNode(NodeBase):
         self,
         before_result: Any,
         state: State,
-        console: tkinter.scrolledtext.ScrolledText,
+        console: customtkinter.CTkTextbox,
     ) -> str:
         """
         Sends a http request

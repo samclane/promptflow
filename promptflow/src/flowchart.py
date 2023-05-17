@@ -2,6 +2,7 @@
 This module contains the Flowchart class, which manages the nodes and connectors of a flowchart.
 """
 from __future__ import annotations
+import customtkinter
 import logging
 import tkinter as tk
 import tkinter.scrolledtext
@@ -169,8 +170,8 @@ class Flowchart:
         self.is_dirty = True
 
     def initialize(
-        self, state: State, console: tkinter.scrolledtext.ScrolledText
-    ) -> State:
+        self, state: State, console: customtkinter.CTkTextbox
+    ) -> Optional[State]:
         """
         Initialize the flowchart
         """
@@ -180,16 +181,16 @@ class Flowchart:
             console.insert(tk.END, "\n[System: Already initialized]\n")
             console.see(tk.END)
             return state
-        queue: list[NodeBase] = Queue()
+        queue: Queue[NodeBase] = Queue()
         queue.put(init_node)
         return self.run(state, console, queue)
 
     def run(
         self,
-        state: State,
-        console: tkinter.scrolledtext.ScrolledText,
-        queue: Queue[NodeBase] = None,
-    ) -> State:
+        state: Optional[State],
+        console: customtkinter.CTkTextbox,
+        queue: Optional[Queue[NodeBase]] = None,
+    ) -> Optional[State]:
         """
         Given a state, run the flowchart and update the state
         """

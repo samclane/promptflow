@@ -3,7 +3,7 @@ Nodes for handling structured data.
 """
 from abc import ABC, abstractmethod
 import json
-import tkinter as tk
+import customtkinter
 from typing import Any
 import jsonschema
 from promptflow.src.dialogues.text_input import TextInput
@@ -30,7 +30,7 @@ class StructuredDataNode(NodeBase, ABC):
         """
 
     def run_subclass(
-        self, before_result: Any, state, console: tk.scrolledtext.ScrolledText
+        self, before_result: Any, state, console: customtkinter.CTkTextbox
     ) -> str:
         validation: str = self.validate(state.result)
         return validation

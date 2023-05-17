@@ -2,8 +2,8 @@
 Initialize environmental variables using .env
 """
 import os
-import tkinter
-from typing import Any
+import customtkinter
+from typing import Any, Optional
 
 from dotenv import load_dotenv
 from promptflow.src.dialogues.multi_file import MultiFileInput
@@ -18,7 +18,7 @@ class EnvNode(NodeBase):
     """
 
     filename: str = ".env"
-    options_popup: MultiFileInput = None
+    options_popup: Optional[MultiFileInput] = None
 
     def __init__(
         self,
@@ -29,9 +29,10 @@ class EnvNode(NodeBase):
         self.filename = kwargs.get("filename", ".env")
 
     def run_subclass(
-        self, before_result: Any, state, console: tkinter.scrolledtext.ScrolledText
+        self, before_result: Any, state, console: customtkinter.CTkTextbox
     ) -> str:
         load_dotenv(self.filename)
+        return state.result
 
     def edit_options(self, event):
         self.options_popup = MultiFileInput(
@@ -58,7 +59,7 @@ class ManualEnvNode(NodeBase):
 
     key: str = ""
     val: str = ""
-    options_popup: NodeOptions = None
+    options_popup: Optional[NodeOptions] = None
 
     def __init__(
         self,
@@ -70,7 +71,7 @@ class ManualEnvNode(NodeBase):
         self.val = kwargs.get("val", "")
 
     def run_subclass(
-        self, before_result: Any, state, console: tkinter.scrolledtext.ScrolledText
+        self, before_result: Any, state, console: customtkinter.CTkTextbox
     ) -> str:
         os.environ[self.key] = self.val
         return state.result

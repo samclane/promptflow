@@ -1,7 +1,6 @@
 from abc import ABC
 import logging
-import tkinter
-import tkinter as tk
+import customtkinter
 from typing import Any, Callable, Optional, TYPE_CHECKING
 from promptflow.src.db_interface.main import (
     PGInterface,
@@ -114,9 +113,10 @@ class DBNode(NodeBase, ABC):
         )
 
     def run_subclass(
-        self, before_result: Any, state, console: tk.scrolledtext.ScrolledText
+        self, before_result: Any, state, console: customtkinter.CTkTextbox
     ) -> str:
         self.interface.interface.connect()
+        return state.result
 
 
 class SQLiteNode(DBNode):
@@ -149,6 +149,7 @@ class SQLiteNode(DBNode):
 
 class PGMLNode(DBNode):
     node_color = monokai.GREEN
+    interface: DBConnectionSingleton
 
     def __init__(
         self,
@@ -194,7 +195,7 @@ class SQLiteQueryNode(DBNode):
         super().__init__(*args, SQLiteInterface, **kwargs)
 
     def run_subclass(
-        self, before_result: Any, state, console: tkinter.scrolledtext.ScrolledText
+        self, before_result: Any, state, console: customtkinter.CTkTextbox
     ) -> str:
         super().run_subclass(before_result, state, console)
         select = self.interface.interface.run_query(state.result)
@@ -227,7 +228,7 @@ class PGQueryNode(DBNode):
         super().__init__(flowchart, center_x, center_y, label, PGInterface, **kwargs)
 
     def run_subclass(
-        self, before_result: Any, state, console: tkinter.scrolledtext.ScrolledText
+        self, before_result: Any, state, console: customtkinter.CTkTextbox
     ) -> str:
         super().run_subclass(before_result, state, console)
         select = self.interface.interface.run_query(state.result)
@@ -236,7 +237,7 @@ class PGQueryNode(DBNode):
 
 class PGGenerateNode(PGMLNode):
     def run_subclass(
-        self, before_result: Any, state, console: tkinter.scrolledtext.ScrolledText
+        self, before_result: Any, state, console: customtkinter.CTkTextbox
     ) -> str:
         super().run_subclass(before_result, state, console)
         gen = self.interface.interface.generate(self.model, state.result)[0][0]

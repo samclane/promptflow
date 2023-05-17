@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING, Any, Optional
 
 import tiktoken
+import customtkinter
 from promptflow.src.state import State
 
 from promptflow.src.text_data import TextData
@@ -191,7 +192,7 @@ class OpenAINode(NodeBase):
         return completion["choices"][0]["text"]  # type: ignore
 
     def run_subclass(
-        self, before_result: Any, state, console: tk.scrolledtext.ScrolledText
+        self, before_result: Any, state, console: customtkinter.CTkTextbox
     ) -> str:
         """
         Format the prompt and run the OpenAI API.
@@ -254,7 +255,7 @@ class ClaudeNode(NodeBase):
         return history
 
     def run_subclass(
-        self, before_result: Any, state, console: tk.scrolledtext.ScrolledText
+        self, before_result: Any, state, console: customtkinter.CTkTextbox
     ) -> str:
         """
         Format the prompt and run the Anthropics API

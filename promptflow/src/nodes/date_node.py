@@ -2,7 +2,7 @@
 Convenience node for injecting date into state
 """
 import datetime
-import tkinter
+import customtkinter
 from typing import TYPE_CHECKING, Any
 from promptflow.src.dialogues.node_options import NodeOptions
 from promptflow.src.nodes.node_base import NodeBase
@@ -38,7 +38,7 @@ class DateNode(NodeBase):
         self.datetime_format = "%m/%d/%Y, %H:%M:%S"
 
     def run_subclass(
-        self, before_result: Any, state, console: tkinter.scrolledtext.ScrolledText
+        self, before_result: Any, state, console: customtkinter.CTkTextbox
     ) -> str:
         """
         Injects date into state
