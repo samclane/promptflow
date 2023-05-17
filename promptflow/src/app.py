@@ -504,7 +504,7 @@ class App:
         self.logger.debug(
             str((self.canvas.canvasx(event.x), self.canvas.canvasy(event.y)))
         )
-        self.cursor.move_to(self.canvas.canvasx(event.x), self.canvas.canvasy(event.y))
+        # self.cursor.move_to(self.canvas.canvasx(event.x), self.canvas.canvasy(event.y))
 
     @property
     def current_file(self) -> str:
