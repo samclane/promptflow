@@ -99,8 +99,10 @@ class App:
         png = Image.open(png_path)
         photo = ImageTk.PhotoImage(png)
         self.root.wm_iconphoto(False, photo)
-        ico_path = os.path.join(ico_dir, "Logo_2.ico")
-        self.root.wm_iconbitmap(default=ico_path)
+        # if on windows, use ico
+        if os.name == "nt":
+            ico_path = os.path.join(ico_dir, "Logo_2.ico")
+            self.root.wm_iconbitmap(default=ico_path)
 
         self.command_manager = CommandManager()  # todo
 
