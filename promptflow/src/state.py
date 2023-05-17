@@ -5,6 +5,7 @@ State class definition
 from __future__ import annotations
 from typing import Any
 import logging
+import tiktoken
 from promptflow.src.serializable import Serializable
 
 
@@ -63,3 +64,15 @@ class State(Serializable):
         Makes access in f-strings easy
         """
         return self.snapshot.get(key, "")
+
+    @property
+    def token_count(self) -> int:
+        """
+        Get token count of history + result
+        """
+        encoding = tiktoken.get_encoding("cl100k_base")  # assume gpt3/4
+        count = 0
+        for item in self.history:
+            count += len(encoding.encode(item["content"]))
+        count += len(encoding.encode(self.result))
+        return count
