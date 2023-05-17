@@ -2,6 +2,7 @@
 Nodes for handling structured data.
 """
 from abc import ABC, abstractmethod
+import ast
 import json
 import customtkinter
 from typing import Any
@@ -85,4 +86,5 @@ class JsonerizerNode(NodeBase):
     def run_subclass(
         self, before_result: Any, state, console: customtkinter.CTkTextbox
     ) -> str:
-        return json.dumps(state.result, indent=4)
+        d = ast.literal_eval(state.result)
+        return json.dumps(d, indent=4)
