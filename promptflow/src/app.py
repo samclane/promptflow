@@ -59,6 +59,7 @@ from promptflow.src.nodes.embedding_node import (
     EmbeddingsIngestNode,
 )
 from promptflow.src.nodes.input_node import FileInput, InputNode, JSONFileInput
+from promptflow.src.nodes.server_node import ServerInputNode
 from promptflow.src.nodes.structured_data_node import JsonNode, JsonerizerNode
 from promptflow.src.nodes.test_nodes import AssertNode, LoggingNode
 from promptflow.src.nodes.websearch_node import SerpApiNode
@@ -192,6 +193,10 @@ class App:
         self.input_menu.add_command(
             label="Input - Pause for user input",
             command=self.create_add_node_function(InputNode, "Input"),
+        )
+        self.input_menu.add_command(
+            label="Server - Listen for input on a port",
+            command=self.create_add_node_function(ServerInputNode, "Server"),
         )
         self.input_menu.add_command(
             label="File - Read file from disk",

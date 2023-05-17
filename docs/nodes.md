@@ -46,6 +46,10 @@ Allows the user to preselect a file. The file output is saved to `state.result` 
 
 Parses `key` from `state.result` and opens the file. Double-click to edit the key.
 
+### ServerInput
+
+Wait for a POST request to be made to a server. Defaults to `localhost:8000`. Double-click to edit the server address.
+
 (Output)=
 
 ## Output
