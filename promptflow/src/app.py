@@ -58,7 +58,7 @@ from promptflow.src.nodes.embedding_node import (
     EmbeddingsIngestNode,
 )
 from promptflow.src.nodes.input_node import FileInput, InputNode, JSONFileInput
-from promptflow.src.nodes.structured_data_node import JsonNode
+from promptflow.src.nodes.structured_data_node import JsonNode, JsonerizerNode
 from promptflow.src.nodes.test_nodes import AssertNode, LoggingNode
 from promptflow.src.nodes.websearch_node import SerpApiNode
 from promptflow.src.options import Options
@@ -275,6 +275,10 @@ class App:
         self.structured_data_menu.add_command(
             label="JSON - Parse and validate JSON",
             command=self.create_add_node_function(JsonNode, "JSON"),
+        )
+        self.structured_data_menu.add_command(
+            label="JSONerizer - Parse JSON from text",
+            command=self.create_add_node_function(JsonerizerNode, "JSONerizer"),
         )
         self.add_menu.add_cascade(
             label="Structured Data", menu=self.structured_data_menu

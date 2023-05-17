@@ -41,7 +41,7 @@ class StructuredDataNode(NodeBase, ABC):
 
 class JsonNode(StructuredDataNode):
     """
-    Node that validates JSON.
+    Node that validates JSON into a python dictionary.
     """
 
     def edit_options(self, event):
@@ -75,3 +75,14 @@ class JsonNode(StructuredDataNode):
         self.schema = json.loads(self.text_input.get_text().text)
         self.text_input.destroy()
         self.text_input = None
+
+
+class JsonerizerNode(NodeBase):
+    """
+    Node that converts a python dictionary into JSON.
+    """
+
+    def run_subclass(
+        self, before_result: Any, state, console: customtkinter.CTkTextbox
+    ) -> str:
+        return json.dumps(state.result, indent=4)

@@ -264,6 +264,10 @@ Like the [`Regex`](Regex) node, but extracts text in-between tags. For example, 
 
 Validate JSON against a user-provided schema. Double-click to edit the schema.
 
+### Jsonerizer
+
+Converts a string to JSON.
+
 (Search)=
 ## Search
 
