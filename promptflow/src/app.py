@@ -497,14 +497,13 @@ class App:
         self.canvas.bind("<5>", self.handle_zoom)  # MacOS (wheel down)
         self.canvas.bind("<ButtonPress-2>", self.start_pan)  # Middle mouse button press
         self.canvas.bind("<B2-Motion>", self.pan)  # Middle mouse button drag
-        self.canvas.bind("<Button-1>", self.move_cursor)  # Left mouse button click
+        self.canvas.bind("<Button-1>", self.log_click)  # Left mouse button click
 
-    def move_cursor(self, event):
+    def log_click(self, event):
         """Print the coordinates of the mouse click"""
         self.logger.debug(
             str((self.canvas.canvasx(event.x), self.canvas.canvasy(event.y)))
         )
-        # self.cursor.move_to(self.canvas.canvasx(event.x), self.canvas.canvasy(event.y))
 
     @property
     def current_file(self) -> str:
@@ -752,6 +751,7 @@ class App:
         self.canvas.scan_dragto(event.x, event.y, gain=1)
         self.pan_x = self.canvas.canvasx(event.x)
         self.pan_y = self.canvas.canvasy(event.y)
+        self.cursor.move_to(self.pan_x, self.pan_y)
 
     def show_loading_popup(self, message: str):
         """Show the loading popup"""
