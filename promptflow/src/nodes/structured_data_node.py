@@ -9,6 +9,7 @@ from typing import Any
 import jsonschema
 from promptflow.src.dialogues.text_input import TextInput
 from promptflow.src.nodes.node_base import NodeBase
+from promptflow.src.state import State
 from promptflow.src.text_data import TextData
 
 
@@ -31,7 +32,7 @@ class StructuredDataNode(NodeBase, ABC):
         """
 
     def run_subclass(
-        self, before_result: Any, state, console: customtkinter.CTkTextbox
+        self, before_result: Any, state: State, console: customtkinter.CTkTextbox
     ) -> str:
         validation: str = self.validate(state.result)
         return validation
@@ -86,5 +87,5 @@ class JsonerizerNode(NodeBase):
     def run_subclass(
         self, before_result: Any, state, console: customtkinter.CTkTextbox
     ) -> str:
-        d = ast.literal_eval(state.result)
+        d: dict = ast.literal_eval(state.result)
         return json.dumps(d, indent=4)

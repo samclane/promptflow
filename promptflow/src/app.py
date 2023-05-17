@@ -26,6 +26,7 @@ from promptflow.src.command import (
     RemoveNodeCommand,
 )
 from promptflow.src.connectors.connector import Connector
+from promptflow.src.cursor import FlowchartCursor
 
 from promptflow.src.flowchart import Flowchart
 from promptflow.src.nodes.audio_node import ElevenLabsNode, WhispersNode
@@ -117,6 +118,9 @@ class App:
             background=monokai.BACKGROUND,
         )
         self.flowchart = Flowchart(self.canvas)
+        self.cursor = FlowchartCursor(
+            self.canvas, options.width / 2, options.height / 2
+        )
         self.current_file = "Untitled"
 
         # scrolling text meant to simulate a console
@@ -486,13 +490,14 @@ class App:
         self.canvas.bind("<5>", self.handle_zoom)  # MacOS (wheel down)
         self.canvas.bind("<ButtonPress-2>", self.start_pan)  # Middle mouse button press
         self.canvas.bind("<B2-Motion>", self.pan)  # Middle mouse button drag
-        self.canvas.bind("<Button-1>", self.print_coords)  # Left mouse button click
+        self.canvas.bind("<Button-1>", self.move_cursor)  # Left mouse button click
 
-    def print_coords(self, event):
+    def move_cursor(self, event):
         """Print the coordinates of the mouse click"""
         self.logger.debug(
             str((self.canvas.canvasx(event.x), self.canvas.canvasy(event.y)))
         )
+        self.cursor.move_to(self.canvas.canvasx(event.x), self.canvas.canvasy(event.y))
 
     @property
     def current_file(self) -> str:
@@ -564,7 +569,7 @@ class App:
     def run(self):
         """Run the app."""
         self.logger.info("Running app")
-        tk.mainloop()
+        self.root.mainloop()
 
     def save_image(self):
         """
@@ -640,11 +645,19 @@ class App:
         """
 
         def add_node():
-            node = node_class(self.flowchart, 100, 100, name)
+            node = node_class(
+                self.flowchart, self.cursor.center_x, self.cursor.center_y, name
+            )
             self.flowchart.add_node(node)
             # scale node
             for item in node.items:
-                self.canvas.scale(item, 0, 0, self.zoom_level, self.zoom_level)
+                self.canvas.scale(
+                    item,
+                    self.cursor.center_x,
+                    self.cursor.center_y,
+                    self.zoom_level,
+                    self.zoom_level,
+                )
             for button in node.buttons:
                 button.configure(width=button.cget("width") * self.zoom_level)
                 button.configure(height=button.cget("height") * self.zoom_level)
