@@ -16,6 +16,7 @@ class NodeOptions(customtkinter.CTkToplevel):
         master,
         options_dict: dict[str, Any],
         dropdown_options: Optional[dict[str, Any]] = None,
+        file_options: Optional[dict[str, Any]] = None,
     ):
         super().__init__(master)
         self.title("Node Options")
@@ -25,6 +26,9 @@ class NodeOptions(customtkinter.CTkToplevel):
 
         if dropdown_options is None:
             dropdown_options = {}
+
+        if file_options is None:
+            file_options = {}
 
         for index, (key, value) in enumerate(self.options_dict.items()):
             label = customtkinter.CTkLabel(self, text=key)
@@ -40,6 +44,20 @@ class NodeOptions(customtkinter.CTkToplevel):
                     row=index, column=1, padx=(5, 10), pady=(5, 5), sticky="w"
                 )
                 self.entries[key] = var
+            elif key in file_options:
+                # create a file input
+                entry = customtkinter.CTkEntry(self)
+                entry.insert(0, value)
+                entry.grid(row=index, column=1, padx=(5, 10), pady=(5, 5), sticky="w")
+                self.entries[key] = entry
+                # create a button to open the file input
+                button = customtkinter.CTkButton(
+                    self,
+                    text="Browse",
+                    command=lambda key=key: self.open_file_input(key),
+                )
+                button.grid(row=index, column=2, padx=(5, 10), pady=(5, 5), sticky="w")
+
             else:
                 entry = customtkinter.CTkEntry(self)
                 entry.insert(0, value)
@@ -84,3 +102,10 @@ class NodeOptions(customtkinter.CTkToplevel):
         """
         self.cancelled = True
         self.destroy()
+
+    def open_file_input(self, key):
+        """
+        Open a file input dialog for the given key
+        """
+        self.entries[key].delete(0, tk.END)
+        self.entries[key].insert(0, customtkinter.filedialog.askopenfilename())
