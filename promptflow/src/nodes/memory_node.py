@@ -99,7 +99,10 @@ class PineconeQueryNode(PineconeNode):
         embedding = self.embed(state.result)
         results = index.query(embedding, k=self.k)
         console.insert("end", f"Results: {results}")
-        return results["matches"][0]["metadata"]["text"]
+        result = ""
+        for match in results["matches"]:
+            result += f"{match['metadata']['text']}\n"
+        return result
 
     def edit_options(self, event):
         options_popup = NodeOptions(
