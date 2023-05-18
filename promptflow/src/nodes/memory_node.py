@@ -97,7 +97,7 @@ class PineconeQueryNode(PineconeNode):
             raise ValueError("Index must be set")
         index = pinecone.Index(self.index)
         embedding = self.embed(state.result)
-        results = index.query(embedding, k=self.k)
+        results = index.query(embedding, k=self.k, include_metadata=True)
         console.insert("end", f"Results: {results}")
         result = ""
         for match in results["matches"]:
