@@ -90,6 +90,18 @@ The WindowedHistoryNode node saves the last `n` results of the [`History`](Histo
 
 The DynamicWindowedHistoryNode node saves the last `n` results of the [`History`](History) node since a target string has appeared in the history. This is useful for LLMs, which have token limits. Double-click the node to edit the window size and target string.
 
+(Memory)=
+## Memory Nodes
+
+Nodes for managing long term memory, usually with vector stores or caches.
+
+### PineconeInsertNode
+
+Inserts the `state.result` into a Pinecone vector store. Double-click the node to edit the vector store index.
+
+### PineconeQueryNode
+
+Queries a Pinecone vector store. Double-click the node to edit the vector store index and the number of results returned.
 
 (Prompt)=
 
