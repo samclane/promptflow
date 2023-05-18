@@ -4,6 +4,7 @@ Handles long term memory storage and retrieval.
 
 from abc import ABC
 import os
+from uuid import uuid4
 from typing import Any, Optional
 
 import customtkinter
@@ -72,7 +73,7 @@ class PineconeInsertNode(PineconeNode):
             raise ValueError("Index must be set")
         index = pinecone.Index(self.index)
         embedding = self.embed(state)
-        index.upsert([(state.result, embedding)])
+        index.upsert([(uuid4(), embedding, {"text": state.result})])
         return state.result
 
 
@@ -98,7 +99,7 @@ class PineconeQueryNode(PineconeNode):
         embedding = self.embed(state.result)
         results = index.query(embedding, k=self.k)
         console.insert("end", f"Results: {results}")
-        return results["matches"][0]["id"]
+        return results["matches"][0]["metadata"]["text"]
 
     def edit_options(self, event):
         options_popup = NodeOptions(
