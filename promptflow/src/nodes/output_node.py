@@ -19,13 +19,17 @@ class FileOutput(NodeBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.filename = kwargs.get("filename", "")
+        self.mode = kwargs.get("mode", "w")
 
     def edit_options(self, event):
-        self.options_popup = MultiFileInput(
+        self.options_popup = NodeOptions(
             self.canvas,
             {
                 "filename": self.filename,
+                "mode": self.mode,
             },
+            dropdown_options={"mode": ["w", "a"]},
+            file_options={"filename": {}},
         )
         self.canvas.wait_window(self.options_popup)
         if self.options_popup.cancelled:
