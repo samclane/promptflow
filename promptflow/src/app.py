@@ -33,6 +33,7 @@ from promptflow.src.nodes.audio_node import ElevenLabsNode, WhispersNode
 from promptflow.src.nodes.date_node import DateNode
 from promptflow.src.nodes.env_node import EnvNode, ManualEnvNode
 from promptflow.src.nodes.http_node import HttpNode, JSONRequestNode
+from promptflow.src.nodes.memory_node import PineconeInsertNode, PineconeQueryNode
 from promptflow.src.nodes.node_base import NodeBase
 from promptflow.src.nodes.db_node import (
     PGMLNode,
@@ -259,6 +260,18 @@ class App:
             ),
         )
         self.add_menu.add_cascade(label="History", menu=self.history_menu)
+        self.memory_menu = tk.Menu(self.add_menu, tearoff=0)
+        self.memory_menu.add_command(
+            label="Pinecone Insert - Insert data into Pinecone",
+            command=self.create_add_node_function(
+                PineconeInsertNode, "Pinecone Insert"
+            ),
+        )
+        self.memory_menu.add_command(
+            label="Pinecone Query - Query data from Pinecone",
+            command=self.create_add_node_function(PineconeQueryNode, "Pinecone Query"),
+        )
+        self.add_menu.add_cascade(label="Memory", menu=self.memory_menu)
         self.requests_menu = tk.Menu(self.add_menu, tearoff=0)
         self.requests_menu.add_command(
             label="HTTP - Send HTTP request",
