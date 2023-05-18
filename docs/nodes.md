@@ -74,6 +74,23 @@ For a simple example of History Node usage, see [Usage](working-with-llms).
 
 Allows the user to manually create an extended conversation history before runtime. Double-click to edit the history.
 
+## HistoryWindow
+
+The [`History`](History) node saves to an "infinite" memory, which isn't feasible for LLMs, which have token limits. The Memory node allows you to apply various windowing strategies to the history.
+
+(WindowedMemory)=
+
+### WindowedHistoryNode
+
+The WindowedHistoryNode node saves the last `n` results of the [`History`](History) node. This is useful for LLMs, which have token limits. Double-click the node to edit the window size.
+
+(DynamicWindowedMemory)=
+
+### DynamicWindowedHistoryNode
+
+The DynamicWindowedHistoryNode node saves the last `n` results of the [`History`](History) node since a target string has appeared in the history. This is useful for LLMs, which have token limits. Double-click the node to edit the window size and target string.
+
+
 (Prompt)=
 
 ## Prompt
@@ -148,23 +165,6 @@ def main(state: State):
     return json.loads(state.result)["field"]
 ```
 
-(Memory)=
-
-## Memory
-
-The [`History`](History) node saves to an "infinite" memory, which isn't feasible for LLMs, which have token limits. The Memory node allows you to apply various memory strategies to the history.
-
-(WindowedMemory)=
-
-### WindowedMemory
-
-The WindowedMemory node saves the last `n` results of the [`History`](History) node. This is useful for LLMs, which have token limits. Double-click the node to edit the window size.
-
-(DynamicWindowedMemory)=
-
-### DynamicWindowedMemory
-
-The DynamicWindowedMemory node saves the last `n` results of the [`History`](History) node since a target string has appeared in the history. This is useful for LLMs, which have token limits. Double-click the node to edit the window size and target string.
 
 (Date)=
 

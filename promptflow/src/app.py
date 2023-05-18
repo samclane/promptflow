@@ -47,11 +47,12 @@ from promptflow.src.nodes.prompt_node import PromptNode
 from promptflow.src.nodes.func_node import FuncNode
 from promptflow.src.nodes.llm_node import ClaudeNode, OpenAINode
 from promptflow.src.nodes.random_number import RandomNode
-from promptflow.src.nodes.history_node import HistoryNode, ManualHistoryNode
-from promptflow.src.nodes.memory_node import (
-    MemoryNode,
-    WindowedMemoryNode,
-    DynamicWindowedMemoryNode,
+from promptflow.src.nodes.history_node import (
+    HistoryNode,
+    ManualHistoryNode,
+    HistoryWindow,
+    WindowedHistoryNode,
+    DynamicWindowedHistoryNode,
 )
 from promptflow.src.nodes.embedding_node import (
     EmbeddingInNode,
@@ -245,6 +246,18 @@ class App:
             label="Manual History - Manually set chat history",
             command=self.create_add_node_function(ManualHistoryNode, "Manual History"),
         )
+        self.history_menu.add_command(
+            label="Windowed History - Save to history with a window",
+            command=self.create_add_node_function(
+                WindowedHistoryNode, "Windowed History"
+            ),
+        )
+        self.history_menu.add_command(
+            label="Dynamic Windowed History - Save to history based on last occurrence of text",
+            command=self.create_add_node_function(
+                DynamicWindowedHistoryNode, "Dynamic Windowed history"
+            ),
+        )
         self.add_menu.add_cascade(label="History", menu=self.history_menu)
         self.requests_menu = tk.Menu(self.add_menu, tearoff=0)
         self.requests_menu.add_command(
@@ -258,20 +271,6 @@ class App:
             ),
         )
         self.add_menu.add_cascade(label="Requests", menu=self.requests_menu)
-        self.add_memory_menu = tk.Menu(self.add_menu, tearoff=0)
-        self.add_memory_menu.add_command(
-            label="Windowed Memory - Save to memory with a window",
-            command=self.create_add_node_function(
-                WindowedMemoryNode, "Windowed Memory"
-            ),
-        )
-        self.add_memory_menu.add_command(
-            label="Dynamic Windowed Memory - Save to memory based on last occurrence of text",
-            command=self.create_add_node_function(
-                DynamicWindowedMemoryNode, "Dynamic Windowed Memory"
-            ),
-        )
-        self.add_menu.add_cascade(label="Memory", menu=self.add_memory_menu)
         self.regex_menu = tk.Menu(self.add_menu, tearoff=0)
         self.regex_menu.add_command(
             label="Regex - Match text with regex",

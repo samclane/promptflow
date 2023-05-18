@@ -17,14 +17,15 @@ from promptflow.src.nodes.func_node import FuncNode
 from promptflow.src.nodes.llm_node import OpenAINode, ClaudeNode
 from promptflow.src.nodes.date_node import DateNode
 from promptflow.src.nodes.random_number import RandomNode
-from promptflow.src.nodes.history_node import HistoryNode, ManualHistoryNode
+from promptflow.src.nodes.history_node import (
+    HistoryNode,
+    ManualHistoryNode,
+    HistoryWindow,
+    WindowedHistoryNode,
+    DynamicWindowedHistoryNode,
+)
 from promptflow.src.nodes.dummy_llm_node import DummyNode
 from promptflow.src.nodes.prompt_node import PromptNode
-from promptflow.src.nodes.memory_node import (
-    MemoryNode,
-    WindowedMemoryNode,
-    DynamicWindowedMemoryNode,
-)
 from promptflow.src.nodes.embedding_node import (
     EmbeddingInNode,
     EmbeddingQueryNode,
