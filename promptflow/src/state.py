@@ -19,6 +19,7 @@ class State(Serializable):
         self.snapshot: dict[str, str] = kwargs.get("snapshot", {})
         self.history: list[dict[str, str]] = kwargs.get("history", [])
         self.result: str = kwargs.get("result", "")
+        self.data: dict[str, Any] = kwargs.get("data", {})
         self.logger = logging.getLogger(__name__)
 
     def reset(self) -> None:
@@ -28,6 +29,7 @@ class State(Serializable):
         self.snapshot = {}
         self.history = []
         self.result = ""
+        self.data = {}
         self.logger.debug("State reset")
 
     def __or__(self, __t: dict | State) -> "State":
@@ -46,6 +48,7 @@ class State(Serializable):
             snapshot=self.snapshot.copy(),
             history=self.history.copy(),
             result=self.result,
+            data=self.data.copy(),
         )
 
     @classmethod
@@ -57,6 +60,7 @@ class State(Serializable):
             "snapshot": self.snapshot,
             "history": self.history,
             "result": self.result,
+            "data": self.data,
         }
 
     def __getitem__(self, key: str) -> str:

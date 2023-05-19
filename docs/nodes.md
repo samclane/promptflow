@@ -322,3 +322,12 @@ Uses [Whisper](https://platform.openai.com/docs/guides/speech-to-text) to conver
 ### ElevenLabs Text-to-Speech
 
 Uses [ElevenLabs](https://beta.elevenlabs.io/) to convert text to speech. Uses the ElevenLabs API.
+
+
+(Image)=
+
+## Image
+
+### DallENode
+
+Call the openai DallE model to generate an image. The prompt is the `state.result`, so you can use the result of a previous node to generate an image. 
