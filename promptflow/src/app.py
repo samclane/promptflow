@@ -33,6 +33,7 @@ from promptflow.src.nodes.audio_node import ElevenLabsNode, WhispersNode
 from promptflow.src.nodes.date_node import DateNode
 from promptflow.src.nodes.env_node import EnvNode, ManualEnvNode
 from promptflow.src.nodes.http_node import HttpNode, JSONRequestNode
+from promptflow.src.nodes.image_node import DallENode
 from promptflow.src.nodes.memory_node import PineconeInsertNode, PineconeQueryNode
 from promptflow.src.nodes.node_base import NodeBase
 from promptflow.src.nodes.db_node import (
@@ -381,6 +382,12 @@ class App:
             ),
         )
         self.add_menu.add_cascade(label="Audio", menu=self.audio_menu)
+        self.image_menu = tk.Menu(self.add_menu, tearoff=0)
+        self.image_menu.add_command(
+            label="Dall-E - Generate image from text",
+            command=self.create_add_node_function(DallENode, "Dall-E"),
+        )
+        self.add_menu.add_cascade(label="Image", menu=self.image_menu)
 
         # Create the "Arrange" menu
         self.arrange_menu = tk.Menu(self.menubar, tearoff=0)
