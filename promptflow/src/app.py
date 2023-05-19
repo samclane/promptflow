@@ -38,6 +38,7 @@ from promptflow.src.nodes.image_node import (
     CaptionNode,
     OpenImageFile,
     JSONImageFile,
+    SaveImageNode,
 )
 from promptflow.src.nodes.memory_node import PineconeInsertNode, PineconeQueryNode
 from promptflow.src.nodes.node_base import NodeBase
@@ -409,6 +410,10 @@ class App:
                 JSONImageFile,
                 "JSON File",
             ),
+        )
+        self.image_menu.add_command(
+            label="Save Image - Save image to file",
+            command=self.create_add_node_function(SaveImageNode, "Save Image"),
         )
         self.image_menu.add_command(
             label="Caption - Caption an image",

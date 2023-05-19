@@ -46,6 +46,7 @@ from promptflow.src.nodes.image_node import (
     CaptionNode,
     OpenImageFile,
     JSONImageFile,
+    SaveImageNode,
 )
 from promptflow.src.connectors.connector import Connector
 from promptflow.src.connectors.partial_connector import PartialConnector

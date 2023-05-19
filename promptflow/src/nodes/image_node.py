@@ -214,3 +214,41 @@ class CaptionNode(ImageNode):
         return super().serialize() | {
             "max_length": self.max_length,
         }
+
+
+class SaveImageNode(ImageNode):
+    """
+    Save image to filename
+    """
+
+    filename: str = ""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.filename = kwargs.get("filename", "")
+
+    def edit_options(self, event):
+        options_popup = NodeOptions(
+            self.canvas,
+            {
+                "filename": self.filename,
+            },
+            file_options={"filename": self.filename},
+        )
+        self.canvas.wait_window(options_popup)
+        if options_popup.cancelled:
+            return
+        self.filename = options_popup.result["filename"]
+
+    def run_subclass(
+        self, before_result: Any, state, console: customtkinter.CTkTextbox
+    ) -> str:
+        # convert tkphotoimage to PIL image
+        pil_image = ImageTk.getimage(state.data)
+        pil_image.save(self.filename)
+        return state.result
+
+    def serialize(self) -> dict[str, Any]:
+        return super().serialize() | {
+            "filename": self.filename,
+        }

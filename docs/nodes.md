@@ -348,3 +348,7 @@ Parse a filename and a data key from `state.result` and open the image. Double-c
 ### CaptionNode
 
 Caption the image in `state.data`. Assumes the image is a `tk.PhotoImage`, as of right now.
+
+### SaveImageNode
+
+Write thte image in `state.data` to a file. Double-click the node to edit the file path.
