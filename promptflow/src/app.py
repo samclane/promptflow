@@ -33,7 +33,12 @@ from promptflow.src.nodes.audio_node import ElevenLabsNode, WhispersNode
 from promptflow.src.nodes.date_node import DateNode
 from promptflow.src.nodes.env_node import EnvNode, ManualEnvNode
 from promptflow.src.nodes.http_node import HttpNode, JSONRequestNode
-from promptflow.src.nodes.image_node import DallENode, CaptionNode, OpenImageFile
+from promptflow.src.nodes.image_node import (
+    DallENode,
+    CaptionNode,
+    OpenImageFile,
+    JSONImageFile,
+)
 from promptflow.src.nodes.memory_node import PineconeInsertNode, PineconeQueryNode
 from promptflow.src.nodes.node_base import NodeBase
 from promptflow.src.nodes.db_node import (
@@ -396,6 +401,13 @@ class App:
             command=self.create_add_node_function(
                 OpenImageFile,
                 "Open File",
+            ),
+        )
+        self.image_menu.add_command(
+            label="JSON File - Open image from file parsed from JSON",
+            command=self.create_add_node_function(
+                JSONImageFile,
+                "JSON File",
             ),
         )
         self.image_menu.add_command(

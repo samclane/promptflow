@@ -341,6 +341,10 @@ Call the openai DallE model to generate an image. The prompt is the `state.resul
 
 Open an image file. Double-click the node to edit the file path.
 
+### JSONImageFile
+
+Parse a filename and a data key from `state.result` and open the image. Double-click the node to edit the filename key.
+
 ### CaptionNode
 
 Caption the image in `state.data`. Assumes the image is a `tk.PhotoImage`, as of right now.

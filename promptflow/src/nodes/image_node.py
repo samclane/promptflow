@@ -5,6 +5,7 @@ from abc import ABC
 import base64
 from enum import Enum
 from PIL import Image, ImageTk
+import json
 import io
 from typing import Any
 import torch
@@ -67,6 +68,57 @@ class OpenImageFile(ImageNode):
         self.canvas.wait_window(self.image_inspector)
         state.data = self.image
         return state.result
+
+
+class JSONImageFile(ImageNode):
+    """
+    Open a file specified by input JSON
+    """
+
+    filename_key: str = "filename"
+    options_popup: NodeOptions
+
+    def __init__(
+        self,
+        *args,
+        **kwargs,
+    ):
+        super().__init__(*args, **kwargs)
+        self.filename_key = kwargs.get("filename_key", "")
+
+    def edit_options(self, event):
+        self.options_popup = NodeOptions(
+            self.canvas,
+            {
+                "filename_key": self.filename_key,
+            },
+        )
+        self.canvas.wait_window(self.options_popup)
+        result = self.options_popup.result
+        # check if cancel
+        if self.options_popup.cancelled:
+            return
+        self.filename_key = result["filename_key"]
+
+    def run_subclass(
+        self, before_result: Any, state, console: customtkinter.CTkTextbox
+    ) -> str:
+        try:
+            data = json.loads(state.result)
+        except json.decoder.JSONDecodeError:
+            return "Invalid JSON"
+        # convert tkphotoimage to PIL image
+        pil_image = Image.open(data[self.filename_key])
+        self.image = ImageTk.PhotoImage(pil_image)
+        self.image_inspector = ImageInspector(self.canvas, self.image)
+        self.canvas.wait_window(self.image_inspector)
+        state.data = self.image
+        return state.result
+
+    def serialize(self) -> dict[str, Any]:
+        return super().serialize() | {
+            "filename_key": self.filename_key,
+        }
 
 
 class DallENode(ImageNode):
