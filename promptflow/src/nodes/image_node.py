@@ -37,6 +37,38 @@ class ImageNode(NodeBase, ABC):
     pass
 
 
+class OpenImageFile(ImageNode):
+    """
+    Specify a file to open
+    """
+
+    filename = ""
+
+    def edit_options(self, event):
+        options_popup = NodeOptions(
+            self.canvas,
+            {
+                "filename": self.filename,
+            },
+            file_options={"filename": self.filename},
+        )
+        self.canvas.wait_window(options_popup)
+        if options_popup.cancelled:
+            return
+        self.filename = options_popup.result["filename"]
+
+    def run_subclass(
+        self, before_result: Any, state, console: customtkinter.CTkTextbox
+    ) -> str:
+        # convert tkphotoimage to PIL image
+        pil_image = Image.open(self.filename)
+        self.image = ImageTk.PhotoImage(pil_image)
+        self.image_inspector = ImageInspector(self.canvas, self.image)
+        self.canvas.wait_window(self.image_inspector)
+        state.data = self.image
+        return state.result
+
+
 class DallENode(ImageNode):
     """
     Call OpenAI's Dall-E API
