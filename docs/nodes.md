@@ -140,6 +140,10 @@ Call to one of OpenAI's GPT LLMs (`text-davinci-003`, `gpt3.5-turbo`, `gpt4`, et
 
 Call to Anthropic's Claude LLM.
 
+### Google Vertex / Generative AI
+
+Call to Google's Vertex AI LLMs.
+
 
 (Function)=
 

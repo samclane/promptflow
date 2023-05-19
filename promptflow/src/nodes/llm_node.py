@@ -17,6 +17,7 @@ from promptflow.src.themes import monokai
 import tkinter as tk
 import openai
 import anthropic
+import google.generativeai as genai
 import os
 import enum
 
@@ -38,11 +39,17 @@ class AnthropicModel(enum.Enum):
     claude_instant_v1_100k = "claude-instant-v1-100k"
 
 
+class GoogleModel(enum.Enum):
+    text_bison_001 = "text-bison-001"
+    chat_bison_001 = "chat-bison-001"
+
+
 chat_models = [
     OpenAIModel.gpt35turbo.value,
     OpenAIModel.gpt35turbo0301.value,
     OpenAIModel.gpt4.value,
     OpenAIModel.gpt40314.value,
+    GoogleModel.chat_bison_001.value,
 ]
 
 
@@ -57,6 +64,8 @@ prompt_cost_1k = {
     AnthropicModel.claude_instant_v1_100k.value: 0.00163,
     AnthropicModel.claude_v1.value: 0.01102,
     AnthropicModel.claude_v1_100k.value: 0.01102,
+    GoogleModel.text_bison_001.value: 0.001,
+    GoogleModel.chat_bison_001.value: 0.0005,
 }
 completion_cost_1k = {
     OpenAIModel.textdavinci.value: 0.02,
@@ -68,6 +77,8 @@ completion_cost_1k = {
     AnthropicModel.claude_instant_v1_100k.value: 0.00551,
     AnthropicModel.claude_v1.value: 0.03268,
     AnthropicModel.claude_v1_100k.value: 0.03268,
+    GoogleModel.text_bison_001.value: 0.001,
+    GoogleModel.chat_bison_001.value: 0.0005,
 }
 
 
@@ -295,6 +306,8 @@ class ClaudeNode(NodeBase):
         if self.options_popup.cancelled:
             return
         self.model_var.set(result["Model"])
+        self.model = self.model_var.get()
+        self.max_tokens = int(result["Max Tokens"])
 
     def cost(self, state: State) -> float:
         """
@@ -304,6 +317,75 @@ class ClaudeNode(NodeBase):
         enc = tiktoken.encoding_for_model(self.model)
         prompt_tokens = enc.encode(state.result.format(state=state))
         max_completion_tokens = self.max_tokens - len(prompt_tokens)
+        prompt_cost = prompt_cost_1k[self.model] * len(prompt_tokens) / 1000
+        completion_cost = completion_cost_1k[self.model] * max_completion_tokens / 1000
+        total = prompt_cost + completion_cost
+        return total
+
+
+class GoogleVertexNode(NodeBase):
+    """
+    Call to Google's Generative AI
+    """
+
+    model = GoogleModel.text_bison_001.value
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.model = kwargs.get("model", GoogleModel.text_bison_001.value)
+        self.model_var = tk.StringVar(value=self.model)
+
+    def _build_history(self, state: State) -> list[str]:
+        history = []
+        for message in state.history:
+            if message["role"] == "user":
+                history.append("User: " + message["content"])
+            else:
+                history.append("AI: " + message["content"])
+        return history
+
+    def run_subclass(
+        self, before_result: Any, state, console: customtkinter.CTkTextbox
+    ) -> str:
+        genai.configure(api_key=os.environ["GENAI_API_KEY"])
+        response = genai.chat(
+            model=self.model, messages=self._build_history(state), prompt=state.result
+        )
+        return response.last
+
+    def edit_options(self, event: tk.Event):
+        """
+        Create a menu to edit the prompt.
+        """
+        self.options_popup = NodeOptions(
+            self.canvas,
+            {
+                "Model": self.model_var.get(),
+            },
+            {
+                "Model": [model.value for model in GoogleModel],
+            },
+        )
+        self.canvas.wait_window(self.options_popup)
+        result = self.options_popup.result
+        # check if cancel
+        if self.options_popup.cancelled:
+            return
+        self.model_var.set(result["Model"])
+
+    def serialize(self):
+        return super().serialize() | {
+            "model": self.model_var.get(),
+        }
+
+    def cost(self, state: State) -> float:
+        """
+        Return the cost of running this node.
+        """
+        # count the number of tokens
+        enc = tiktoken.encoding_for_model(self.model)
+        prompt_tokens = enc.encode(state.result.format(state=state))
+        max_completion_tokens = 1024 - len(prompt_tokens)
         prompt_cost = prompt_cost_1k[self.model] * len(prompt_tokens) / 1000
         completion_cost = completion_cost_1k[self.model] * max_completion_tokens / 1000
         total = prompt_cost + completion_cost

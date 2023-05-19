@@ -53,7 +53,7 @@ from promptflow.src.nodes.regex_node import RegexNode, TagNode
 from promptflow.src.nodes.start_node import InitNode, StartNode
 from promptflow.src.nodes.prompt_node import PromptNode
 from promptflow.src.nodes.func_node import FuncNode
-from promptflow.src.nodes.llm_node import ClaudeNode, OpenAINode
+from promptflow.src.nodes.llm_node import ClaudeNode, OpenAINode, GoogleVertexNode
 from promptflow.src.nodes.random_number import RandomNode
 from promptflow.src.nodes.history_node import (
     HistoryNode,
@@ -243,6 +243,10 @@ class App:
         self.llm_menu.add_command(
             label="Claude - Pass text to Anthropic Claude",
             command=self.create_add_node_function(ClaudeNode, "Claude"),
+        )
+        self.llm_menu.add_command(
+            label="Google - Pass text to Google LLM",
+            command=self.create_add_node_function(GoogleVertexNode, "Google"),
         )
         self.add_menu.add_cascade(label="LLM", menu=self.llm_menu)
         self.history_menu = tk.Menu(self.add_menu, tearoff=0)
