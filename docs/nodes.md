@@ -335,3 +335,8 @@ Uses [ElevenLabs](https://beta.elevenlabs.io/) to convert text to speech. Uses t
 ### DallENode
 
 Call the openai DallE model to generate an image. The prompt is the `state.result`, so you can use the result of a previous node to generate an image. 
+
+
+### CaptionNode
+
+Caption the image in `state.data`. Assumes the image is a `tk.PhotoImage`, as of right now.
