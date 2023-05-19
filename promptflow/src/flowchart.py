@@ -41,7 +41,7 @@ from promptflow.src.nodes.output_node import FileOutput, JSONFileOutput
 from promptflow.src.nodes.http_node import HttpNode, JSONRequestNode
 from promptflow.src.nodes.server_node import ServerInputNode
 from promptflow.src.nodes.memory_node import PineconeInsertNode, PineconeQueryNode
-from promptflow.src.nodes.image_node import DallENode
+from promptflow.src.nodes.image_node import DallENode, CaptionNode
 from promptflow.src.connectors.connector import Connector
 from promptflow.src.connectors.partial_connector import PartialConnector
 from promptflow.src.state import State

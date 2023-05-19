@@ -100,6 +100,8 @@ class InterpreterNode(NodeBase):
     Starts an interactive Python interpreter
     """
 
-    def run_subclass(self, before_result: Any, state, console: customtkinter.CTkTextbox) -> str:
+    def run_subclass(
+        self, before_result: Any, state, console: customtkinter.CTkTextbox
+    ) -> str:
         code.interact(local=locals())
         return state.result

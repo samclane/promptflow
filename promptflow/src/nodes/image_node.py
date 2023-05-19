@@ -6,6 +6,9 @@ import base64
 from PIL import Image, ImageTk
 import io
 from typing import Any
+import torch
+from transformers import AutoProcessor, AutoModelForCausalLM
+
 
 import customtkinter
 from promptflow.src.dialogues.image_inspector import ImageInspector
@@ -43,11 +46,34 @@ class DallENode(ImageNode):
         self.image = ImageTk.PhotoImage(pil_image)
         self.image_inspector = ImageInspector(self.canvas, self.image)
         self.canvas.wait_window(self.image_inspector)
-        state.data = response["data"]
+        state.data = self.image
         return state.result
-    
+
     def serialize(self) -> dict[str, Any]:
         return super().serialize() | {
             "n": self.n,
             "size": self.size,
         }
+
+
+class CaptionNode(ImageNode):
+    """
+    Caption an image
+    """
+
+    def run_subclass(
+        self, before_result: Any, state, console: customtkinter.CTkTextbox
+    ) -> str:
+        checkpoint = "microsoft/git-base"
+        processor = AutoProcessor.from_pretrained(checkpoint)
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+        # convert tkphotoimage to PIL image
+        pil_image = ImageTk.getimage(state.data)
+        inputs = processor(images=pil_image, return_tensors="pt").to(device)
+        pixel_values = inputs.pixel_values
+        model = AutoModelForCausalLM.from_pretrained(checkpoint)
+        generated_ids = model.generate(pixel_values=pixel_values, max_length=50)
+        generated_caption = processor.batch_decode(
+            generated_ids, skip_special_tokens=True
+        )[0]
+        return generated_caption
