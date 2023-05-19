@@ -1,6 +1,7 @@
 """
 Nodes for performing tests on the model.
 """
+import code
 import customtkinter
 from typing import TYPE_CHECKING, Optional, Any
 from promptflow.src.dialogues.node_options import NodeOptions
@@ -92,3 +93,13 @@ class LoggingNode(NodeBase):
         self.debug_str.text = text
         self.text_window.destroy()
         self.text_window = None
+
+
+class InterpreterNode(NodeBase):
+    """
+    Starts an interactive Python interpreter
+    """
+
+    def run_subclass(self, before_result: Any, state, console: customtkinter.CTkTextbox) -> str:
+        code.interact(local=locals())
+        return state.result

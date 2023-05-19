@@ -31,7 +31,7 @@ from promptflow.src.nodes.embedding_node import (
     EmbeddingQueryNode,
     EmbeddingsIngestNode,
 )
-from promptflow.src.nodes.test_nodes import AssertNode
+from promptflow.src.nodes.test_nodes import AssertNode, LoggingNode, InterpreterNode
 from promptflow.src.nodes.env_node import EnvNode, ManualEnvNode
 from promptflow.src.nodes.audio_node import WhispersNode, ElevenLabsNode
 from promptflow.src.nodes.db_node import PGQueryNode, SQLiteQueryNode, PGGenerateNode

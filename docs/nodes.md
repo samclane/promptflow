@@ -311,6 +311,10 @@ Assert a Python expression. Double-click the node to edit the expression.
 
 Logs the output at a certain step. Useful for debugging. Double-click the node to edit the message. The string is a Python f-string, similar to [`Prompt`](Prompt).
 
+### Interpreter
+
+Start an interactive Python interpreter in the console.
+
 (Audio)=
 
 ## Audio

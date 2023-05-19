@@ -64,7 +64,7 @@ from promptflow.src.nodes.embedding_node import (
 from promptflow.src.nodes.input_node import FileInput, InputNode, JSONFileInput
 from promptflow.src.nodes.server_node import ServerInputNode
 from promptflow.src.nodes.structured_data_node import JsonNode, JsonerizerNode
-from promptflow.src.nodes.test_nodes import AssertNode, LoggingNode
+from promptflow.src.nodes.test_nodes import AssertNode, LoggingNode, InterpreterNode
 from promptflow.src.nodes.websearch_node import SerpApiNode
 from promptflow.src.options import Options
 from promptflow.src.nodes.dummy_llm_node import DummyNode
@@ -358,6 +358,10 @@ class App:
         self.test_menu.add_command(
             label="Logging - Print string to log",
             command=self.create_add_node_function(LoggingNode, "Logging"),
+        )
+        self.test_menu.add_command(
+            label="Interpreter - Open a Python interpreter",
+            command=self.create_add_node_function(InterpreterNode, "Interpreter"),
         )
         self.test_menu.add_command(
             label="Dummy LLM - For testing",
