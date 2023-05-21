@@ -84,3 +84,9 @@ class JSONFileOutput(NodeBase):
         with open(filename, "w", encoding="utf-8") as f:
             f.write(data[self.data_key])
         return state.result
+
+    def serialize(self) -> dict[str, Any]:
+        return super().serialize() | {
+            "filename_key": self.filename_key,
+            "data_key": self.data_key,
+        }
