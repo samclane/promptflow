@@ -95,19 +95,17 @@ class OpenAINode(NodeBase):
         center_x: float,
         center_y: float,
         label: str,
-        model: str = OpenAIModel.gpt35turbo.value,
         **kwargs,
     ):
-        self.temperature = 0.0
-        self.top_p = 1.0
-        self.n = 1
-        # self.stop = "\n\n"
-        self.max_tokens = 256
-        self.presence_penalty = 0.0
-        self.frequency_penalty = 0.0
+        self.model = kwargs.get("model", OpenAIModel.gpt35turbo.value)
+        self.temperature = kwargs.get("temperature", 0.0)
+        self.top_p = kwargs.get("top_p", 1.0)
+        self.n = kwargs.get("n", 1)
+        self.max_tokens = kwargs.get("max_tokens", 256)
+        self.presence_penalty = kwargs.get("presence_penalty", 0.0)
+        self.frequency_penalty = kwargs.get("frequency_penalty", 0.0)
 
-        self.model_var = tk.StringVar(value=model)
-        self.model = model
+        self.model_var = tk.StringVar(value=self.model)
         super().__init__(flowchart, center_x, center_y, label, **kwargs)
         self.canvas.tag_bind(self.item, "<Double-Button-1>", self.edit_options)
         self.canvas.update()
