@@ -6,6 +6,7 @@ import customtkinter
 from typing import Any, Callable, Optional
 import json
 import requests
+import bs4
 from promptflow.src.dialogues.node_options import NodeOptions
 
 from promptflow.src.nodes.node_base import NodeBase
@@ -197,4 +198,73 @@ class JSONRequestNode(NodeBase):
         return super().serialize() | {
             "key": self.key,
             "request_type": self.request_type,
+        }
+
+
+class ScrapeNode(NodeBase):
+    """
+    Parses the URL out of the state.result and scrapes the page
+    """
+
+    key: str = "url"
+    options_popup: Optional[NodeOptions]
+
+    def __init__(
+        self,
+        *args,
+        **kwargs,
+    ):
+        super().__init__(
+            *args,
+            **kwargs,
+        )
+        self.key = kwargs.get("key", "url")
+        self.options_popup: Optional[NodeOptions] = None
+        self.bind_drag()
+        self.bind_mouseover()
+
+    def run_subclass(
+        self,
+        before_result: Any,
+        state: State,
+        console: customtkinter.CTkTextbox,
+    ) -> str:
+        """
+        Scrapes a page
+        """
+        try:
+            data = json.loads(state.result)
+            if not data[self.key].startswith("https://"):
+                data[self.key] = "https://" + data[self.key]
+        except json.decoder.JSONDecodeError:
+            return "Invalid JSON"
+        response = requests.get(data[self.key])
+        soup = bs4.BeautifulSoup(response.text, "html.parser")
+        # return only the text
+        # from https://stackoverflow.com/questions/328356/extracting-text-from-html-file-using-python
+        for script in soup(["script", "style"]):
+            script.extract()
+        text = soup.get_text()
+        lines = [line.strip() for line in text.splitlines()]
+        chunks = [phrase.strip() for line in lines for phrase in line.split("  ")]
+        text = "\n".join(chunk for chunk in chunks if chunk)
+        return text
+
+    def edit_options(self, event):
+        self.options_popup = NodeOptions(
+            self.canvas,
+            {
+                "key": self.key,
+            },
+        )
+        self.canvas.wait_window(self.options_popup)
+        result = self.options_popup.result
+        # check if cancel
+        if self.options_popup.cancelled:
+            return
+        self.key = result["key"]
+
+    def serialize(self):
+        return super().serialize() | {
+            "key": self.key,
         }

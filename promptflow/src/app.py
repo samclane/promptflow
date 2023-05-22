@@ -32,7 +32,7 @@ from promptflow.src.flowchart import Flowchart
 from promptflow.src.nodes.audio_node import ElevenLabsNode, WhispersNode
 from promptflow.src.nodes.date_node import DateNode
 from promptflow.src.nodes.env_node import EnvNode, ManualEnvNode
-from promptflow.src.nodes.http_node import HttpNode, JSONRequestNode
+from promptflow.src.nodes.http_node import HttpNode, JSONRequestNode, ScrapeNode
 from promptflow.src.nodes.image_node import (
     DallENode,
     CaptionNode,
@@ -293,6 +293,10 @@ class App:
             command=self.create_add_node_function(
                 JSONRequestNode, "JSON-Parsed Request"
             ),
+        )
+        self.requests_menu.add_command(
+            label="Scrape - Scrape text from a url",
+            command=self.create_add_node_function(ScrapeNode, "Scrape"),
         )
         self.add_menu.add_cascade(label="Requests", menu=self.requests_menu)
         self.regex_menu = tk.Menu(self.add_menu, tearoff=0)
