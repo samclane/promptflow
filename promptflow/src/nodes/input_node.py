@@ -58,6 +58,9 @@ class FileInput(NodeBase):
         with open(self.filename, "r", encoding="utf-8") as f:
             return f.read()
 
+    def serialize(self) -> dict[str, Any]:
+        return super().serialize() | {"filename": self.filename}
+
 
 class JSONFileInput(NodeBase):
     """
@@ -93,3 +96,6 @@ class JSONFileInput(NodeBase):
         data = json.loads(state.result)
         with open(data[self.key], "r", encoding="utf-8") as f:
             return f.read()
+
+    def serialize(self) -> dict[str, Any]:
+        return super().serialize() | {"key": self.key}
