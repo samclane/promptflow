@@ -219,6 +219,12 @@ class OpenAINode(NodeBase):
     def serialize(self):
         return super().serialize() | {
             "model": self.model_var.get(),
+            "temperature": self.temperature,
+            "top_p": self.top_p,
+            "n": self.n,
+            "max_tokens": self.max_tokens,
+            "presence_penalty": self.presence_penalty,
+            "frequency_penalty": self.frequency_penalty,
         }
 
     def on_model_select(self, _: Optional[tk.Event]):
