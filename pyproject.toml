@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "promptflow-gui"
-version = "0.1.5"
+version = "0.1.6"
 description = "Create flowcharts to control LLMs"
 readme = "README.md"
 authors = [{name = "Sawyer McLane", email = "sawyer@fextoolkit.com"}]
