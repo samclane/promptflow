@@ -35,7 +35,6 @@ class TextData(Serializable):
     @label.setter
     def label(self, value: str):
         self._label = value
-        self.flowchart.register_text_data(self)
 
     @property
     def text(self) -> str:
@@ -47,7 +46,6 @@ class TextData(Serializable):
     @text.setter
     def text(self, value: str):
         self._text = value
-        self.flowchart.register_text_data(self)
 
     def serialize(self) -> dict[str, str]:
         return {
@@ -58,3 +56,9 @@ class TextData(Serializable):
     @classmethod
     def deserialize(cls, data: dict[str, str], flowchart: "Flowchart") -> "TextData":
         return cls(data["label"], data.get("text", ""), flowchart)
+
+    def copy(self, flowchart: "Flowchart") -> "TextData":
+        """
+        Returns a copy of this TextData with the same label and text
+        """
+        return TextData(self.label, self.text, flowchart)

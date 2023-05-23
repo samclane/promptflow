@@ -140,6 +140,7 @@ class TextInput(customtkinter.CTkToplevel):
         # force a textdata update (kidna ugly)
         self.text_data.text = self.text_entry.get("1.0", "end")
         self.text_data.label = self.label_entry.get()
+        self.flowchart.register_text_data(self.text_data)
         self.callback()
         self.modified = False
         self.destroy()
@@ -176,7 +177,7 @@ class TextInput(customtkinter.CTkToplevel):
         """
         self.text_data = self.flowchart.text_data_registry[
             self.text_select_dropdown.get()
-        ]
+        ].copy(self.flowchart)
         self.set_text(self.text_data.text)
         self.set_label(self.text_data.label)
 
