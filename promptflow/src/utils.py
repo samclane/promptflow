@@ -17,7 +17,8 @@ def retry_with_exponential_backoff(
     max_retries: int = 10,
     errors: tuple = (
         openai.error.RateLimitError,  # type: ignore
-        openai.error.ServiceUnavailableError,  # type: ignore
+        openai.error.ServiceUnavailableError,  # type: ignore,
+        openai.error.APIError,  # type: ignore
     ),
 ):
     """Retry a function with exponential backoff."""
