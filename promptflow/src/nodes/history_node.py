@@ -3,6 +3,7 @@ Manages writing history to state
 """
 from abc import ABC
 import tkinter as tk
+import tiktoken
 import customtkinter
 from typing import TYPE_CHECKING, Any, Optional
 from promptflow.src.dialogues.history_editor import HistoryEditor, Role
@@ -192,7 +193,17 @@ class WindowedHistoryNode(HistoryWindow):
         self.window = window
 
     def apply_window(self, state):
-        state.history = state.history[-self.window :]
+        # find where to start the window
+        total_tokens = 0
+        i = 0
+        enc = tiktoken.get_encoding("cl100k_base")
+        for i, message in enumerate(reversed(state.history)):
+            encoded = enc.encode(message["content"])
+            if total_tokens + len(encoded) > self.window:
+                break
+            total_tokens += len(encoded)
+        state.history = state.history[-i:]
+
         return state.history
 
     def edit_options(self, event):
