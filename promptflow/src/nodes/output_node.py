@@ -51,6 +51,7 @@ class JSONFileOutput(NodeBase):
 
     filename_key: str = "filename"
     data_key: str = "data"
+    mode: str = "w"
     options_popup: NodeOptions
 
     def __init__(
@@ -61,6 +62,7 @@ class JSONFileOutput(NodeBase):
         super().__init__(*args, **kwargs)
         self.filename_key = kwargs.get("filename_key", "")
         self.data_key = kwargs.get("data_key", "")
+        self.mode = kwargs.get("mode", "w")
 
     def edit_options(self, event):
         self.options_popup = NodeOptions(
@@ -68,20 +70,23 @@ class JSONFileOutput(NodeBase):
             {
                 "filename_key": self.filename_key,
                 "data_key": self.data_key,
+                "mode": self.mode,
             },
+            dropdown_options={"mode": ["w", "a"]},
         )
         self.canvas.wait_window(self.options_popup)
         if self.options_popup.cancelled:
             return
         self.filename_key = self.options_popup.result["filename_key"]
         self.data_key = self.options_popup.result["data_key"]
+        self.mode = self.options_popup.result["mode"]
 
     def run_subclass(
         self, before_result: Any, state, console: customtkinter.CTkTextbox
     ):
         data = json.loads(state.result)
         filename = data[self.filename_key]
-        with open(filename, "w", encoding="utf-8") as f:
+        with open(filename, self.mode, encoding="utf-8") as f:
             f.write(data[self.data_key])
         return state.result
 
@@ -89,4 +94,5 @@ class JSONFileOutput(NodeBase):
         return super().serialize() | {
             "filename_key": self.filename_key,
             "data_key": self.data_key,
+            "mode": self.mode,
         }
