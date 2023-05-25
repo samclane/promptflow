@@ -89,6 +89,12 @@ class Flowchart:
             x_offset = pan[0]
             y_offset = pan[1]
             flowchart.add_node(node, (x_offset, y_offset))
+            for item in node.items:
+                canvas.move(item, x_offset, y_offset)
+                canvas.scale(item, 0, 0, zoom, zoom)
+            for button in node.buttons:
+                button.configure(width=button.cget("width") * zoom)
+                button.configure(height=button.cget("height") * zoom)
         for connector_data in data["connectors"]:
             node1 = flowchart.find_node(connector_data["node1"])
             node2 = flowchart.find_node(connector_data["node2"])
