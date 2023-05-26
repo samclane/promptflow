@@ -471,6 +471,14 @@ class App:
         )
         self.menubar.add_cascade(label="Arrange", menu=self.arrange_menu)
 
+        # Create the "Zoom" menu
+        self.zoom_menu = tk.Menu(self.menubar, tearoff=0)
+        # self.zoom_menu.add_command(label="Zoom In", command=self.zoom_in)
+        # self.zoom_menu.add_command(label="Zoom Out", command=self.zoom_out)
+        # self.zoom_menu.add_command(label="Reset Zoom", command=self.reset_zoom)
+        self.zoom_menu.add_command(label="Zoom to Fit", command=self.zoom_to_fit)
+        self.menubar.add_cascade(label="Zoom", menu=self.zoom_menu)
+
         # create a help menu
         self.help_menu = tk.Menu(self.menubar, tearoff=0)
         self.help_menu.add_command(label="About PromptFlow...", command=self.show_about)
@@ -883,3 +891,23 @@ class App:
 
     def arrange_networkx(self, algorithm):
         self.flowchart.arrange_networkx(algorithm)
+
+    def zoom_to_fit(self, event=None):
+        """
+        Zoom the canvas to fit the contents
+        """
+        self.logger.info("Zooming to fit")
+        min_x = min([node.center_x for node in self.flowchart.nodes])
+        min_y = min([node.center_y for node in self.flowchart.nodes])
+        max_x = max([node.center_x for node in self.flowchart.nodes])
+        max_y = max([node.center_y for node in self.flowchart.nodes])
+        scale_x = self.canvas.winfo_width() / (max_x - min_x)
+        scale_y = self.canvas.winfo_height() / (max_y - min_y)
+        scale = min(scale_x, scale_y)
+        self.canvas.scale("all", 0, 0, scale, scale)
+        for node in self.flowchart.nodes:
+            for button in node.buttons:
+                button.configure(width=button.cget("width") * scale)
+                button.configure(height=button.cget("height") * scale)
+                # button.cget("font").configure(size=int(button.cget("font").cget("size") * scale))
+        self.canvas.configure(scrollregion=self.canvas.bbox("all"))
