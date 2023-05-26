@@ -38,6 +38,8 @@ class Connector(Serializable):
         self.node2 = node2
         self.flowchart = node1.flowchart
         points = self.get_points()
+        self.center_x = (points[0] + points[2]) / 2
+        self.center_y = (points[1] + points[3]) / 2
         self.item = canvas.create_line(
             points,  # type: ignore
             fill="black",

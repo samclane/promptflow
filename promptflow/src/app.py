@@ -472,12 +472,10 @@ class App:
         self.menubar.add_cascade(label="Arrange", menu=self.arrange_menu)
 
         # Create the "Zoom" menu
-        self.zoom_menu = tk.Menu(self.menubar, tearoff=0)
-        # self.zoom_menu.add_command(label="Zoom In", command=self.zoom_in)
-        # self.zoom_menu.add_command(label="Zoom Out", command=self.zoom_out)
-        # self.zoom_menu.add_command(label="Reset Zoom", command=self.reset_zoom)
-        self.zoom_menu.add_command(label="Zoom to Fit", command=self.zoom_to_fit)
-        self.menubar.add_cascade(label="Zoom", menu=self.zoom_menu)
+        self.view_menu = tk.Menu(self.menubar, tearoff=0)
+        self.view_menu.add_command(label="Zoom to Fit", command=self.zoom_to_fit)
+        self.view_menu.add_command(label="Center", command=self.center_view)
+        self.menubar.add_cascade(label="View", menu=self.view_menu)
 
         # create a help menu
         self.help_menu = tk.Menu(self.menubar, tearoff=0)
@@ -912,3 +910,11 @@ class App:
                 # button.cget("font").configure(size=int(button.cget("font").cget("size") * scale))
         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
         self.zoom_level *= scale
+
+    def center_view(self, event=None):
+        """
+        Center the view on the canvas
+        """
+        self.logger.info("Centering view")
+        self.canvas.xview_moveto(0.5)
+        self.canvas.yview_moveto(0.5)
