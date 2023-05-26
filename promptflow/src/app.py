@@ -911,3 +911,4 @@ class App:
                 button.configure(height=button.cget("height") * scale)
                 # button.cget("font").configure(size=int(button.cget("font").cget("size") * scale))
         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+        self.zoom_level *= scale
