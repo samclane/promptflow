@@ -240,11 +240,18 @@ class ScrapeNode(NodeBase):
             return "Invalid JSON"
         response = requests.get(data[self.key])
         soup = bs4.BeautifulSoup(response.text, "html.parser")
-        # return only the text
-        # from https://stackoverflow.com/questions/328356/extracting-text-from-html-file-using-python
-        for script in soup(["script", "style"]):
-            script.extract()
-        text = soup.get_text()
+        # return only the text and links
+        text = ""
+        for element in soup.find_all(['p', 'a']):  # Specify the relevant HTML tags to extract (e.g., 'p', 'a', etc.)
+            if element.name == 'a':
+                link_text = element.get_text()
+                link_url = element.get('href', '')
+                markdown_link = f"[{link_text}]({link_url})"
+                element.replace_with(markdown_link)  # Replace the link in the HTML with the markdown link
+                text += markdown_link + " "
+            else:
+                # get text and remove newlines
+                text += element.get_text().replace("\n", " ") + " "
         # escape curly braces
         text = text.replace("{", "{{").replace("}", "}}")
         lines = [line.strip() for line in text.splitlines()]
