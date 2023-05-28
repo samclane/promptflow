@@ -34,5 +34,5 @@ class SerpApiNode(WebSearchNode):
             "api_key": os.environ["SERP_API_KEY"],
         }
         search = GoogleSearch(searchParams)
-        results = search.get_dict()["organic_results"]
+        results = search.get_dict().get("organic_results", [])
         return str(results)
