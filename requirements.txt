@@ -38,6 +38,7 @@ fsspec==2023.4.0
 future==0.18.3
 gevent==22.10.2
 gevent-websocket==0.10.1
+googlesearch-python==1.2.3
 google-ai-generativelanguage==0.2.0
 google-api-core==2.11.0
 google-auth==2.18.1

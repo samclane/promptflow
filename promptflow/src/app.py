@@ -71,7 +71,7 @@ from promptflow.src.nodes.input_node import FileInput, InputNode, JSONFileInput
 from promptflow.src.nodes.server_node import ServerInputNode
 from promptflow.src.nodes.structured_data_node import JsonNode, JsonerizerNode
 from promptflow.src.nodes.test_nodes import AssertNode, LoggingNode, InterpreterNode
-from promptflow.src.nodes.websearch_node import SerpApiNode
+from promptflow.src.nodes.websearch_node import SerpApiNode, GoogleSearchNode
 from promptflow.src.options import Options
 from promptflow.src.nodes.dummy_llm_node import DummyNode
 from promptflow.src.state import State
@@ -325,6 +325,10 @@ class App:
         self.search_nodes_menu.add_command(
             label="SerpAPI - Search Google with SerpAPI",
             command=self.create_add_node_function(SerpApiNode, "SerpAPI"),
+        )
+        self.search_nodes_menu.add_command(
+            label="Google Search - Search Google with googlesearch",
+            command=self.create_add_node_function(GoogleSearchNode, "Google Search"),
         )
         self.add_menu.add_cascade(label="Search Nodes", menu=self.search_nodes_menu)
         self.embedding_menu = tk.Menu(self.add_menu, tearoff=0)

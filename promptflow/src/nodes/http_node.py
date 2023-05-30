@@ -242,12 +242,16 @@ class ScrapeNode(NodeBase):
         soup = bs4.BeautifulSoup(response.text, "html.parser")
         # return only the text and links
         text = ""
-        for element in soup.find_all(['p', 'a']):  # Specify the relevant HTML tags to extract (e.g., 'p', 'a', etc.)
-            if element.name == 'a':
+        for element in soup.find_all(
+            ["p", "a"]
+        ):  # Specify the relevant HTML tags to extract (e.g., 'p', 'a', etc.)
+            if element.name == "a":
                 link_text = element.get_text()
-                link_url = element.get('href', '')
+                link_url = element.get("href", "")
                 markdown_link = f"[{link_text}]({link_url})"
-                element.replace_with(markdown_link)  # Replace the link in the HTML with the markdown link
+                element.replace_with(
+                    markdown_link
+                )  # Replace the link in the HTML with the markdown link
                 text += markdown_link + " "
             else:
                 # get text and remove newlines

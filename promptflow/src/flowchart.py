@@ -36,7 +36,7 @@ from promptflow.src.nodes.env_node import EnvNode, ManualEnvNode
 from promptflow.src.nodes.audio_node import WhispersNode, ElevenLabsNode
 from promptflow.src.nodes.db_node import PGQueryNode, SQLiteQueryNode, PGGenerateNode
 from promptflow.src.nodes.structured_data_node import JsonNode, JsonerizerNode
-from promptflow.src.nodes.websearch_node import SerpApiNode
+from promptflow.src.nodes.websearch_node import SerpApiNode, GoogleSearchNode
 from promptflow.src.nodes.output_node import FileOutput, JSONFileOutput
 from promptflow.src.nodes.http_node import HttpNode, JSONRequestNode, ScrapeNode
 from promptflow.src.nodes.server_node import ServerInputNode
