@@ -297,6 +297,10 @@ Nodes that search the web
 
 Uses [SerpApi](https://serpapi.com/) to search the web using the result of the previous query.
 
+### GoogleSearch
+
+Uses [googlesearch-python](https://pypi.org/project/googlesearch-python/) to search the web using the result of the previous query.
+
 (Test)=
 
 ## Test Nodes
