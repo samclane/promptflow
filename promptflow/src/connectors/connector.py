@@ -3,7 +3,6 @@ This module contains the Connector class, which represents a connection
 between two nodes in the flowchart.
 """
 import math
-import tkinter as tk
 import logging
 from typing import Optional, Tuple
 
@@ -28,7 +27,6 @@ class Connector(Serializable):
 
     def __init__(
         self,
-        canvas: tk.Canvas,
         node1: NodeBase,
         node2: NodeBase,
         condition: Optional[TextData | dict] = None,

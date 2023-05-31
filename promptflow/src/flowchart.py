@@ -2,10 +2,7 @@
 This module contains the Flowchart class, which manages the nodes and connectors of a flowchart.
 """
 from __future__ import annotations
-import customtkinter
 import logging
-import tkinter as tk
-import tkinter.scrolledtext
 import threading
 from queue import Queue
 from typing import Any, Optional
@@ -52,15 +49,19 @@ from promptflow.src.connectors.connector import Connector
 from promptflow.src.connectors.partial_connector import PartialConnector
 from promptflow.src.state import State
 from promptflow.src.text_data import TextData
+from pydantic import BaseModel
 
 
-class Flowchart:
+class Flowchart(BaseModel):
     """
     Holds the nodes and connectors of a flowchart.
     """
 
-    def __init__(self, canvas: tk.Canvas, init_nodes: bool = True):
-        self.canvas = canvas
+    id: str
+    name: str
+    description: str
+
+    def __init__(self, init_nodes: bool = True):
         self.graph = nx.DiGraph()
         self.nodes: list[NodeBase] = []
         self.connectors: list[Connector] = []
@@ -69,38 +70,26 @@ class Flowchart:
 
         self._selected_element: Optional[NodeBase | Connector] = None
         self._partial_connector: Optional[PartialConnector] = None
-        self.is_dirty = False
-        self.is_running = False
 
         if init_nodes:
             self.add_node(InitNode(self, 70, 100, "Init"))
             self.add_node(StartNode(self, 70, 300, "Start"))
 
     @classmethod
-    def deserialize(
-        cls, canvas: tk.Canvas, data: dict[str, Any], pan=(0, 0), zoom=1.0
-    ) -> Flowchart:
+    def deserialize(cls, data: dict[str, Any], pan=(0, 0), zoom=1.0) -> Flowchart:
         """
         Deserialize a flowchart from a dict onto a canvas
         """
-        flowchart = cls(canvas, init_nodes=False)
+        flowchart = cls(init_nodes=False)
         for node_data in data["nodes"]:
             node = eval(node_data["classname"]).deserialize(flowchart, node_data)
             x_offset = pan[0]
             y_offset = pan[1]
             flowchart.add_node(node, (x_offset, y_offset))
-            for item in node.items:
-                canvas.move(item, x_offset, y_offset)
-                canvas.scale(item, 0, 0, zoom, zoom)
-            for button in node.buttons:
-                button.configure(width=button.cget("width") * zoom)
-                button.configure(height=button.cget("height") * zoom)
         for connector_data in data["connectors"]:
             node1 = flowchart.find_node(connector_data["node1"])
             node2 = flowchart.find_node(connector_data["node2"])
-            connector = Connector(
-                canvas, node1, node2, connector_data.get("condition", "")
-            )
+            connector = Connector(node1, node2, connector_data.get("condition", ""))
             flowchart.add_connector(connector)
         flowchart.reset_node_colors()
         canvas.update()
@@ -185,9 +174,7 @@ class Flowchart:
         self.selected_element = connector
         self.is_dirty = True
 
-    def initialize(
-        self, state: State, console: customtkinter.CTkTextbox
-    ) -> Optional[State]:
+    def initialize(self, state: State) -> Optional[State]:
         """
         Initialize the flowchart
         """
@@ -199,12 +186,11 @@ class Flowchart:
             return state
         queue: Queue[NodeBase] = Queue()
         queue.put(init_node)
-        return self.run(state, console, queue)
+        return self.run(state, queue)
 
     def run(
         self,
         state: Optional[State],
-        console: customtkinter.CTkTextbox,
         queue: Optional[Queue[NodeBase]] = None,
     ) -> Optional[State]:
         """

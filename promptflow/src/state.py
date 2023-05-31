@@ -39,7 +39,7 @@ class State(Serializable):
             self.snapshot.update(__t.snapshot)
         return self
 
-    def copy(self) -> State:
+    def copy(self) -> "State":
         """
         Create a new State object with a copy of the snapshot and history
         """
@@ -52,7 +52,7 @@ class State(Serializable):
         )
 
     @classmethod
-    def deserialize(cls, data: dict[str, Any]) -> State:
+    def deserialize(cls, data: dict[str, Any]) -> "State":
         return cls(**data)
 
     def serialize(self) -> dict[str, Any]:
