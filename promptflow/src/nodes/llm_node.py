@@ -107,47 +107,8 @@ class OpenAINode(NodeBase):
 
         self.model_var = tk.StringVar(value=self.model)
         super().__init__(flowchart, center_x, center_y, label, **kwargs)
-        self.canvas.tag_bind(self.item, "<Double-Button-1>", self.edit_options)
-        self.canvas.update()
-        self.bind_drag()
-        self.bind_mouseover()
         self.text_window: Optional[TextInput] = None
         self.options_popup: Optional[NodeOptions] = None
-
-    def edit_options(self, event: tk.Event):
-        """
-        Create a menu to edit the prompt.
-        """
-        self.options_popup = NodeOptions(
-            self.canvas,
-            {
-                "Model": self.model_var.get(),
-                "Temperature": self.temperature,
-                "Top P": self.top_p,
-                "n": self.n,
-                # "stop": self.stop,
-                "Max Tokens": self.max_tokens,
-                "presence_penalty": self.presence_penalty,
-                "frequency_penalty": self.frequency_penalty,
-            },
-            {
-                "Model": [model.value for model in OpenAIModel],
-            },
-        )
-        self.canvas.wait_window(self.options_popup)
-        result = self.options_popup.result
-        # check if cancel
-        if self.options_popup.cancelled:
-            return
-        self.model_var.set(result["Model"])
-        self.on_model_select(None)  # todo: manually calling this is a bit hacky
-        self.max_tokens = int(result["Max Tokens"])
-        self.temperature = float(result["Temperature"])
-        self.top_p = float(result["Top P"])
-        self.n = int(result["n"])
-        # self.stop = result["stop"]
-        self.presence_penalty = float(result["presence_penalty"])
-        self.frequency_penalty = float(result["frequency_penalty"])
 
     @retry_with_exponential_backoff
     def _chat_completion(self, prompt: str, state: State) -> str:
@@ -290,29 +251,6 @@ class ClaudeNode(NodeBase):
             "max_tokens": self.max_tokens,
         }
 
-    def edit_options(self, event: tk.Event):
-        """
-        Create a menu to edit the prompt.
-        """
-        self.options_popup = NodeOptions(
-            self.canvas,
-            {
-                "Model": self.model_var.get(),
-                "Max Tokens": self.max_tokens,
-            },
-            {
-                "Model": [model.value for model in AnthropicModel],
-            },
-        )
-        self.canvas.wait_window(self.options_popup)
-        result = self.options_popup.result
-        # check if cancel
-        if self.options_popup.cancelled:
-            return
-        self.model_var.set(result["Model"])
-        self.model = self.model_var.get()
-        self.max_tokens = int(result["Max Tokens"])
-
     def cost(self, state: State) -> float:
         """
         Return the cost of running this node.
@@ -356,26 +294,6 @@ class GoogleVertexNode(NodeBase):
             model=self.model, messages=self._build_history(state), prompt=state.result
         )
         return response.last
-
-    def edit_options(self, event: tk.Event):
-        """
-        Create a menu to edit the prompt.
-        """
-        self.options_popup = NodeOptions(
-            self.canvas,
-            {
-                "Model": self.model_var.get(),
-            },
-            {
-                "Model": [model.value for model in GoogleModel],
-            },
-        )
-        self.canvas.wait_window(self.options_popup)
-        result = self.options_popup.result
-        # check if cancel
-        if self.options_popup.cancelled:
-            return
-        self.model_var.set(result["Model"])
 
     def serialize(self):
         return super().serialize() | {

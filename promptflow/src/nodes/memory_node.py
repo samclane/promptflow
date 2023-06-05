@@ -46,18 +46,6 @@ class PineconeNode(MemoryNode, ABC):
         )
         return state.result
 
-    def edit_options(self, event):
-        options_popup = NodeOptions(
-            self.canvas,
-            {
-                "index": self.index,
-            },
-        )
-        self.canvas.wait_window(options_popup)
-        if options_popup.cancelled:
-            return
-        self.index = options_popup.result["index"]
-
 
 class PineconeInsertNode(PineconeNode):
     """
@@ -103,17 +91,3 @@ class PineconeQueryNode(PineconeNode):
         for match in results["matches"]:
             result += f"{match['metadata']['text']}\n"
         return result
-
-    def edit_options(self, event):
-        options_popup = NodeOptions(
-            self.canvas,
-            {
-                "index": self.index,
-                "k": self.k,
-            },
-        )
-        self.canvas.wait_window(options_popup)
-        if options_popup.cancelled:
-            return
-        self.index = options_popup.result["index"]
-        self.k = options_popup.result["k"]

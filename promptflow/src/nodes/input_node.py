@@ -40,18 +40,6 @@ class FileInput(NodeBase):
         super().__init__(*args, **kwargs)
         self.filename = kwargs.get("filename", "")
 
-    def edit_options(self, event):
-        self.options_popup = MultiFileInput(
-            self.canvas,
-            {
-                "filename": self.filename,
-            },
-        )
-        self.canvas.wait_window(self.options_popup)
-        if self.options_popup.cancelled:
-            return
-        self.filename = self.options_popup.result["filename"]
-
     def run_subclass(
         self, before_result: Any, state, console: customtkinter.CTkTextbox
     ) -> str:
@@ -77,18 +65,6 @@ class JSONFileInput(NodeBase):
     ):
         super().__init__(*args, **kwargs)
         self.key = kwargs.get("key", "")
-
-    def edit_options(self, event):
-        self.options_popup = NodeOptions(
-            self.canvas,
-            {
-                "key": self.key,
-            },
-        )
-        self.canvas.wait_window(self.options_popup)
-        if self.options_popup.cancelled:
-            return
-        self.key = self.options_popup.result["key"]
 
     def run_subclass(
         self, before_result: Any, state, console: customtkinter.CTkTextbox

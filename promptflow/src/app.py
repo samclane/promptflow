@@ -5,73 +5,15 @@ flowcharts.
 """
 import json
 import logging
-import sys
 from fastapi import FastAPI, Response, File, UploadFile
-from PIL import Image, ImageTk
-import networkx as nx
 import os
-from typing import Optional
 import zipfile
-from PIL import ImageGrab
-from promptflow.src.command import (
-    CommandManager,
-    AddConnectionCommand,
-    RemoveConnectionCommand,
-    AddNodeCommand,
-    RemoveNodeCommand,
-)
-from promptflow.src.connectors.connector import Connector
-from promptflow.src.cursor import FlowchartCursor
-
 from promptflow.src.flowchart import Flowchart
-from promptflow.src.nodes.audio_node import ElevenLabsNode, WhispersNode
-from promptflow.src.nodes.date_node import DateNode
-from promptflow.src.nodes.env_node import EnvNode, ManualEnvNode
-from promptflow.src.nodes.http_node import HttpNode, JSONRequestNode, ScrapeNode
-from promptflow.src.nodes.image_node import (
-    DallENode,
-    CaptionNode,
-    OpenImageFile,
-    JSONImageFile,
-    SaveImageNode,
-)
-from promptflow.src.nodes.memory_node import PineconeInsertNode, PineconeQueryNode
-from promptflow.src.nodes.node_base import NodeBase
-from promptflow.src.nodes.db_node import (
-    PGMLNode,
-    PGGenerateNode,
-    SQLiteQueryNode,
-    PGQueryNode,
-)
-from promptflow.src.nodes.output_node import FileOutput, JSONFileOutput
-from promptflow.src.nodes.regex_node import RegexNode, TagNode
-from promptflow.src.nodes.start_node import InitNode, StartNode
-from promptflow.src.nodes.prompt_node import PromptNode
-from promptflow.src.nodes.func_node import FuncNode
-from promptflow.src.nodes.llm_node import ClaudeNode, OpenAINode, GoogleVertexNode
-from promptflow.src.nodes.random_number import RandomNode
-from promptflow.src.nodes.history_node import (
-    HistoryNode,
-    ManualHistoryNode,
-    HistoryWindow,
-    WindowedHistoryNode,
-    DynamicWindowedHistoryNode,
-)
+
 from promptflow.src.nodes.embedding_node import (
-    EmbeddingInNode,
-    EmbeddingQueryNode,
     EmbeddingsIngestNode,
 )
-from promptflow.src.nodes.input_node import FileInput, InputNode, JSONFileInput
-from promptflow.src.nodes.server_node import ServerInputNode
-from promptflow.src.nodes.structured_data_node import JsonNode, JsonerizerNode
-from promptflow.src.nodes.test_nodes import AssertNode, LoggingNode, InterpreterNode
-from promptflow.src.nodes.websearch_node import SerpApiNode, GoogleSearchNode
-from promptflow.src.options import Options
-from promptflow.src.nodes.dummy_llm_node import DummyNode
 from promptflow.src.state import State
-from promptflow.src.themes import monokai
-from promptflow.src.dialogues.app_options import AppOptions
 
 app = FastAPI()
 
@@ -94,7 +36,7 @@ class App:
     def run_flowchart(self, flowchart_id: int) -> dict:
         """Execute the flowchart."""
         self.logger.info("Running flowchart")
-        flowchart = Flowchart.get_flowchart_by_id(flowchart_id)
+        flowchart = Flowchart.get_flowchart_by_id(flowchart_id, self)
         init_state = State()
         init_state = flowchart.initialize(init_state)
         final_state = flowchart.run(init_state)
@@ -108,7 +50,7 @@ class App:
     def stop_flowchart(self, flowchart_id: int):
         """Stop the flowchart."""
         self.logger.info("Stopping flowchart")
-        flowchart = Flowchart.get_flowchart_by_id(flowchart_id)
+        flowchart = Flowchart.get_flowchart_by_id(flowchart_id, self)
         flowchart.is_running = False
         flowchart.is_dirty = True
         return {"message": "Flowchart stopped"}
@@ -117,7 +59,7 @@ class App:
     def serialize_flowchart(self, flowchart_id: int) -> dict:
         """Serialize the flowchart to JSON."""
         self.logger.info("Serializing flowchart")
-        flowchart = Flowchart.get_flowchart_by_id(flowchart_id)
+        flowchart = Flowchart.get_flowchart_by_id(flowchart_id, self)
         chart_json = json.dumps(flowchart.serialize(), indent=4)
         self.logger.info(chart_json)
         return {"flowchart": chart_json}
@@ -126,16 +68,15 @@ class App:
     def clear_flowchart(self, flowchart_id: int):
         """Clear the flowchart."""
         self.logger.info("Clearing flowchart")
-        flowchart = Flowchart.get_flowchart_by_id(flowchart_id)
+        flowchart = Flowchart.get_flowchart_by_id(flowchart_id, self)
         flowchart.clear()
-        # self.output_console.delete("1.0", tk.END)
         return {"message": "Flowchart cleared"}
 
     @app.get("/flowcharts/{flowchart_id}/cost")
     def cost_flowchart(self, flowchart_id: int) -> dict:
         """Get the approx cost to run the flowchart"""
         self.logger.info("Getting cost of flowchart")
-        flowchart = Flowchart.get_flowchart_by_id(flowchart_id)
+        flowchart = Flowchart.get_flowchart_by_id(flowchart_id, self)
         state = State()
         cost = flowchart.cost(state)
         return {"cost": cost}
@@ -145,7 +86,7 @@ class App:
         """
         Serialize the flowchart and save it to a file
         """
-        flowchart = Flowchart.get_flowchart_by_id(flowchart_id)
+        flowchart = Flowchart.get_flowchart_by_id(flowchart_id, self)
         filename = flowchart.name
         if filename:
             with zipfile.ZipFile(filename, "w", zipfile.ZIP_DEFLATED) as archive:
@@ -187,7 +128,7 @@ class App:
                                 node["label_file"], path=os.getcwd()
                             )
                             node["label_file"] = label_file
-                    flowchart = Flowchart.deserialize(data)
+                    flowchart = Flowchart.deserialize(data, self)
                     return {"flowchart": flowchart.serialize()}
         else:
             self.logger.info("No file selected to load from")
@@ -196,12 +137,16 @@ class App:
     @app.post("/nodes/{classname}/add")
     def add_node(self, classname: str, flowchart_id: int) -> dict:
         node = exec(f"{classname}()")
-        flowchart = Flowchart.get_flowchart_by_id(flowchart_id)
-        flowchart.add_node(node)
-        return {"message": "Node added"}
+        flowchart = Flowchart.get_flowchart_by_id(flowchart_id, self)
+        if node:
+            flowchart.add_node(node)
+            return {"message": "Node added"}
+        else:
+            return {"message": "Node not added: invalid classname"}
 
-    @app.post("/nodes/{classname}/remove")
-    def remove_node(self, classname: str, flowchart_id: int) -> dict:
-        flowchart = Flowchart.get_flowchart_by_id(flowchart_id)
-        node = flowchart.get_node_by_id(classname)
+    @app.post("/nodes/{node_id}/remove")
+    def remove_node(self, node_id: str, flowchart_id: int) -> dict:
+        flowchart = Flowchart.get_flowchart_by_id(flowchart_id, self)
+        node = flowchart.find_node(node_id)
         flowchart.remove_node(node)
+        return {"message": "Node removed"}

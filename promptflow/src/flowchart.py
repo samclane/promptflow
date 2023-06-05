@@ -2,6 +2,7 @@
 This module contains the Flowchart class, which manages the nodes and connectors of a flowchart.
 """
 from __future__ import annotations
+import sqlite3
 import logging
 import threading
 from queue import Queue
@@ -61,7 +62,8 @@ class Flowchart(BaseModel):
     name: str
     description: str
 
-    def __init__(self, init_nodes: bool = True):
+    def __init__(self, master, init_nodes: bool = True):
+        self.master = master
         self.graph = nx.DiGraph()
         self.nodes: list[NodeBase] = []
         self.connectors: list[Connector] = []
@@ -76,11 +78,25 @@ class Flowchart(BaseModel):
             self.add_node(StartNode(self, 70, 300, "Start"))
 
     @classmethod
-    def deserialize(cls, data: dict[str, Any], pan=(0, 0), zoom=1.0) -> Flowchart:
+    def get_flowchart_by_id(cls, id, master):
         """
-        Deserialize a flowchart from a dict onto a canvas
+        Return a flowchart by id
         """
-        flowchart = cls(init_nodes=False)
+        conn = sqlite3.connect("flowcharts.db")
+        c = conn.cursor()
+        c.execute("SELECT * FROM flowcharts WHERE id=?", (id,))
+        flowchart = c.fetchone()
+        conn.close()
+        return cls.deserialize(flowchart[1], master)
+
+    @classmethod
+    def deserialize(
+        cls, data: dict[str, Any], master, pan=(0, 0), zoom=1.0
+    ) -> Flowchart:
+        """
+        Deserialize a flowchart from a dict
+        """
+        flowchart = cls(master, init_nodes=False)
         for node_data in data["nodes"]:
             node = eval(node_data["classname"]).deserialize(flowchart, node_data)
             x_offset = pan[0]
@@ -91,8 +107,6 @@ class Flowchart(BaseModel):
             node2 = flowchart.find_node(connector_data["node2"])
             connector = Connector(node1, node2, connector_data.get("condition", ""))
             flowchart.add_connector(connector)
-        flowchart.reset_node_colors()
-        canvas.update()
         flowchart.is_dirty = False
         return flowchart
 
@@ -106,13 +120,6 @@ class Flowchart(BaseModel):
     @selected_element.setter
     def selected_element(self, elem: Optional[NodeBase | Connector]):
         self.logger.info("Selected element changed to %s", elem.label if elem else None)
-        # deselect previous node
-        if self._selected_element:
-            # configure to have solid border
-            self.canvas.itemconfig(self._selected_element.item, width=2)
-        # select new node
-        if elem:
-            self.canvas.itemconfig(elem.item, width=4)
         self._selected_element = elem
 
     @property
@@ -181,8 +188,7 @@ class Flowchart(BaseModel):
         self.is_running = True
         init_node: Optional[InitNode] = self.init_node
         if not init_node or init_node.run_once:
-            console.insert(tk.END, "\n[System: Already initialized]\n")
-            console.see(tk.END)
+            self.logger.info("Flowchart already initialized")
             return state
         queue: Queue[NodeBase] = Queue()
         queue.put(init_node)
@@ -208,53 +214,34 @@ class Flowchart(BaseModel):
 
         if not queue.empty():
             if not self.is_running:
-                self.reset_node_colors()
-                console.insert(tk.END, "\n[System: Stopped]\n")
-                console.see(tk.END)
+                self.logger.info("Flowchart stopped")
                 self.is_running = False
                 return state
             cur_node: NodeBase = queue.get()
-            # turn node light yellow while running
-            cur_node.canvas.itemconfig(cur_node.item, fill="#ffffcc")
-            cur_node.canvas.update()
             self.logger.info(f"Running node {cur_node.label}")
-            before_result = cur_node.before(state, console)
+            before_result = cur_node.before(state)
             try:
                 thread = threading.Thread(
                     target=cur_node.run_node,
-                    args=(before_result, state, console),
+                    args=(before_result, state),
                     daemon=True,
                 )
                 thread.start()
                 while thread.is_alive():
-                    self.canvas.update()
+                    pass
                 thread.join()
                 output = state.result
             except Exception as node_err:
                 self.logger.error(
                     f"Error running node {cur_node.label}: {node_err}", exc_info=True
                 )
-                if console:
-                    console.insert(
-                        tk.END, f"[ERROR]{cur_node.label}: {node_err}" + "\n"
-                    )
-                    console.see(tk.END)
                 return state
-            if console:
-                console.insert(tk.END, f"{cur_node.label}: {output}" + "\n")
-                console.see(tk.END)
             self.logger.info(f"Node {cur_node.label} output: {output}")
-            # turn node light green
-            cur_node.canvas.itemconfig(cur_node.item, fill="#ccffcc")
-            cur_node.canvas.update()
 
             if output is None:
                 self.logger.info(
                     f"Node {cur_node.label} output is None, stopping execution"
                 )
-                self.reset_node_colors()
-                console.insert(tk.END, "\n[System: Done]\n")
-                console.see(tk.END)
                 return state
 
             for connector in cur_node.output_connectors:
@@ -269,16 +256,10 @@ class Flowchart(BaseModel):
                         cond = state.snapshot["main"](state)  # type: ignore
                     except Exception as node_err:
                         # log complete error traceback
-                        # self.logger.error(f"Error evaluating condition: {node_err}")
                         self.logger.error(
                             f"Error evaluating condition: {node_err}",
                             exc_info=True,
                         )
-                        if console:
-                            console.insert(
-                                tk.END, f"[ERROR]{cur_node.label}: {node_err}" + "\n"
-                            )
-                            console.see(tk.END)
                         break
                     self.logger.info(
                         f"Condition {connector.condition} evaluated to {cond}"
@@ -289,13 +270,11 @@ class Flowchart(BaseModel):
                     # if connector.node2 not in queue:
                     if queue.queue.count(connector.node2) == 0:
                         queue.put(connector.node2)
-                        self.canvas.master.after(0, self.run, state, console, queue)
+                        self.master.after(0, self.run, state, queue)
                     self.logger.info(f"Added node {connector.node2.label} to queue")
 
         if queue.empty():
-            self.reset_node_colors()
-            console.insert(tk.END, "\n[System: Done]\n")
-            console.see(tk.END)
+            self.logger.info("Flowchart stopped")
             self.is_running = False
             return state
 
@@ -306,9 +285,6 @@ class Flowchart(BaseModel):
         if self._partial_connector:
             self._partial_connector.delete(None)
         self._partial_connector = PartialConnector(self, node)
-        self.canvas.bind("<Motion>", self._partial_connector.update)
-        self.canvas.bind("<Button-1>", self._partial_connector.finish)
-        self.canvas.bind("<Escape>", self._partial_connector.delete)
 
     def serialize(self) -> dict[str, Any]:
         """
@@ -322,6 +298,19 @@ class Flowchart(BaseModel):
         for connector in self.connectors:
             data["connectors"].append(connector.serialize())
         return data
+
+    def save_to_db(self) -> None:
+        """
+        Save the flowchart to the database
+        """
+        conn = sqlite3.connect("flowcharts.db")
+        c = conn.cursor()
+        c.execute(
+            "INSERT INTO flowcharts VALUES (?, ?)",
+            (self.id, self.json(exclude={"id"})),
+        )
+        conn.commit()
+        conn.close()
 
     def remove_node(self, node: NodeBase) -> None:
         """
@@ -358,17 +347,8 @@ class Flowchart(BaseModel):
         for connector in self.connectors:
             connector.delete()
         self.connectors = []
-        self.canvas.delete("all")
-        self.canvas.update()
         self.graph.clear()
         self.is_dirty = True
-
-    def reset_node_colors(self) -> None:
-        """
-        Set all node colors to their default color.
-        """
-        for node in self.nodes:
-            self.canvas.itemconfig(node.item, fill=node.node_color)
 
     def register_text_data(self, text_data: TextData) -> None:
         """
@@ -425,14 +405,6 @@ class Flowchart(BaseModel):
                 """
         graphml_string += "\r</graphml>"
         return graphml_string
-
-    def to_postscript(self, filename: str = "flowchart.ps"):
-        """
-        Convert the flowchart to postscript
-        """
-        self.canvas.postscript(file=filename, colormode="color")
-        with open(filename, "r") as f:
-            return f.read()
 
     def arrange_tree(self, root: NodeBase, x=0.0, y=0.0, x_gap=60.0, y_gap=60.0):
         """
