@@ -5,6 +5,7 @@ flowcharts.
 """
 import json
 import logging
+import sqlite3
 from fastapi import FastAPI, Response, File, UploadFile
 import os
 import zipfile
@@ -33,6 +34,17 @@ class PromptFlowApp:
 
 app = FastAPI()
 promptflow = PromptFlowApp()
+# create the table of flowcharts if it doesn't exist
+conn = sqlite3.connect("flowcharts.db")
+c = conn.cursor()
+c.execute(
+    """CREATE TABLE IF NOT EXISTS flowcharts (
+    id TEXT PRIMARY KEY,
+    data TEXT NOT NULL
+)"""
+)
+conn.commit()
+conn.close()
 
 
 @app.get("/flowcharts")
@@ -44,7 +56,7 @@ def get_flowcharts() -> dict:
 
 
 @app.get("/flowcharts/{flowchart_id}")
-def get_flowchart(flowchart_id: int) -> dict:
+def get_flowchart(flowchart_id: str) -> dict:
     """Get a flowchart by id."""
     promptflow.logger.info("Getting flowchart")
     flowchart = Flowchart.get_flowchart_by_id(flowchart_id, promptflow)
@@ -60,7 +72,7 @@ def create_flowchart() -> dict:
 
 
 @app.post("/flowcharts/{flowchart_id}/delete")
-def delete_flowchart(flowchart_id: int) -> dict:
+def delete_flowchart(flowchart_id: str) -> dict:
     """
     Delete the flowchart with the given id.
     """

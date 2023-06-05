@@ -3,6 +3,8 @@ This module contains the Flowchart class, which manages the nodes and connectors
 """
 from __future__ import annotations
 import sqlite3
+import uuid
+import json
 import logging
 import threading
 from queue import Queue
@@ -53,7 +55,7 @@ from promptflow.src.text_data import TextData
 from pydantic import BaseModel
 
 
-class Flowchart(BaseModel):
+class Flowchart():
     """
     Holds the nodes and connectors of a flowchart.
     """
@@ -61,8 +63,10 @@ class Flowchart(BaseModel):
     id: str
     name: str
     description: str
+    master: Any
 
     def __init__(self, master, init_nodes: bool = True):
+        self.id = str(uuid.uuid1())
         self.master = master
         self.graph = nx.DiGraph()
         self.nodes: list[NodeBase] = []
@@ -90,7 +94,7 @@ class Flowchart(BaseModel):
         c.execute("SELECT * FROM flowcharts WHERE id=?", (id,))
         flowchart = c.fetchone()
         conn.close()
-        return cls.deserialize(flowchart[1], master)
+        return cls.deserialize(json.loads(flowchart[1]), master)
 
     @classmethod
     def get_all_flowcharts(cls, master):
@@ -102,7 +106,7 @@ class Flowchart(BaseModel):
         c.execute("SELECT * FROM flowcharts")
         flowcharts = c.fetchall()
         conn.close()
-        return [cls.deserialize(flowchart[1], master) for flowchart in flowcharts]
+        return [cls.deserialize(json.loads(flowchart[1]), master) for flowchart in flowcharts]
 
     @classmethod
     def deserialize(
@@ -305,7 +309,9 @@ class Flowchart(BaseModel):
         """
         Write the flowchart to a dictionary
         """
-        data: dict[str, Any] = {}
+        data: dict[str, Any] = {
+            "id": self.id,
+        }
         data["nodes"] = []
         for node in self.nodes:
             data["nodes"].append(node.serialize())
@@ -320,9 +326,10 @@ class Flowchart(BaseModel):
         """
         conn = sqlite3.connect("flowcharts.db")
         c = conn.cursor()
+        data = self.serialize()
         c.execute(
-            "INSERT INTO flowcharts VALUES (?, ?)",
-            (self.id, self.json(exclude={"id"})),
+            "INSERT INTO flowcharts (id, data) VALUES (?, ?)",
+            (self.id, json.dumps(data)),
         )
         conn.commit()
         conn.close()
