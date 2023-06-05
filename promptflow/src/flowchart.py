@@ -77,6 +77,9 @@ class Flowchart(BaseModel):
             self.add_node(InitNode(self, 70, 100, "Init"))
             self.add_node(StartNode(self, 70, 300, "Start"))
 
+        # insert into database
+        self.save_to_db()
+
     @classmethod
     def get_flowchart_by_id(cls, id, master):
         """
@@ -88,6 +91,18 @@ class Flowchart(BaseModel):
         flowchart = c.fetchone()
         conn.close()
         return cls.deserialize(flowchart[1], master)
+
+    @classmethod
+    def get_all_flowcharts(cls, master):
+        """
+        Return all flowcharts
+        """
+        conn = sqlite3.connect("flowcharts.db")
+        c = conn.cursor()
+        c.execute("SELECT * FROM flowcharts")
+        flowcharts = c.fetchall()
+        conn.close()
+        return [cls.deserialize(flowchart[1], master) for flowchart in flowcharts]
 
     @classmethod
     def deserialize(
@@ -433,3 +448,13 @@ class Flowchart(BaseModel):
         pos = algorithm(self.graph, scale=self.nodes[0].size_px * 10, **kwargs)
         for node in self.nodes:
             node.move_to(pos[node][0], pos[node][1])
+
+    def delete(self):
+        """
+        Remove the flowchart from the database.
+        """
+        conn = sqlite3.connect("flowcharts.db")
+        c = conn.cursor()
+        c.execute("DELETE FROM flowcharts WHERE id=?", (self.id,))
+        conn.commit()
+        conn.close()

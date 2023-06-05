@@ -35,6 +35,41 @@ app = FastAPI()
 promptflow = PromptFlowApp()
 
 
+@app.get("/flowcharts")
+def get_flowcharts() -> dict:
+    """Get all flowcharts."""
+    promptflow.logger.info("Getting flowcharts")
+    flowcharts = Flowchart.get_all_flowcharts(promptflow)
+    return {"flowcharts": [chart.serialize() for chart in flowcharts]}
+
+
+@app.get("/flowcharts/{flowchart_id}")
+def get_flowchart(flowchart_id: int) -> dict:
+    """Get a flowchart by id."""
+    promptflow.logger.info("Getting flowchart")
+    flowchart = Flowchart.get_flowchart_by_id(flowchart_id, promptflow)
+    return {"flowchart": flowchart.serialize()}
+
+
+@app.post("/flowcharts/create")
+def create_flowchart() -> dict:
+    """Create a new flowchart."""
+    promptflow.logger.info("Creating flowchart")
+    flowchart = Flowchart(promptflow)
+    return {"flowchart": flowchart.serialize()}
+
+
+@app.post("/flowcharts/{flowchart_id}/delete")
+def delete_flowchart(flowchart_id: int) -> dict:
+    """
+    Delete the flowchart with the given id.
+    """
+    promptflow.logger.info("Deleting flowchart")
+    flowchart = Flowchart.get_flowchart_by_id(flowchart_id, promptflow)
+    flowchart.delete()
+    return {"message": "Flowchart deleted"}
+
+
 @app.get("/flowcharts/{flowchart_id}/run")
 def run_flowchart(flowchart_id: int) -> dict:
     """Execute the flowchart."""
@@ -58,16 +93,6 @@ def stop_flowchart(flowchart_id: int):
     flowchart.is_running = False
     flowchart.is_dirty = True
     return {"message": "Flowchart stopped"}
-
-
-@app.get("/flowcharts/{flowchart_id}/serialize")
-def serialize_flowchart(flowchart_id: int) -> dict:
-    """Serialize the flowchart to JSON."""
-    promptflow.logger.info("Serializing flowchart")
-    flowchart = Flowchart.get_flowchart_by_id(flowchart_id, promptflow)
-    chart_json = json.dumps(flowchart.serialize(), indent=4)
-    promptflow.logger.info(chart_json)
-    return {"flowchart": chart_json}
 
 
 @app.get("/flowcharts/{flowchart_id}/clear")
