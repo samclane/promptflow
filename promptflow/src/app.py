@@ -15,10 +15,8 @@ from promptflow.src.nodes.embedding_node import (
 )
 from promptflow.src.state import State
 
-app = FastAPI()
 
-
-class App:
+class PromptFlowApp:
     """
     Primary application class. This class is responsible for creating the
     window, menu, and canvas. It also handles the saving and loading of
@@ -32,121 +30,132 @@ class App:
         logging.basicConfig(level=logging.DEBUG, format=self.logging_fmt)
         self.logger.info("Creating app")
 
-    @app.get("/flowcharts/{flowchart_id}/run")
-    def run_flowchart(self, flowchart_id: int) -> dict:
-        """Execute the flowchart."""
-        self.logger.info("Running flowchart")
-        flowchart = Flowchart.get_flowchart_by_id(flowchart_id, self)
-        init_state = State()
-        init_state = flowchart.initialize(init_state)
-        final_state = flowchart.run(init_state)
-        self.logger.info("Finished running flowchart")
-        if final_state:
-            return {"state": final_state.serialize()}
-        else:
-            return {"state": None}
 
-    @app.get("/flowcharts/{flowchart_id}/stop")
-    def stop_flowchart(self, flowchart_id: int):
-        """Stop the flowchart."""
-        self.logger.info("Stopping flowchart")
-        flowchart = Flowchart.get_flowchart_by_id(flowchart_id, self)
-        flowchart.is_running = False
-        flowchart.is_dirty = True
-        return {"message": "Flowchart stopped"}
+app = FastAPI()
+promptflow = PromptFlowApp()
 
-    @app.get("/flowcharts/{flowchart_id}/serialize")
-    def serialize_flowchart(self, flowchart_id: int) -> dict:
-        """Serialize the flowchart to JSON."""
-        self.logger.info("Serializing flowchart")
-        flowchart = Flowchart.get_flowchart_by_id(flowchart_id, self)
-        chart_json = json.dumps(flowchart.serialize(), indent=4)
-        self.logger.info(chart_json)
-        return {"flowchart": chart_json}
 
-    @app.get("/flowcharts/{flowchart_id}/clear")
-    def clear_flowchart(self, flowchart_id: int):
-        """Clear the flowchart."""
-        self.logger.info("Clearing flowchart")
-        flowchart = Flowchart.get_flowchart_by_id(flowchart_id, self)
-        flowchart.clear()
-        return {"message": "Flowchart cleared"}
+@app.get("/flowcharts/{flowchart_id}/run")
+def run_flowchart(flowchart_id: int) -> dict:
+    """Execute the flowchart."""
+    promptflow.logger.info("Running flowchart")
+    flowchart = Flowchart.get_flowchart_by_id(flowchart_id, promptflow)
+    init_state = State()
+    init_state = flowchart.initialize(init_state)
+    final_state = flowchart.run(init_state)
+    promptflow.logger.info("Finished running flowchart")
+    if final_state:
+        return {"state": final_state.serialize()}
+    else:
+        return {"state": None}
 
-    @app.get("/flowcharts/{flowchart_id}/cost")
-    def cost_flowchart(self, flowchart_id: int) -> dict:
-        """Get the approx cost to run the flowchart"""
-        self.logger.info("Getting cost of flowchart")
-        flowchart = Flowchart.get_flowchart_by_id(flowchart_id, self)
-        state = State()
-        cost = flowchart.cost(state)
-        return {"cost": cost}
 
-    @app.post("/flowcharts/{flowchart_id}/save_as", response_class=Response)
-    def save_as(self, flowchart_id: int) -> Response:
-        """
-        Serialize the flowchart and save it to a file
-        """
-        flowchart = Flowchart.get_flowchart_by_id(flowchart_id, self)
-        filename = flowchart.name
-        if filename:
-            with zipfile.ZipFile(filename, "w", zipfile.ZIP_DEFLATED) as archive:
-                archive.writestr(
-                    "flowchart.json", json.dumps(flowchart.serialize(), indent=4)
-                )
-                # if there's an embedding ingest node, save the embedding
-                for node in flowchart.nodes:
-                    if isinstance(node, EmbeddingsIngestNode):
-                        # write the embedding to the archive
-                        archive.write(node.filename, arcname=node.filename)
-                        archive.write(node.label_file, arcname=node.label_file)
-                self.logger.info("Saved flowchart to %s", filename)
-            with open(filename, "rb") as f:
-                return Response(content=f.read(), media_type="application/zip")
-        else:
-            self.logger.info("No file selected to save to")
-            return Response(status_code=404)
+@app.get("/flowcharts/{flowchart_id}/stop")
+def stop_flowchart(flowchart_id: int):
+    """Stop the flowchart."""
+    promptflow.logger.info("Stopping flowchart")
+    flowchart = Flowchart.get_flowchart_by_id(flowchart_id, promptflow)
+    flowchart.is_running = False
+    flowchart.is_dirty = True
+    return {"message": "Flowchart stopped"}
 
-    @app.post("/flowcharts/load_from")
-    def load_from(self, file: UploadFile = File(...)) -> dict:
-        """
-        Read a json file and deserialize as a flowchart
-        """
-        if file.filename:
-            with zipfile.ZipFile(file.filename, "r") as archive:
-                with archive.open("flowchart.json") as loadfile:
-                    data = json.load(loadfile)
-                    # load the embedding if there is one
-                    for node in data["nodes"]:
-                        if node["classname"] == "EmbeddingsIngestNode":
-                            # load the embedding
-                            embed_file = archive.extract(
-                                node["filename"], path=os.getcwd()
-                            )
-                            node["filename"] = embed_file
-                            # load the labels
-                            label_file = archive.extract(
-                                node["label_file"], path=os.getcwd()
-                            )
-                            node["label_file"] = label_file
-                    flowchart = Flowchart.deserialize(data, self)
-                    return {"flowchart": flowchart.serialize()}
-        else:
-            self.logger.info("No file selected to load from")
-            return {"message": "No file selected to load from"}
 
-    @app.post("/nodes/{classname}/add")
-    def add_node(self, classname: str, flowchart_id: int) -> dict:
-        node = exec(f"{classname}()")
-        flowchart = Flowchart.get_flowchart_by_id(flowchart_id, self)
-        if node:
-            flowchart.add_node(node)
-            return {"message": "Node added"}
-        else:
-            return {"message": "Node not added: invalid classname"}
+@app.get("/flowcharts/{flowchart_id}/serialize")
+def serialize_flowchart(flowchart_id: int) -> dict:
+    """Serialize the flowchart to JSON."""
+    promptflow.logger.info("Serializing flowchart")
+    flowchart = Flowchart.get_flowchart_by_id(flowchart_id, promptflow)
+    chart_json = json.dumps(flowchart.serialize(), indent=4)
+    promptflow.logger.info(chart_json)
+    return {"flowchart": chart_json}
 
-    @app.post("/nodes/{node_id}/remove")
-    def remove_node(self, node_id: str, flowchart_id: int) -> dict:
-        flowchart = Flowchart.get_flowchart_by_id(flowchart_id, self)
-        node = flowchart.find_node(node_id)
-        flowchart.remove_node(node)
-        return {"message": "Node removed"}
+
+@app.get("/flowcharts/{flowchart_id}/clear")
+def clear_flowchart(flowchart_id: int):
+    """Clear the flowchart."""
+    promptflow.logger.info("Clearing flowchart")
+    flowchart = Flowchart.get_flowchart_by_id(flowchart_id, promptflow)
+    flowchart.clear()
+    return {"message": "Flowchart cleared"}
+
+
+@app.get("/flowcharts/{flowchart_id}/cost")
+def cost_flowchart(flowchart_id: int) -> dict:
+    """Get the approx cost to run the flowchart"""
+    promptflow.logger.info("Getting cost of flowchart")
+    flowchart = Flowchart.get_flowchart_by_id(flowchart_id, promptflow)
+    state = State()
+    cost = flowchart.cost(state)
+    return {"cost": cost}
+
+
+@app.post("/flowcharts/{flowchart_id}/save_as", response_class=Response)
+def save_as(flowchart_id: int) -> Response:
+    """
+    Serialize the flowchart and save it to a file
+    """
+    flowchart = Flowchart.get_flowchart_by_id(flowchart_id, promptflow)
+    filename = flowchart.name
+    if filename:
+        with zipfile.ZipFile(filename, "w", zipfile.ZIP_DEFLATED) as archive:
+            archive.writestr(
+                "flowchart.json", json.dumps(flowchart.serialize(), indent=4)
+            )
+            # if there's an embedding ingest node, save the embedding
+            for node in flowchart.nodes:
+                if isinstance(node, EmbeddingsIngestNode):
+                    # write the embedding to the archive
+                    archive.write(node.filename, arcname=node.filename)
+                    archive.write(node.label_file, arcname=node.label_file)
+            promptflow.logger.info("Saved flowchart to %s", filename)
+        with open(filename, "rb") as f:
+            return Response(content=f.read(), media_type="application/zip")
+    else:
+        promptflow.logger.info("No file selected to save to")
+        return Response(status_code=404)
+
+
+@app.post("/flowcharts/load_from")
+def load_from(file: UploadFile = File(...)) -> dict:
+    """
+    Read a json file and deserialize as a flowchart
+    """
+    if file.filename:
+        with zipfile.ZipFile(file.filename, "r") as archive:
+            with archive.open("flowchart.json") as loadfile:
+                data = json.load(loadfile)
+                # load the embedding if there is one
+                for node in data["nodes"]:
+                    if node["classname"] == "EmbeddingsIngestNode":
+                        # load the embedding
+                        embed_file = archive.extract(node["filename"], path=os.getcwd())
+                        node["filename"] = embed_file
+                        # load the labels
+                        label_file = archive.extract(
+                            node["label_file"], path=os.getcwd()
+                        )
+                        node["label_file"] = label_file
+                flowchart = Flowchart.deserialize(data, promptflow)
+                return {"flowchart": flowchart.serialize()}
+    else:
+        promptflow.logger.info("No file selected to load from")
+        return {"message": "No file selected to load from"}
+
+
+@app.post("/nodes/{classname}/add")
+def add_node(classname: str, flowchart_id: int) -> dict:
+    node = exec(f"{classname}()")
+    flowchart = Flowchart.get_flowchart_by_id(flowchart_id, promptflow)
+    if node:
+        flowchart.add_node(node)
+        return {"message": "Node added"}
+    else:
+        return {"message": "Node not added: invalid classname"}
+
+
+@app.post("/nodes/{node_id}/remove")
+def remove_node(node_id: str, flowchart_id: int) -> dict:
+    flowchart = Flowchart.get_flowchart_by_id(flowchart_id, promptflow)
+    node = flowchart.find_node(node_id)
+    flowchart.remove_node(node)
+    return {"message": "Node removed"}
