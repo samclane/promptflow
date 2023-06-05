@@ -422,8 +422,6 @@ class Flowchart(BaseModel):
                 if not child.visited:
                     self.arrange_tree(child, next_x, next_y, x_gap, y_gap)
                     next_x += child.size_px + x_gap
-        for connector in self.connectors:
-            connector.update()
 
     def arrange_networkx(self, algorithm):
         """
@@ -435,5 +433,3 @@ class Flowchart(BaseModel):
         pos = algorithm(self.graph, scale=self.nodes[0].size_px * 10, **kwargs)
         for node in self.nodes:
             node.move_to(pos[node][0], pos[node][1])
-        for connector in self.connectors:
-            connector.update()

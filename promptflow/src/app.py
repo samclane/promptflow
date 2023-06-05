@@ -81,8 +81,8 @@ class App:
         cost = flowchart.cost(state)
         return {"cost": cost}
 
-    @app.post("/flowcharts/{flowchart_id}/save_as")
-    def save_as(self, flowchart_id: int) -> dict | Response:
+    @app.post("/flowcharts/{flowchart_id}/save_as", response_class=Response)
+    def save_as(self, flowchart_id: int) -> Response:
         """
         Serialize the flowchart and save it to a file
         """
@@ -104,7 +104,7 @@ class App:
                 return Response(content=f.read(), media_type="application/zip")
         else:
             self.logger.info("No file selected to save to")
-            return {"message": "No file selected to save to"}
+            return Response(status_code=404)
 
     @app.post("/flowcharts/load_from")
     def load_from(self, file: UploadFile = File(...)) -> dict:

@@ -107,8 +107,6 @@ class NodeBase(Serializable, ABC):
         """
         self.center_x = event.x
         self.center_y = event.y
-        for connector in self.connectors:
-            connector.update()
 
     def stop_drag(self, _: tk.Event):
         """
