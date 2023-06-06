@@ -1,0 +1,31 @@
+{
+  "name": "promptflow",
+  "version": "0.1.7",
+  "description": "Low-Code GUI for visualizing LLM data flows",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/InsuranceToolkits/promptflow.git"
+  },
+  "keywords": [
+    "low-code",
+    "prompt-engineering",
+    "llm",
+    "openai",
+    "chatgpt",
+    "gpt"
+  ],
+  "author": "Insurance Toolkits",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/InsuranceToolkits/promptflow/issues"
+  },
+  "homepage": "https://github.com/InsuranceToolkits/promptflow#readme",
+  "dependencies": {
+    "electron": "^25.0.1"
+  }
+}
