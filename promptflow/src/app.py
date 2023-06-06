@@ -59,7 +59,10 @@ def get_flowcharts() -> dict:
 def get_flowchart(flowchart_id: str) -> dict:
     """Get a flowchart by id."""
     promptflow.logger.info("Getting flowchart")
-    flowchart = Flowchart.get_flowchart_by_id(flowchart_id, promptflow)
+    try:
+        flowchart = Flowchart.get_flowchart_by_id(flowchart_id, promptflow)
+    except ValueError:
+        return {"message": "Flowchart not found"}
     return {"flowchart": flowchart.serialize()}
 
 
@@ -77,9 +80,12 @@ def delete_flowchart(flowchart_id: str) -> dict:
     Delete the flowchart with the given id.
     """
     promptflow.logger.info("Deleting flowchart")
-    flowchart = Flowchart.get_flowchart_by_id(flowchart_id, promptflow)
+    try:
+        flowchart = Flowchart.get_flowchart_by_id(flowchart_id, promptflow)
+    except ValueError:
+        return {"message": "Flowchart not found"}
     flowchart.delete()
-    return {"message": "Flowchart deleted"}
+    return {"message": "Flowchart deleted", "flowchart": flowchart.serialize()}
 
 
 @app.get("/flowcharts/{flowchart_id}/run")
@@ -104,7 +110,7 @@ def stop_flowchart(flowchart_id: int):
     flowchart = Flowchart.get_flowchart_by_id(flowchart_id, promptflow)
     flowchart.is_running = False
     flowchart.is_dirty = True
-    return {"message": "Flowchart stopped"}
+    return {"message": "Flowchart stopped", "flowchart": flowchart.serialize()}
 
 
 @app.get("/flowcharts/{flowchart_id}/clear")
@@ -113,7 +119,7 @@ def clear_flowchart(flowchart_id: int):
     promptflow.logger.info("Clearing flowchart")
     flowchart = Flowchart.get_flowchart_by_id(flowchart_id, promptflow)
     flowchart.clear()
-    return {"message": "Flowchart cleared"}
+    return {"message": "Flowchart cleared", "flowchart": flowchart.serialize()}
 
 
 @app.get("/flowcharts/{flowchart_id}/cost")

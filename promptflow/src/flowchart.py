@@ -94,6 +94,8 @@ class Flowchart:
         c.execute("SELECT * FROM flowcharts WHERE id=?", (id,))
         flowchart = c.fetchone()
         conn.close()
+        if not flowchart:
+            raise ValueError(f"No flowchart with id {id} found")
         return cls.deserialize(json.loads(flowchart[1]), master)
 
     @classmethod
