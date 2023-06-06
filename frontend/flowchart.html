@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1 id="flowchart-id"></h1>
+    <div id="nodes"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios@0.26.1/dist/axios.min.js"></script>
+    <script>
+        // Replace with the ID of the flowchart you want to display
+        const flowchartId = window.localStorage.getItem('flowchartId');
+        const endpoint = "http://localhost:8000/flowcharts";  // Change the URL to match your API server
+
+
+        axios.get(`${endpoint}/${flowchartId}`)
+        .then((response) => {
+            const flowchart = response.data.flowchart;
+
+            const nodesDiv = document.getElementById('nodes');
+            flowchart.nodes.forEach((node) => {
+                const nodeDiv = document.createElement('div');
+                nodeDiv.className = 'node';
+                nodeDiv.textContent = node['label'];
+                nodeDiv.style.top = `${node.center_y}px`;
+                nodeDiv.style.left = `${node.center_x}px`;
+                nodesDiv.appendChild(nodeDiv);
+            });
+
+            const connectorsDiv = document.getElementById('connectors');
+            flowchart.connectors.forEach((connector) => {
+                const connectorDiv = document.createElement('div');
+                connectorDiv.className = 'connector';
+                connectorDiv.textContent = JSON.stringify(connector, null, 2);
+                connectorsDiv.appendChild(connectorDiv);
+            });
+        })
+        .catch((error) => {
+            console.log(error);
+        });
+    </script>
+</body>
+</html>

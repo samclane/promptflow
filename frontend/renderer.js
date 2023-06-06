@@ -13,6 +13,7 @@ function createFlowchartHtml(flowchart) {
             <p>ID: ${flowchart.id}</p>
             <p>Nodes: ${flowchart.nodes.length}</p>
             <p>Connectors: ${flowchart.connectors.length}</p>
+            <button class="open-button" data-id="${flowchart.id}">Open</button>
             <button class="delete-button" data-id="${flowchart.id}">Delete</button>
         </div>
     `;
@@ -43,6 +44,26 @@ const deleteButtonClick$ = fromEvent(flowchartListElement, 'click')
     );
 
 deleteButtonClick$.subscribe();
+
+const openButtonClick$ = fromEvent(flowchartListElement, 'click')
+    .pipe(
+        tap((event) => {
+            if (event.target.classList.contains('open-button')) {
+                const flowchartId = event.target.getAttribute('data-id');
+                data = axios.get(`${endpoint}/${flowchartId}`)
+                    .then(response => {
+                        const flowchart = response.data;
+                        const flowchartData = JSON.stringify(flowchart);
+                        window.localStorage.setItem('flowchartId', flowchartId);
+                        window.location.href = 'flowchart.html';
+                    }
+                    )
+                    .catch(error => console.error('Error:', error));
+            }
+        })
+    );
+
+openButtonClick$.subscribe();
 
 const createFlowchartButton = document.getElementById('create-flowchart-button');
 

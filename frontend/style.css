@@ -59,3 +59,39 @@ body {
 .create-button:hover {
     background: #3D8FD1;
 }
+
+.open-button {
+    background: #98C379;
+    border: none;
+    color: #ffffff;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background 0.3s;
+}
+
+.open-button:hover {
+    background: #75A667;
+}
+
+.node {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    background-color: #444;
+    color: white;
+    border-radius: 40px;  /* half of width and height to make it circular */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    font-size: 0.8em;
+    transition: transform 0.5s;
+    border: 2px solid #eee;
+    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.3);
+}
