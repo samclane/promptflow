@@ -194,6 +194,7 @@ class Flowchart:
         self.graph.add_node(node)
         self.selected_element = node
         self.is_dirty = True
+        self.save_to_db()
 
     def add_connector(self, connector: Connector) -> None:
         """
@@ -205,6 +206,7 @@ class Flowchart:
         self.graph.add_edge(connector.node1, connector.node2)
         self.selected_element = connector
         self.is_dirty = True
+        self.save_to_db()
 
     def initialize(self, state: State) -> Optional[State]:
         """
@@ -363,6 +365,7 @@ class Flowchart:
                 self.graph.remove_edge(connector.node1, connector.node2)
         self.graph.remove_node(node)
         self.is_dirty = True
+        self.save_to_db()
 
     def clear(self) -> None:
         """
@@ -377,6 +380,7 @@ class Flowchart:
         self.connectors = []
         self.graph.clear()
         self.is_dirty = True
+        self.save_to_db()
 
     def register_text_data(self, text_data: TextData) -> None:
         """
