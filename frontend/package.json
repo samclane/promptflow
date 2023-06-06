@@ -26,6 +26,8 @@
   },
   "homepage": "https://github.com/InsuranceToolkits/promptflow#readme",
   "dependencies": {
-    "electron": "^25.0.1"
+    "axios": "^1.4.0",
+    "electron": "^25.0.1",
+    "rxjs": "^7.8.1"
   }
 }
