@@ -297,7 +297,7 @@ class Flowchart:
                     # if connector.node2 not in queue:
                     if queue.queue.count(connector.node2) == 0:
                         queue.put(connector.node2)
-                        self.master.after(0, self.run, state, queue)
+                        self.run(state, queue)
                     self.logger.info(f"Added node {connector.node2.label} to queue")
 
         if queue.empty():

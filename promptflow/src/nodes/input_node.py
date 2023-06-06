@@ -3,7 +3,6 @@ Nodes that get run time input from the user
 """
 import json
 from typing import Any, Optional
-import customtkinter
 from promptflow.src.dialogues.multi_file import MultiFileInput
 from promptflow.src.dialogues.node_options import NodeOptions
 
@@ -15,14 +14,10 @@ class InputNode(NodeBase):
     Node that prompts the user for input
     """
 
-    def before(self, state, console):
-        dialog = customtkinter.CTkInputDialog(
-            text="Enter a value for this input:", title=self.label
-        )
-        dialog.grab_set()
-        return {"input": dialog.get_input()}
+    def before(self, state):
+        return {"input": input()}  # todo tie this into a frontend
 
-    def run_subclass(self, before_result, state, console):
+    def run_subclass(self, before_result, state):
         if before_result["input"] == "":
             return None
         return before_result["input"]
@@ -40,9 +35,7 @@ class FileInput(NodeBase):
         super().__init__(*args, **kwargs)
         self.filename = kwargs.get("filename", "")
 
-    def run_subclass(
-        self, before_result: Any, state, console: customtkinter.CTkTextbox
-    ) -> str:
+    def run_subclass(self, before_result: Any, state) -> str:
         with open(self.filename, "r", encoding="utf-8") as f:
             return f.read()
 
@@ -66,9 +59,7 @@ class JSONFileInput(NodeBase):
         super().__init__(*args, **kwargs)
         self.key = kwargs.get("key", "")
 
-    def run_subclass(
-        self, before_result: Any, state, console: customtkinter.CTkTextbox
-    ) -> str:
+    def run_subclass(self, before_result: Any, state) -> str:
         data = json.loads(state.result)
         with open(data[self.key], "r", encoding="utf-8") as f:
             return f.read()
