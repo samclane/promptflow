@@ -9,7 +9,6 @@ from typing import Optional, Tuple
 from promptflow.src.nodes.start_node import StartNode
 from promptflow.src.serializable import Serializable
 from promptflow.src.nodes.node_base import NodeBase
-from promptflow.src.dialogues.code_input import CodeInput
 from promptflow.src.text_data import TextData
 from promptflow.src.themes import monokai
 
@@ -48,7 +47,6 @@ class Connector(Serializable):
             condition.text = DEFAULT_COND_TEMPLATE
         self.condition: TextData = condition
         self.condition_label: Optional[int] = None
-        self.text_window: Optional[CodeInput] = None
 
     @property
     def label(self) -> str:
@@ -79,16 +77,6 @@ class Connector(Serializable):
         Select the connector.
         """
         self.flowchart.selected_element = self
-
-    def update_condition(self):
-        """
-        Update the connector's condition with the text in the text input window.
-        """
-        if self.text_window is None:
-            self.logger.warning("Text window is None")
-            return
-        self.condition = self.text_window.get_text()
-        self.text_window.destroy()
 
     def detect_cycle(self) -> bool:
         """

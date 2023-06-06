@@ -10,13 +10,8 @@ import time
 import hnswlib
 
 import numpy as np
-import customtkinter
 from InstructorEmbedding import INSTRUCTOR
 
-from promptflow.src.dialogues.multi_file import MultiFileInput
-from promptflow.src.dialogues.node_options import NodeOptions
-
-from promptflow.src.state import State
 from promptflow.src.nodes.node_base import NodeBase
 from promptflow.src.themes import monokai
 
@@ -106,9 +101,7 @@ class EmbeddingInNode(EmbeddingNode):
     Takes data from a node and puts it into an hnswlib index
     """
 
-    def run_subclass(
-        self, before_result: Any, state, console: customtkinter.CTkTextbox
-    ) -> str:
+    def run_subclass(self, before_result: Any, state) -> str:
         new_id = len(self.collection.content_index)
         self.collection.content_index[new_id] = state.result
         self.collection.index.add_items(
@@ -169,9 +162,7 @@ class EmbeddingQueryNode(EmbeddingNode):
         print("query time", time.process_time() - st)
         return output
 
-    def run_subclass(
-        self, before_result: Any, state, console: customtkinter.CTkTextbox
-    ) -> str:
+    def run_subclass(self, before_result: Any, state) -> str:
         results = self.query(
             query_embeddings=self.embeddings(state.result),
             n_results=self.n_results,
@@ -186,22 +177,6 @@ class EmbeddingQueryNode(EmbeddingNode):
             for k, v in doc.items():
                 return_string += f"{k}: {v}" + self.result_separator
         return return_string
-
-    def edit_options(self, event):
-        self.options_popup = NodeOptions(
-            self.canvas,
-            {
-                "n_results": self.n_results,
-                "result_separator": self.result_separator,
-            },
-        )
-        self.canvas.wait_window(self.options_popup)
-        result = self.options_popup.result
-        # check if cancel
-        if self.options_popup.cancelled:
-            return
-        self.n_results = int(result["n_results"])
-        self.result_separator = result["result_separator"]
 
     def serialize(self):
         return super().serialize() | {
@@ -236,9 +211,7 @@ class EmbeddingsIngestNode(EmbeddingNode):
         self.options_popup = None
         self.rows = kwargs.get("rows", [])
 
-    def run_subclass(
-        self, before_result: Any, state, console: customtkinter.CTkTextbox
-    ) -> str:
+    def run_subclass(self, before_result: Any, state) -> str:
         self.collection.index.load_index(self.filename)
         with open(self.label_file, "r") as f:
             csv_reader = csv.DictReader(f, fieldnames=self.rows)
@@ -248,27 +221,6 @@ class EmbeddingsIngestNode(EmbeddingNode):
                     row_name: row for row_name in self.rows if row_name in row.keys()
                 }
         return state.result
-
-    def edit_options(self, event):
-        self.options_popup = MultiFileInput(
-            self.canvas,
-            {
-                "Rows": self.rows,
-                "Bin File (.bin)": self.filename,
-                "CSV File (.csv)": self.label_file,
-            },
-        )
-        self.canvas.wait_window(self.options_popup)
-        result = self.options_popup.result
-        # check if cancel
-        if self.options_popup.cancelled:
-            return
-        self.rows = result["Rows"].split(",")
-        self.filename = result["Bin File (.bin)"]
-        self.label_file = result["CSV File (.csv)"]
-
-        self.collection.label_file = self.label_file
-        self.collection.filename = self.filename
 
     def serialize(self):
         # convert filename to relative path

@@ -1,11 +1,11 @@
 """
 Base class for all nodes
 """
-from typing import TYPE_CHECKING, Any, Optional
-import tkinter as tk
+from typing import TYPE_CHECKING, Any
 from abc import ABC, abstractmethod
 import logging
 import uuid
+
 from promptflow.src.state import State
 from promptflow.src.serializable import Serializable
 from promptflow.src.themes import monokai
@@ -91,7 +91,7 @@ class NodeBase(Serializable, ABC):
         """
         self.flowchart.begin_add_connector(self)
 
-    def start_drag(self, event: tk.Event):
+    def start_drag(self, event):
         """
         Update the flowchart's selected node and start dragging the node by
         updating the node's x and y coordinates.
@@ -100,7 +100,7 @@ class NodeBase(Serializable, ABC):
         self.center_x = event.x
         self.center_y = event.y
 
-    def on_drag(self, event: tk.Event):
+    def on_drag(self, event):
         """
         Continuously update the node's position while dragging.
         Update all connectors to follow the node.
@@ -108,7 +108,7 @@ class NodeBase(Serializable, ABC):
         self.center_x = event.x
         self.center_y = event.y
 
-    def stop_drag(self, _: tk.Event):
+    def stop_drag(self, _):
         """
         Required to be able to drag the node.
         """

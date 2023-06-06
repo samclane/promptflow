@@ -2,9 +2,7 @@
 Nodes that get run time input from the user
 """
 import json
-from typing import Any, Optional
-from promptflow.src.dialogues.multi_file import MultiFileInput
-from promptflow.src.dialogues.node_options import NodeOptions
+from typing import Any
 
 from promptflow.src.nodes.node_base import NodeBase
 
@@ -28,7 +26,6 @@ class FileInput(NodeBase):
     Reads a file and returns its contents
     """
 
-    options_popup: Optional[MultiFileInput] = None
     filename: str = ""
 
     def __init__(self, *args, **kwargs):
@@ -49,7 +46,6 @@ class JSONFileInput(NodeBase):
     """
 
     key: str = "filename"
-    options_popup: Optional[NodeOptions] = None
 
     def __init__(
         self,

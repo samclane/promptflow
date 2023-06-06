@@ -19,7 +19,7 @@ class State(Serializable):
         self.snapshot: dict[str, str] = kwargs.get("snapshot", {})
         self.history: list[dict[str, str]] = kwargs.get("history", [])
         self.result: str = kwargs.get("result", "")
-        self.data: dict[str, Any] = kwargs.get("data", {})
+        self.data: Any = kwargs.get("data", {})
         self.logger = logging.getLogger(__name__)
 
     def reset(self) -> None:

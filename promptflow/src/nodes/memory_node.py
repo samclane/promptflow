@@ -7,12 +7,10 @@ import os
 from uuid import uuid4
 from typing import Any, Optional
 
-import customtkinter
 import pinecone
 from InstructorEmbedding import INSTRUCTOR
 
 from promptflow.src.nodes.node_base import NodeBase
-from promptflow.src.dialogues.node_options import NodeOptions
 from promptflow.src.state import State
 
 
@@ -37,9 +35,7 @@ class PineconeNode(MemoryNode, ABC):
         embedding = instructor.encode(state.result)
         return embedding
 
-    def run_subclass(
-        self, before_result: Any, state, console: customtkinter.CTkTextbox
-    ) -> str:
+    def run_subclass(self, before_result: Any, state) -> str:
         pinecone.init(
             api_key=os.environ["PINECONE_API_KEY"],
             environment=os.environ["PINECONE_ENVIRONMENT"],
@@ -52,12 +48,9 @@ class PineconeInsertNode(PineconeNode):
     Inserts data into Pinecone
     """
 
-    def run_subclass(
-        self, before_result: Any, state, console: customtkinter.CTkTextbox
-    ) -> str:
-        super().run_subclass(before_result, state, console)
+    def run_subclass(self, before_result: Any, state) -> str:
+        super().run_subclass(before_result, state)
         if self.index is None:
-            console.insert("end", "Index must be set")
             raise ValueError("Index must be set")
         index = pinecone.Index(self.index)
         embedding = self.embed(state)
@@ -76,17 +69,13 @@ class PineconeQueryNode(PineconeNode):
         super().__init__(*args, **kwargs)
         self.k = kwargs.get("k", 1)
 
-    def run_subclass(
-        self, before_result: Any, state, console: customtkinter.CTkTextbox
-    ) -> str:
-        super().run_subclass(before_result, state, console)
+    def run_subclass(self, before_result: Any, state) -> str:
+        super().run_subclass(before_result, state)
         if self.index is None:
-            console.insert("end", "Index must be set")
             raise ValueError("Index must be set")
         index = pinecone.Index(self.index)
         embedding = self.embed(state.result)
         results = index.query(embedding, k=self.k, include_metadata=True)
-        console.insert("end", f"Results: {results}")
         result = ""
         for match in results["matches"]:
             result += f"{match['metadata']['text']}\n"

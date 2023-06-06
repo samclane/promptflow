@@ -4,13 +4,12 @@ Nodes for handling structured data.
 from abc import ABC, abstractmethod
 import ast
 import json
-import customtkinter
 from typing import Any
+
 import jsonschema
-from promptflow.src.dialogues.text_input import TextInput
+
 from promptflow.src.nodes.node_base import NodeBase
 from promptflow.src.state import State
-from promptflow.src.text_data import TextData
 
 
 class StructuredDataNode(NodeBase, ABC):
@@ -31,9 +30,7 @@ class StructuredDataNode(NodeBase, ABC):
         Validate the data.
         """
 
-    def run_subclass(
-        self, before_result: Any, state: State, console: customtkinter.CTkTextbox
-    ) -> str:
+    def run_subclass(self, before_result: Any, state: State) -> str:
         validation: str = self.validate(state.result)
         return validation
 
@@ -46,16 +43,11 @@ class JsonNode(StructuredDataNode):
     Node that validates JSON into a python dictionary.
     """
 
-    def edit_options(self, event):
-        """
-        Allow user to edit the schema.
-        """
-        # create a text input dialogue
-        text_data = TextData(
-            "Schema", json.dumps(self.schema, indent=4), self.flowchart
-        )
-        self.text_input = TextInput(self.canvas, self.flowchart, text_data)
-        self.text_input.set_callback(self.save_options)
+    schema = None
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.schema = kwargs.get("schema", None)
 
     def validate(self, data):
         try:
@@ -70,22 +62,12 @@ class JsonNode(StructuredDataNode):
             return "Schema error: " + str(e)
         return data
 
-    def save_options(self):
-        """
-        Save the schema.
-        """
-        self.schema = json.loads(self.text_input.get_text().text)
-        self.text_input.destroy()
-        self.text_input = None
-
 
 class JsonerizerNode(NodeBase):
     """
     Node that converts a python dictionary into JSON.
     """
 
-    def run_subclass(
-        self, before_result: Any, state, console: customtkinter.CTkTextbox
-    ) -> str:
+    def run_subclass(self, before_result: Any, state) -> str:
         d: dict = ast.literal_eval(state.result)
         return json.dumps(d, indent=4)

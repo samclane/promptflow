@@ -1,6 +1,5 @@
 from abc import ABC
 import logging
-import customtkinter
 from typing import Any, Callable, Optional, TYPE_CHECKING
 from promptflow.src.db_interface.main import (
     PGInterface,
@@ -8,7 +7,6 @@ from promptflow.src.db_interface.main import (
     SQLBase,
     SQLiteInterface,
 )
-from promptflow.src.dialogues.node_options import NodeOptions
 from promptflow.src.nodes.node_base import NodeBase
 from promptflow.src.themes import monokai
 
@@ -86,35 +84,7 @@ class DBNode(NodeBase, ABC):
 
         super().__init__(flowchart, center_x, center_y, label, **kwargs)
 
-        self.options_popup: Optional[NodeOptions] = None
-
-    def edit_options(self, event):
-        self.options_popup = NodeOptions(
-            self.canvas,
-            {
-                "dbname": self.dbname,
-                "user": self.user,
-                "password": self.password,
-                "host": self.host,
-                "port": self.port,
-            },
-        )
-        self.canvas.wait_window(self.options_popup)
-        result = self.options_popup.result
-        if self.options_popup.cancelled:
-            return
-        self.dbname = result["dbname"]
-        self.user = result["user"]
-        self.password = result["password"]
-        self.host = result["host"]
-        self.port = result["port"]  # maybe make an int?
-        self.interface.update(
-            self.dbname, self.user, self.password, self.host, self.port
-        )
-
-    def run_subclass(
-        self, before_result: Any, state, console: customtkinter.CTkTextbox
-    ) -> str:
+    def run_subclass(self, before_result: Any, state) -> str:
         self.interface.interface.connect()
         return state.result
 
@@ -129,22 +99,6 @@ class SQLiteNode(DBNode):
     ):
         super().__init__(*args, **kwargs)
         self.interface = DBConnectionSingleton(SQLiteInterface)
-
-    def edit_options(self, event):
-        self.options_popup = NodeOptions(
-            self.canvas,
-            {
-                "dbpath": self.dbname,
-            },
-        )
-        self.canvas.wait_window(self.options_popup)
-        result = self.options_popup.result
-        if self.options_popup.cancelled:
-            return
-        self.dbname = result["dbpath"]
-        self.interface.update(
-            self.dbname, self.user, self.password, self.host, self.port
-        )
 
 
 class PGMLNode(DBNode):
@@ -163,57 +117,15 @@ class PGMLNode(DBNode):
         super().__init__(flowchart, center_x, center_y, label, **kwargs)
         self.model = "gpt2-instruct-dolly"
 
-    def edit_options(self, event):
-        self.options_popup = NodeOptions(
-            self.canvas,
-            {
-                "dbname": self.dbname,
-                "user": self.user,
-                "password": self.password,
-                "host": self.host,
-                "port": self.port,
-                "model": self.model,
-            },
-        )
-        self.canvas.wait_window(self.options_popup)
-        result = self.options_popup.result
-        if self.options_popup.cancelled:
-            return
-        self.dbname = result["dbname"]
-        self.user = result["user"]
-        self.password = result["password"]
-        self.host = result["host"]
-        self.port = result["port"]  # maybe make an int?
-        self.model = result["model"]
-        self.interface.update(
-            self.dbname, self.user, self.password, self.host, self.port
-        )
-
 
 class SQLiteQueryNode(DBNode):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, SQLiteInterface, **kwargs)
 
-    def run_subclass(
-        self, before_result: Any, state, console: customtkinter.CTkTextbox
-    ) -> str:
-        super().run_subclass(before_result, state, console)
+    def run_subclass(self, before_result: Any, state) -> str:
+        super().run_subclass(before_result, state)
         select = self.interface.interface.run_query(state.result)
         return str(select)
-
-    def edit_options(self, event):
-        self.options_popup = NodeOptions(
-            self.canvas,
-            {
-                "dbname": self.dbname,
-            },
-        )
-        self.canvas.wait_window(self.options_popup)
-        result = self.options_popup.result
-        if self.options_popup.cancelled:
-            return
-        self.dbname = result["dbname"]
-        self.interface.update(self.dbname)
 
 
 class PGQueryNode(DBNode):
@@ -227,18 +139,14 @@ class PGQueryNode(DBNode):
     ):
         super().__init__(flowchart, center_x, center_y, label, PGInterface, **kwargs)
 
-    def run_subclass(
-        self, before_result: Any, state, console: customtkinter.CTkTextbox
-    ) -> str:
-        super().run_subclass(before_result, state, console)
+    def run_subclass(self, before_result: Any, state) -> str:
+        super().run_subclass(before_result, state)
         select = self.interface.interface.run_query(state.result)
         return str(select)
 
 
 class PGGenerateNode(PGMLNode):
-    def run_subclass(
-        self, before_result: Any, state, console: customtkinter.CTkTextbox
-    ) -> str:
-        super().run_subclass(before_result, state, console)
+    def run_subclass(self, before_result: Any, state) -> str:
+        super().run_subclass(before_result, state)
         gen = self.interface.interface.generate(self.model, state.result)[0][0]
         return gen

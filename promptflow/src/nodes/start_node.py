@@ -2,9 +2,9 @@
 Special node that prompts the user for input
 Also signals the start of the flowchart
 """
-import customtkinter
 from typing import TYPE_CHECKING, Any
 import uuid
+
 from promptflow.src.nodes.node_base import NodeBase
 from promptflow.src.themes import monokai
 

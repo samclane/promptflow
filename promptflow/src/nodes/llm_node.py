@@ -1,25 +1,19 @@
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 import tiktoken
-import customtkinter
-from promptflow.src.state import State
-
-from promptflow.src.text_data import TextData
-from promptflow.src.utils import retry_with_exponential_backoff
-
-if TYPE_CHECKING:
-    from promptflow.src.flowchart import Flowchart
-from promptflow.src.nodes.node_base import NodeBase
-from promptflow.src.dialogues.text_input import TextInput
-from promptflow.src.dialogues.node_options import NodeOptions
-from promptflow.src.themes import monokai
-
-import tkinter as tk
 import openai
 import anthropic
 import google.generativeai as genai
 import os
 import enum
+
+from promptflow.src.state import State
+from promptflow.src.utils import retry_with_exponential_backoff
+from promptflow.src.nodes.node_base import NodeBase
+from promptflow.src.themes import monokai
+
+if TYPE_CHECKING:
+    from promptflow.src.flowchart import Flowchart
 
 
 class OpenAIModel(enum.Enum):
@@ -105,10 +99,7 @@ class OpenAINode(NodeBase):
         self.presence_penalty = kwargs.get("presence_penalty", 0.0)
         self.frequency_penalty = kwargs.get("frequency_penalty", 0.0)
 
-        self.model_var = tk.StringVar(value=self.model)
         super().__init__(flowchart, center_x, center_y, label, **kwargs)
-        self.text_window: Optional[TextInput] = None
-        self.options_popup: Optional[NodeOptions] = None
 
     @retry_with_exponential_backoff
     def _chat_completion(self, prompt: str, state: State) -> str:
@@ -121,7 +112,7 @@ class OpenAINode(NodeBase):
         if prompt:
             messages.append({"role": "user", "content": prompt})
         completion = openai.ChatCompletion.create(
-            model=self.model_var.get(),
+            model=self.model,
             messages=messages,
             temperature=self.temperature,
             top_p=self.top_p,
@@ -149,7 +140,7 @@ class OpenAINode(NodeBase):
         )
         prompt = f"{history}\n{prompt}\n"
         completion = openai.Completion.create(
-            model=self.model_var.get(),
+            model=self.model,
             prompt=prompt,
             max_tokens=self.max_tokens,
             temperature=self.temperature,
@@ -161,9 +152,7 @@ class OpenAINode(NodeBase):
         )
         return completion["choices"][0]["text"]  # type: ignore
 
-    def run_subclass(
-        self, before_result: Any, state, console: customtkinter.CTkTextbox
-    ) -> str:
+    def run_subclass(self, before_result: Any, state) -> str:
         """
         Format the prompt and run the OpenAI API.
         """
@@ -179,7 +168,7 @@ class OpenAINode(NodeBase):
 
     def serialize(self):
         return super().serialize() | {
-            "model": self.model_var.get(),
+            "model": self.model,
             "temperature": self.temperature,
             "top_p": self.top_p,
             "n": self.n,
@@ -188,11 +177,11 @@ class OpenAINode(NodeBase):
             "frequency_penalty": self.frequency_penalty,
         }
 
-    def on_model_select(self, _: Optional[tk.Event]):
+    def on_model_select(self, *args, **kwargs):
         """
         Callback for when the OpenAI model is changed.
         """
-        self.model = self.model_var.get()
+        self.model = self.model
         if self.model in [OpenAIModel.gpt4.value, OpenAIModel.gpt40314.value]:
             self.logger.warning("You're using a GPT-4 model. This is costly.")
         self.logger.info(f"Selected model: {self.model}")
@@ -215,7 +204,6 @@ class ClaudeNode(NodeBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.model = kwargs.get("model", AnthropicModel.claude_v1.value)
-        self.model_var = tk.StringVar(value=self.model)
         self.max_tokens = kwargs.get("max_tokens", 256)
 
     def _build_history(self, state: State) -> str:
@@ -230,9 +218,7 @@ class ClaudeNode(NodeBase):
         history += f"{anthropic.HUMAN_PROMPT}: {state.result}\n"
         return history
 
-    def run_subclass(
-        self, before_result: Any, state, console: customtkinter.CTkTextbox
-    ) -> str:
+    def run_subclass(self, before_result: Any, state) -> str:
         """
         Format the prompt and run the Anthropics API
         """
@@ -247,7 +233,7 @@ class ClaudeNode(NodeBase):
 
     def serialize(self):
         return super().serialize() | {
-            "model": self.model_var.get(),
+            "model": self.model,
             "max_tokens": self.max_tokens,
         }
 
@@ -275,7 +261,6 @@ class GoogleVertexNode(NodeBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.model = kwargs.get("model", GoogleModel.text_bison_001.value)
-        self.model_var = tk.StringVar(value=self.model)
 
     def _build_history(self, state: State) -> list[str]:
         history = []
@@ -286,9 +271,7 @@ class GoogleVertexNode(NodeBase):
                 history.append("AI: " + message["content"])
         return history
 
-    def run_subclass(
-        self, before_result: Any, state, console: customtkinter.CTkTextbox
-    ) -> str:
+    def run_subclass(self, before_result: Any, state) -> str:
         genai.configure(api_key=os.environ["GENAI_API_KEY"])
         response = genai.chat(
             model=self.model, messages=self._build_history(state), prompt=state.result
@@ -297,7 +280,7 @@ class GoogleVertexNode(NodeBase):
 
     def serialize(self):
         return super().serialize() | {
-            "model": self.model_var.get(),
+            "model": self.model,
         }
 
     def cost(self, state: State) -> float:
