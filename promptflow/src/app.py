@@ -39,7 +39,7 @@ conn = sqlite3.connect("flowcharts.db")
 c = conn.cursor()
 c.execute(
     """CREATE TABLE IF NOT EXISTS flowcharts (
-    id TEXT PRIMARY KEY,
+    id TEXT PRIMARY KEY NOT NULL UNIQUE,
     data TEXT NOT NULL
 )"""
 )
@@ -179,20 +179,20 @@ def load_from(file: UploadFile = File(...)) -> dict:
         return {"message": "No file selected to load from"}
 
 
-@app.post("/nodes/{classname}/add")
-def add_node(classname: str, flowchart_id: int) -> dict:
+@app.post("/flowcharts/{flowchart_id}/nodes/add")
+def add_node(flowchart_id: int, classname: str) -> dict:
     node = exec(f"{classname}()")
     flowchart = Flowchart.get_flowchart_by_id(flowchart_id, promptflow)
     if node:
         flowchart.add_node(node)
-        return {"message": "Node added"}
+        return {"message": "Node added", "node": node.serialize()}
     else:
         return {"message": "Node not added: invalid classname"}
 
 
-@app.post("/nodes/{node_id}/remove")
+@app.post("/flowcharts/{flowchart_id}/nodes/{node_id}/remove")
 def remove_node(node_id: str, flowchart_id: int) -> dict:
     flowchart = Flowchart.get_flowchart_by_id(flowchart_id, promptflow)
     node = flowchart.find_node(node_id)
     flowchart.remove_node(node)
-    return {"message": "Node removed"}
+    return {"message": "Node removed", "node": node.serialize()}

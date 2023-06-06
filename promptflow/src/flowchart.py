@@ -55,7 +55,7 @@ from promptflow.src.text_data import TextData
 from pydantic import BaseModel
 
 
-class Flowchart():
+class Flowchart:
     """
     Holds the nodes and connectors of a flowchart.
     """
@@ -65,8 +65,8 @@ class Flowchart():
     description: str
     master: Any
 
-    def __init__(self, master, init_nodes: bool = True):
-        self.id = str(uuid.uuid1())
+    def __init__(self, master, init_nodes: bool = True, id: Optional[str] = None):
+        self.id = id or str(uuid.uuid1())
         self.master = master
         self.graph = nx.DiGraph()
         self.nodes: list[NodeBase] = []
@@ -106,7 +106,10 @@ class Flowchart():
         c.execute("SELECT * FROM flowcharts")
         flowcharts = c.fetchall()
         conn.close()
-        return [cls.deserialize(json.loads(flowchart[1]), master) for flowchart in flowcharts]
+        return [
+            cls.deserialize(json.loads(flowchart[1]), master)
+            for flowchart in flowcharts
+        ]
 
     @classmethod
     def deserialize(
@@ -115,7 +118,7 @@ class Flowchart():
         """
         Deserialize a flowchart from a dict
         """
-        flowchart = cls(master, init_nodes=False)
+        flowchart = cls(master, init_nodes=False, id=data["id"])
         for node_data in data["nodes"]:
             node = eval(node_data["classname"]).deserialize(flowchart, node_data)
             x_offset = pan[0]
@@ -127,6 +130,7 @@ class Flowchart():
             connector = Connector(node1, node2, connector_data.get("condition", ""))
             flowchart.add_connector(connector)
         flowchart.is_dirty = False
+        flowchart.save_to_db()
         return flowchart
 
     @property
@@ -328,7 +332,7 @@ class Flowchart():
         c = conn.cursor()
         data = self.serialize()
         c.execute(
-            "INSERT INTO flowcharts (id, data) VALUES (?, ?)",
+            "INSERT OR REPLACE INTO flowcharts (id, data) VALUES (?, ?)",
             (self.id, json.dumps(data)),
         )
         conn.commit()
