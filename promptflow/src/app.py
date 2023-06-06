@@ -7,6 +7,7 @@ import json
 import logging
 import sqlite3
 from fastapi import FastAPI, Response, File, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 import os
 import zipfile
 from promptflow.src.flowchart import Flowchart
@@ -76,6 +77,12 @@ class PromptFlowApp:
 
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 promptflow = PromptFlowApp()
 # create the table of flowcharts if it doesn't exist
 conn = sqlite3.connect("flowcharts.db")
@@ -91,11 +98,11 @@ conn.close()
 
 
 @app.get("/flowcharts")
-def get_flowcharts() -> dict:
+def get_flowcharts() -> list[dict]:
     """Get all flowcharts."""
     promptflow.logger.info("Getting flowcharts")
     flowcharts = Flowchart.get_all_flowcharts(promptflow)
-    return {"flowcharts": [chart.serialize() for chart in flowcharts]}
+    return [chart.serialize() for chart in flowcharts]
 
 
 @app.get("/flowcharts/{flowchart_id}")
