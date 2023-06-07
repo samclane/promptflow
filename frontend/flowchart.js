@@ -20,6 +20,7 @@ let SCROLL_SENSITIVITY = 0.0005
 let isDragging = false
 let dragStart = { x: 0, y: 0 }
 let hoveredNode = null;
+let selectedNode = null;
 
 
 function getEventLocation(e) {
@@ -176,15 +177,40 @@ function onPointerDown(e) {
     isDragging = true
     dragStart.x = getEventLocation(e).x / cameraZoom - cameraOffset.x
     dragStart.y = getEventLocation(e).y / cameraZoom - cameraOffset.y
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left - cameraOffset.x;
+    const y = e.clientY - rect.top - cameraOffset.y;
+
+    // Check if a node was clicked
+    for (let i = 0; i < flowchart.nodes.length; i++) {
+        const node = flowchart.nodes[i];
+        const distance = Math.hypot(node.center_x - x, node.center_y - y);
+        console.log(distance);
+        if (distance < 50) {  // radius is the radius of the nodes
+            selectedNode = node;
+            break;
+        }
+    }
 }
 
 function onPointerUp(e) {
     isDragging = false
     initialPinchDistance = null
     lastZoom = cameraZoom
+    selectedNode = null;
 }
 
 function onPointerMove(e) {
+    if (selectedNode) {
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left - cameraOffset.x;
+        const y = e.clientY - rect.top - cameraOffset.y;
+
+        selectedNode.center_x = x;
+        selectedNode.center_y = y;
+        return;
+
+    }
     if (isDragging) {
         cameraOffset.x = getEventLocation(e).x / cameraZoom - dragStart.x
         cameraOffset.y = getEventLocation(e).y / cameraZoom - dragStart.y
@@ -193,9 +219,9 @@ function onPointerMove(e) {
     hoveredNode = null;
     if (flowchart === null) return;
     for (let i = 0; i < flowchart.nodes.length; i++) {
-
+        
         if (isHovering(mousePos, flowchart.nodes[i])) {
-
+            
             hoveredNode = flowchart.nodes[i];
             break;
         }
