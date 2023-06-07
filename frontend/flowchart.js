@@ -1,3 +1,5 @@
+const axios = require('axios');
+
 const flowchartId = window.localStorage.getItem('flowchartId');
 const endpoint = "http://localhost:8000/flowcharts";  // Change the URL to match your API server
 let canvas = document.getElementById("flowchartCanvas");
