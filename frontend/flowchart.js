@@ -90,20 +90,72 @@ function drawNodes() {
     requestAnimationFrame(drawNodes);
 }
 
+function drawArrowhead(ctx, from, to, radius, fill, stroke) {
+    let x_center = to.center_x;
+    let y_center = to.center_y;
+
+    let angle;
+    let x;
+    let y;
+
+    ctx.beginPath();
+
+    angle = Math.atan2(to.center_y - from.center_y, to.center_x - from.center_x)
+    x = radius * Math.cos(angle) + x_center;
+    y = radius * Math.sin(angle) + y_center;
+
+    ctx.moveTo(x, y);
+
+    angle += (1/3)*(2*Math.PI);
+    x = radius * Math.cos(angle) + x_center;
+    y = radius * Math.sin(angle) + y_center;
+
+    ctx.lineTo(x, y);
+
+    angle += (1/3)*(2*Math.PI);
+    x = radius * Math.cos(angle) + x_center;
+    y = radius * Math.sin(angle) + y_center;
+
+    ctx.lineTo(x, y);
+    ctx.closePath();
+
+    ctx.fillStyle = fill;
+    ctx.fill();
+    ctx.strokeStyle = stroke;
+    ctx.stroke();
+}
+
+function drawConnectors() {
+    ctx.translate( window.innerWidth / 2, window.innerHeight / 2 )
+    ctx.scale(cameraZoom, cameraZoom)
+    ctx.translate( -window.innerWidth / 2 + cameraOffset.x, -window.innerHeight / 2 + cameraOffset.y )
+    if (flowchart === null) return;
+    if (flowchart.connectors === null) return;
+    flowchart.connectors.forEach((connector) => {
+        const startNode = flowchart.nodes.find((node) => node.id === connector.node1);
+        const endNode = flowchart.nodes.find((node) => node.id === connector.node2);
+        ctx.beginPath();
+        ctx.moveTo(startNode.center_x, startNode.center_y);
+        ctx.lineTo(endNode.center_x, endNode.center_y);
+        ctx.lineWidth = 5;
+        ctx.strokeStyle = '#f5f5f5';
+        ctx.stroke();
+        drawArrowhead(ctx, startNode, endNode, 20, '#f5f5f5', '#f5f5f5');
+    });
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    requestAnimationFrame(drawConnectors);
+}
+
+function drawAll() {
+    drawNodes();
+    drawConnectors();
+}
 
 axios.get(`${endpoint}/${flowchartId}`)
 .then((response) => {
     flowchart = response.data.flowchart;
 
-    drawNodes();
-
-    const connectorsDiv = document.getElementById('connectors');
-    flowchart.connectors.forEach((connector) => {
-        const connectorDiv = document.createElement('div');
-        connectorDiv.className = 'connector';
-        connectorDiv.textContent = JSON.stringify(connector, null, 2);
-        connectorsDiv.appendChild(connectorDiv);
-    });
+    drawAll();
 })
 .catch((error) => {
     console.log(error);
@@ -150,11 +202,10 @@ function onPointerMove(e)
         if (isHovering(mousePos, flowchart.nodes[i])) {
 
             hoveredNode = flowchart.nodes[i];
-            console.log(hoveredNode);
             break;
         }
     }
-    drawNodes();
+    drawAll();
 }
 
 function handleTouch(e, singleTouchHandler)
@@ -203,16 +254,14 @@ function adjustZoom(zoomAmount, zoomFactor)
         }
         else if (zoomFactor)
         {
-            console.log(zoomFactor)
             cameraZoom = zoomFactor*lastZoom
         }
         
         cameraZoom = Math.min( cameraZoom, MAX_ZOOM )
         cameraZoom = Math.max( cameraZoom, MIN_ZOOM )
         
-        console.log(zoomAmount)
     }
-    drawNodes();
+    drawAll();
 }
 
 
