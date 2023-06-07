@@ -1,305 +1,207 @@
 const axios = require('axios');
+const fabric = require('fabric').fabric;
+const { fromEvent, from, Observable } = require('rxjs');
+const { throttleTime } = require('rxjs/operators');
+
+const endpoint = "http://localhost:8000/flowcharts";  // Change the URL to match your API server
+
+const canvas = new fabric.Canvas('flowchartCanvas', {
+    width: 800,
+    height: 600,
+    backgroundColor: '#3B4048',
+    selectionColor: 'blue',
+    selectionLineWidth: 2,
+    preserveObjectStacking: true
+});
 
 const flowchartId = window.localStorage.getItem('flowchartId');
-const endpoint = "http://localhost:8000/flowcharts";  // Change the URL to match your API server
-let canvas = document.getElementById("flowchartCanvas");
-let ctx = canvas.getContext("2d");
-let flowchart = null;
+const flowchart$ = from(axios.get(`${endpoint}/${flowchartId}`));
 
-const scaleFactor = window.devicePixelRatio;
-canvas.width = canvas.clientWidth * scaleFactor;
-canvas.height = canvas.clientHeight * scaleFactor;
-ctx.scale(scaleFactor, scaleFactor);
-// pan and zoom based on https://codepen.io/chengarda/pen/wRxoyB
-let initialAspectRatio = canvas.width / canvas.height;
-let cameraOffset = { x: window.innerWidth / 2, y: window.innerHeight / 2 }
-let cameraZoom = 1
-let MAX_ZOOM = 5
-let MIN_ZOOM = 0.1
-let SCROLL_SENSITIVITY = 0.0005
-let isDragging = false
-let dragStart = { x: 0, y: 0 }
-let hoveredNode = null;
-let selectedNode = null;
+flowchart$.subscribe((response) => {
+    const flowchart = response.data.flowchart;
 
-
-function getEventLocation(e) {
-    if (e.touches && e.touches.length == 1) {
-        return { x: e.touches[0].clientX, y: e.touches[0].clientY }
-    }
-    else if (e.clientX && e.clientY) {
-        return { x: e.clientX, y: e.clientY }
-    }
-}
-
-
-function drawNode(node) {
-    ctx.beginPath();
-    const radius = node == hoveredNode ? 55 : 50;  // Set a fixed radius value
-
-    // Create gradient
-    let grd = ctx.createLinearGradient(node.center_x, node.center_y - radius, node.center_x, node.center_y + radius);
-    grd.addColorStop(0, node == hoveredNode ? '#b4d273' : '#8BC34A');
-    grd.addColorStop(1, '#6C9A1F');
-
-    // Draw the circular node
-    ctx.arc(node.center_x, node.center_y, radius, 0, 2 * Math.PI, false);
-
-    // Set gradient as fill style
-    ctx.fillStyle = grd;
-    ctx.fill();
-
-    // Add shadow for 3D effect
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-    ctx.shadowBlur = 15;
-    ctx.shadowOffsetX = 5;
-    ctx.shadowOffsetY = 5;
-
-    // Stroke
-    ctx.lineWidth = 5;
-    ctx.strokeStyle = '#1C1E26';
-    ctx.stroke();
-
-    // Reset shadow for text drawing
-    ctx.shadowColor = 'transparent';
-
-    // Text
-    ctx.font = "20px 'Segoe UI', Arial, sans-serif"; // Using a more modern font
-    ctx.fillStyle = "black";
-    ctx.textAlign = "center";
-    ctx.textBaseline = 'middle'; // To align the text in the middle vertically
-    ctx.fillText(node.label, node.center_x, node.center_y);
-}
-
-
-
-function drawNodes() {
-    // Clear the canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.translate(window.innerWidth / 2, window.innerHeight / 2)
-    ctx.scale(cameraZoom, cameraZoom)
-    ctx.translate(-window.innerWidth / 2 + cameraOffset.x, -window.innerHeight / 2 + cameraOffset.y)
-    if (flowchart === null) return;
-    if (flowchart.nodes === null) return;
-    // Draw all the nodes
     flowchart.nodes.forEach((node) => {
-        drawNode(node);
+        const rect = new fabric.Rect({
+            left: node.center_x,
+            top: node.center_y,
+            width: 100,
+            height: 100,
+            fill: '#b4d273',
+            stroke: '#2e2e2e',
+            strokeWidth: 2,
+            originX: 'center',
+            originY: 'center',
+            centeredRotation: true,
+            hasControls: false,
+            hasBorders: false,
+            lockRotation: true,
+            lockScalingX: true,
+            lockScalingY: true,
+            lockUniScaling: true,
+            selectable: true,
+            hoverCursor: 'pointer',
+            id: node.id,
+            type: 'node'
+        });
+
+        const text = new fabric.Text(node.label, {
+            left: node.center_x,
+            top: node.center_y,
+            fontSize: 16,
+            fontFamily: 'Arial',
+            fill: '#2e2e2e',
+            originX: 'center',
+            originY: 'center',
+            centeredRotation: true,
+            hasControls: false,
+            hasBorders: false,
+            lockRotation: true,
+            lockScalingX: true,
+            lockScalingY: true,
+            lockUniScaling: true,
+            selectable: true,
+            hoverCursor: 'pointer',
+            id: node.id,
+            type: 'node'
+        });
+
+        const group = new fabric.Group([rect, text], {
+            left: node.center_x,
+            top: node.center_y,
+            originX: 'center',
+            originY: 'center',
+            centeredRotation: true,
+            hasControls: true,
+            hasBorders: true,
+            lockRotation: true,
+            lockScalingX: true,
+            lockScalingY: true,
+            lockUniScaling: true,
+            selectable: true,
+            hoverCursor: 'pointer',
+            id: node.id,
+            type: 'node'
+        });
+        group.id = node.id;
+        canvas.add(group);
     });
-    // Reset the transform to the identity matrix
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    requestAnimationFrame(drawNodes);
-}
 
-function drawArrowhead(ctx, from, to, radius, fill, stroke) {
-    let x_center = to.center_x;
-    let y_center = to.center_y;
-
-    let angle;
-    let x;
-    let y;
-
-    ctx.beginPath();
-
-    angle = Math.atan2(to.center_y - from.center_y, to.center_x - from.center_x)
-    x = radius * Math.cos(angle) + x_center;
-    y = radius * Math.sin(angle) + y_center;
-
-    ctx.moveTo(x, y);
-
-    angle += (1 / 3) * (2 * Math.PI);
-    x = radius * Math.cos(angle) + x_center;
-    y = radius * Math.sin(angle) + y_center;
-
-    ctx.lineTo(x, y);
-
-    angle += (1 / 3) * (2 * Math.PI);
-    x = radius * Math.cos(angle) + x_center;
-    y = radius * Math.sin(angle) + y_center;
-
-    ctx.lineTo(x, y);
-    ctx.closePath();
-
-    ctx.fillStyle = fill;
-    ctx.fill();
-    ctx.strokeStyle = stroke;
-    ctx.stroke();
-}
-
-function drawConnectors() {
-    ctx.translate(window.innerWidth / 2, window.innerHeight / 2)
-    ctx.scale(cameraZoom, cameraZoom)
-    ctx.translate(-window.innerWidth / 2 + cameraOffset.x, -window.innerHeight / 2 + cameraOffset.y)
-    if (flowchart === null) return;
-    if (flowchart.connectors === null) return;
     flowchart.connectors.forEach((connector) => {
-        const startNode = flowchart.nodes.find((node) => node.id === connector.node1);
-        const endNode = flowchart.nodes.find((node) => node.id === connector.node2);
-        ctx.beginPath();
-        ctx.moveTo(startNode.center_x, startNode.center_y);
-        ctx.lineTo(endNode.center_x, endNode.center_y);
-        ctx.lineWidth = 5;
-        ctx.strokeStyle = '#f5f5f5';
-        ctx.stroke();
-        drawArrowhead(ctx, startNode, endNode, 20, '#f5f5f5', '#f5f5f5');
-    });
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    requestAnimationFrame(drawConnectors);
-}
-
-function drawAll() {
-    drawNodes();
-    drawConnectors();
-}
-
-axios.get(`${endpoint}/${flowchartId}`)
-    .then((response) => {
-        flowchart = response.data.flowchart;
-
-        drawAll();
-    })
-    .catch((error) => {
-        console.log(error);
+        start_node = flowchart.nodes.find(node => node.id === connector.node1);
+        end_node = flowchart.nodes.find(node => node.id === connector.node2);
+        const line = new fabric.Line([start_node.center_x, start_node.center_y, end_node.center_x, end_node.center_y], {
+            stroke: '#2e2e2e',
+            strokeWidth: 2,
+            selectable: true,
+            evented: false,
+            id: connector.id,
+            type: 'connector'
+        });
+        line.node1 = connector.node1;
+        line.node2 = connector.node2;
+        canvas.add(line);
+        const angle = Math.atan2(connector.node2.top - connector.node1.top, connector.node2.left - connector.node1.left) * 180 / Math.PI + 90;
+        arrowhead = createArrowhead(end_node.center_x, end_node.center_y, angle);
+        arrowhead.id = connector.node2.id;
+        canvas.add(arrowhead);
     });
 
-let originalCanvasWidth = window.innerWidth;
-let originalCanvasHeight = window.innerHeight;
+});
+
 
 function resizeCanvas() {
-    // Resize the canvas
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-
-    // Redraw nodes, without altering their sizes or aspect ratios
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    canvas.setWidth(window.innerWidth);
+    canvas.setHeight(window.innerHeight);
+    canvas.renderAll();
 }
-
-function onPointerDown(e) {
-    isDragging = true
-    dragStart.x = getEventLocation(e).x / cameraZoom - cameraOffset.x
-    dragStart.y = getEventLocation(e).y / cameraZoom - cameraOffset.y
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left - cameraOffset.x;
-    const y = e.clientY - rect.top - cameraOffset.y;
-
-    // Check if a node was clicked
-    for (let i = 0; i < flowchart.nodes.length; i++) {
-        const node = flowchart.nodes[i];
-        const distance = Math.hypot(node.center_x - x, node.center_y - y);
-        console.log(distance);
-        if (distance < 50) {  // radius is the radius of the nodes
-            selectedNode = node;
-            break;
-        }
-    }
-}
-
-function onPointerUp(e) {
-    isDragging = false
-    initialPinchDistance = null
-    lastZoom = cameraZoom
-    selectedNode = null;
-}
-
-function onPointerMove(e) {
-    if (selectedNode) {
-        const rect = canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left - cameraOffset.x;
-        const y = e.clientY - rect.top - cameraOffset.y;
-
-        selectedNode.center_x = x;
-        selectedNode.center_y = y;
-        return;
-
-    }
-    if (isDragging) {
-        cameraOffset.x = getEventLocation(e).x / cameraZoom - dragStart.x
-        cameraOffset.y = getEventLocation(e).y / cameraZoom - dragStart.y
-    }
-    const mousePos = getMousePos(canvas, e);
-    hoveredNode = null;
-    if (flowchart === null) return;
-    for (let i = 0; i < flowchart.nodes.length; i++) {
-        
-        if (isHovering(mousePos, flowchart.nodes[i])) {
-            
-            hoveredNode = flowchart.nodes[i];
-            break;
-        }
-    }
-    drawAll();
-}
-
-function handleTouch(e, singleTouchHandler) {
-    if (e.touches.length == 1) {
-        singleTouchHandler(e)
-    }
-    else if (e.type == "touchmove" && e.touches.length == 2) {
-        isDragging = false
-        handlePinch(e)
-    }
-}
-
-let initialPinchDistance = null
-let lastZoom = cameraZoom
-
-function handlePinch(e) {
-    e.preventDefault()
-
-    let touch1 = { x: e.touches[0].clientX, y: e.touches[0].clientY }
-    let touch2 = { x: e.touches[1].clientX, y: e.touches[1].clientY }
-
-    // This is distance squared, but no need for an expensive sqrt as it's only used in ratio
-    let currentDistance = (touch1.x - touch2.x) ** 2 + (touch1.y - touch2.y) ** 2
-
-    if (initialPinchDistance == null) {
-        initialPinchDistance = currentDistance
-    }
-    else {
-        adjustZoom(null, currentDistance / initialPinchDistance)
-    }
-}
-
-function adjustZoom(zoomAmount, zoomFactor) {
-    if (!isDragging) {
-        if (zoomAmount) {
-            cameraZoom += zoomAmount
-        }
-        else if (zoomFactor) {
-            cameraZoom = zoomFactor * lastZoom
-        }
-
-        cameraZoom = Math.min(cameraZoom, MAX_ZOOM)
-        cameraZoom = Math.max(cameraZoom, MIN_ZOOM)
-
-    }
-    drawAll();
-}
-
-
-window.addEventListener('resize', resizeCanvas, false);
-canvas.addEventListener('mousedown', onPointerDown)
-canvas.addEventListener('touchstart', (e) => handleTouch(e, onPointerDown))
-canvas.addEventListener('mouseup', onPointerUp)
-canvas.addEventListener('touchend', (e) => handleTouch(e, onPointerUp))
-canvas.addEventListener('mousemove', onPointerMove)
-canvas.addEventListener('touchmove', (e) => handleTouch(e, onPointerMove))
-canvas.addEventListener('wheel', (e) => adjustZoom(e.deltaY * SCROLL_SENSITIVITY))
 
 resizeCanvas();
 
+// Handle window resize events
+const resize$ = fromEvent(window, 'resize').pipe(throttleTime(200));
+resize$.subscribe(() => {
+    resizeCanvas();
+});
 
+// Handle mouse wheel events
+const mouseWheel$ = fromEvent(canvas.upperCanvasEl, 'wheel');
+mouseWheel$.subscribe((event) => {
+    const delta = event.deltaY;
+    let zoom = canvas.getZoom();
+    zoom *= 0.999 ** delta;
+    if (zoom > 20) zoom = 20;
+    if (zoom < 0.01) zoom = 0.01;
+    canvas.zoomToPoint({ x: event.offsetX, y: event.offsetY }, zoom);
+    event.preventDefault();
+    event.stopPropagation();
+});
 
-function getMousePos(canvas, evt) {
-    const rect = canvas.getBoundingClientRect();
-    return {
-        x: evt.clientX - rect.left,
-        y: evt.clientY - rect.top
-    };
+// Handle mouse move events
+const mouseMove$ = fromEvent(canvas.upperCanvasEl, 'mousemove');
+mouseMove$.subscribe((event) => {
+    if (event.buttons === 4) {
+        canvas.relativePan({ x: event.movementX, y: event.movementY });
+    }
+});
+
+// Define a function to create an observable from a FabricJS event
+function fromFabricEvent(target, eventName) {
+    return new Observable((subscriber) => {
+        target.on(eventName, (event) => subscriber.next(event));
+        return () => target.off(eventName);
+    });
 }
 
-function isHovering(mousePos, node) {
-    // adjust mouse position to account for camera offset and zoom
-    const distX = mousePos.x - node.center_x - cameraOffset.x;
-    const distY = mousePos.y - node.center_y - cameraOffset.y;
-    return Math.sqrt(distX * distX + distY * distY) < 50; // 50 is the radius of the node
+const moving$ = fromFabricEvent(canvas, 'object:moving');
+
+moving$.subscribe((event) => {
+    const group = event.target;
+
+    const line = canvas.getObjects('connector').find(line => line.node1 === group.id || line.node2 === group.id);
+    const arrowhead = canvas.getObjects('triangle').find(arrowhead => arrowhead.id === line.node2.id);
+    if (line) {
+        const start_node = canvas.getObjects('node').find(group => group.id === line.node1);
+        const end_node = canvas.getObjects('node').find(group => group.id === line.node2);
+        line.set({ 'x1': start_node.left, 'y1': start_node.top, 'x2': end_node.left, 'y2': end_node.top });
+        arrowhead.set({ 'left': end_node.left, 'top': end_node.top, 'angle': Math.atan2(end_node.top - start_node.top, end_node.left - start_node.left) * 180 / Math.PI + 90 });
+    }
+});
+
+function createArrowhead(left, top, angle) {
+    return new fabric.Triangle({
+        left: left,
+        top: top,
+        originX: 'center',
+        originY: 'center',
+        hasBorders: false,
+        hasControls: false,
+        angle: angle,
+        width: 20,
+        height: 20,
+        fill: '#2e2e2e',
+        selectable: false,
+        type: 'triangle'
+    });
 }
+
+const mouseOver$ = fromFabricEvent(canvas, 'mouse:over');
+mouseOver$.subscribe((event) => {
+    const target = event.target;
+    if (!target) return;
+    if (target.type === 'node') {
+        // darken and make node border visible, increase size
+        target.item(0).set({ 'fill': '#a3c162', 'stroke': '#000000', 'width': 110, 'height': 110 });
+        canvas.renderAll();
+    }
+});
+
+const mouseOut$ = fromFabricEvent(canvas, 'mouse:out');
+mouseOut$.subscribe((event) => {
+    const target = event.target;
+    if (!target) return;
+    if (target.type === 'node') {
+        // lighten and make node border invisible, decrease size
+        target.item(0).set({ 'fill': '#b4d273', 'stroke': '#2e2e2e', 'width': 100, 'height': 100 });
+        canvas.renderAll();
+    }
+});
