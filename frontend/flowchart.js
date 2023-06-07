@@ -1,10 +1,8 @@
-// Replace with the ID of the flowchart you want to display
 const flowchartId = window.localStorage.getItem('flowchartId');
 const endpoint = "http://localhost:8000/flowcharts";  // Change the URL to match your API server
 let canvas = document.getElementById("flowchartCanvas");
 let ctx = canvas.getContext("2d");
 let flowchart = null;
-let nodes = [];
 
 const scaleFactor = window.devicePixelRatio;
 canvas.width = canvas.clientWidth * scaleFactor;
@@ -19,6 +17,8 @@ let MIN_ZOOM = 0.1
 let SCROLL_SENSITIVITY = 0.0005
 let isDragging = false
 let dragStart = { x: 0, y: 0 }
+let hoveredNode = null;
+
 
 function getEventLocation(e)
 {
@@ -35,11 +35,11 @@ function getEventLocation(e)
 
 function drawNode(node) {
     ctx.beginPath();
-    const radius = 50;  // Set a fixed radius value
+    const radius = node == hoveredNode ? 55 : 50;  // Set a fixed radius value
 
     // Create gradient
     let grd = ctx.createLinearGradient(node.center_x, node.center_y - radius, node.center_x, node.center_y + radius);
-    grd.addColorStop(0, '#b4d273');
+    grd.addColorStop(0, node == hoveredNode ? '#b4d273' : '#8BC34A');
     grd.addColorStop(1, '#6C9A1F');
     
     // Draw the circular node
@@ -79,12 +79,15 @@ function drawNodes() {
     ctx.translate( window.innerWidth / 2, window.innerHeight / 2 )
     ctx.scale(cameraZoom, cameraZoom)
     ctx.translate( -window.innerWidth / 2 + cameraOffset.x, -window.innerHeight / 2 + cameraOffset.y )
+    if (flowchart === null) return;
+    if (flowchart.nodes === null) return;
     // Draw all the nodes
     flowchart.nodes.forEach((node) => {
         drawNode(node);
     });
     // Reset the transform to the identity matrix
     ctx.setTransform(1, 0, 0, 1, 0, 0);
+    requestAnimationFrame(drawNodes);
 }
 
 
@@ -116,7 +119,6 @@ function resizeCanvas() {
 
     // Redraw nodes, without altering their sizes or aspect ratios
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    nodes.forEach(drawNode);
 }
 
 function onPointerDown(e)
@@ -139,6 +141,18 @@ function onPointerMove(e)
     {
         cameraOffset.x = getEventLocation(e).x/cameraZoom - dragStart.x
         cameraOffset.y = getEventLocation(e).y/cameraZoom - dragStart.y
+    }
+    const mousePos = getMousePos(canvas, e);
+    hoveredNode = null;
+    if (flowchart === null) return;
+    for (let i = 0; i < flowchart.nodes.length; i++) {
+
+        if (isHovering(mousePos, flowchart.nodes[i])) {
+
+            hoveredNode = flowchart.nodes[i];
+            console.log(hoveredNode);
+            break;
+        }
     }
     drawNodes();
 }
@@ -212,3 +226,20 @@ canvas.addEventListener('touchmove', (e) => handleTouch(e, onPointerMove))
 canvas.addEventListener( 'wheel', (e) => adjustZoom(e.deltaY*SCROLL_SENSITIVITY))
 
 resizeCanvas();
+
+
+
+function getMousePos(canvas, evt) {
+    const rect = canvas.getBoundingClientRect();
+    return {
+        x: evt.clientX - rect.left,
+        y: evt.clientY - rect.top
+    };
+}
+
+function isHovering(mousePos, node) {
+    // adjust mouse position to account for camera offset and zoom
+    const distX = mousePos.x - node.center_x - cameraOffset.x; 
+    const distY = mousePos.y - node.center_y - cameraOffset.y;
+    return Math.sqrt(distX * distX + distY * distY) < 50; // 50 is the radius of the node
+}
