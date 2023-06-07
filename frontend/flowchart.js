@@ -36,17 +36,41 @@ function getEventLocation(e)
 function drawNode(node) {
     ctx.beginPath();
     const radius = 50;  // Set a fixed radius value
+
+    // Create gradient
+    let grd = ctx.createLinearGradient(node.center_x, node.center_y - radius, node.center_x, node.center_y + radius);
+    grd.addColorStop(0, '#b4d273');
+    grd.addColorStop(1, '#6C9A1F');
+    
+    // Draw the circular node
     ctx.arc(node.center_x, node.center_y, radius, 0, 2 * Math.PI, false);
-    ctx.fillStyle = '#00cc00';
+
+    // Set gradient as fill style
+    ctx.fillStyle = grd;
     ctx.fill();
+    
+    // Add shadow for 3D effect
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+    ctx.shadowBlur = 15;
+    ctx.shadowOffsetX = 5;
+    ctx.shadowOffsetY = 5;
+    
+    // Stroke
     ctx.lineWidth = 5;
-    ctx.strokeStyle = '#003300';
+    ctx.strokeStyle = '#1C1E26';
     ctx.stroke();
-    ctx.font = "20px Arial";
+
+    // Reset shadow for text drawing
+    ctx.shadowColor = 'transparent';
+
+    // Text
+    ctx.font = "20px 'Segoe UI', Arial, sans-serif"; // Using a more modern font
     ctx.fillStyle = "black";
     ctx.textAlign = "center";
+    ctx.textBaseline = 'middle'; // To align the text in the middle vertically
     ctx.fillText(node.label, node.center_x, node.center_y);
 }
+
 
 
 function drawNodes() {
@@ -116,6 +140,7 @@ function onPointerMove(e)
         cameraOffset.x = getEventLocation(e).x/cameraZoom - dragStart.x
         cameraOffset.y = getEventLocation(e).y/cameraZoom - dragStart.y
     }
+    drawNodes();
 }
 
 function handleTouch(e, singleTouchHandler)
