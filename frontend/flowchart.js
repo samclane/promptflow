@@ -1,6 +1,6 @@
 const axios = require('axios');
 const fabric = require('fabric').fabric;
-const { fromEvent, from, Observable } = require('rxjs');
+const { from, Observable } = require('rxjs');
 const { throttleTime } = require('rxjs/operators');
 
 const endpoint = "http://localhost:8000/flowcharts";

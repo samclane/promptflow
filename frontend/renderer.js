@@ -1,4 +1,3 @@
-const { fromEvent } = require('rxjs');
 const { switchMap, tap } = require('rxjs/operators');
 const axios = require('axios');
 
