@@ -189,3 +189,16 @@ class NodeBase(Serializable, ABC):
         """
         self.center_x = x
         self.center_y = y
+
+    def get_options(self) -> dict[str, Any]:
+        """
+        Return the options for the node.
+        """
+        return {
+            "options" :{
+                "label": self.label,
+                "center_x": self.center_x,
+                "center_y": self.center_y,
+            },
+            "editor": None, 
+        }

@@ -79,6 +79,14 @@ class WhispersNode(AudioInputNode):
         return super().serialize() | {
             "prompt": self.prompt.serialize(),
         }
+    
+    def get_options(self) -> dict[str, Any]:
+        base_options = super().get_options()
+        base_options["options"].update({
+            "prompt": self.prompt,
+        })
+        base_options["editor"] = "text"
+        return base_options
 
 
 class ElevenLabsNode(AudioOutputNode):

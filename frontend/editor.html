@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Text</title>
+    <script>
+        const path = require('path');
+        window.MonacoEnvironment = {
+            getWorkerUrl: function (moduleId, label) {
+                return `file://${path.join(__dirname, 'node_modules', 'monaco-editor', 'min', 'vs', 'editor', 'editor.main.worker.js')}`;
+            }
+        };
+    </script>
+</head>
+<body>
+    <div id="editor" style="width: 800px; height: 600px;"></div>
+    <script src="./node_modules/monaco-editor/min/vs/loader.js"></script>
+    <script>
+        require.config({ paths: { 'vs': 'node_modules/monaco-editor/min/vs' }});
+        require(['vs/editor/editor.main'], function() {
+            var editor = monaco.editor.create(document.getElementById('editor'), {
+                value: "",
+                language: 'plaintext'
+            });
+        });
+    </script>
+</body>
+</html>

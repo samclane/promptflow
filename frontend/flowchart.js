@@ -217,3 +217,34 @@ mouseOut$.subscribe((event) => {
         canvas.renderAll();
     }
 });
+
+const doubleClick$ = fromFabricEvent(canvas, 'mouse:dblclick');
+doubleClick$.subscribe((event) => {
+    const target = event.target;
+    if (!target) return;
+    if (target.type === 'node') {
+        // get node options from backend
+        const nodeOptions = axios.get(`${endpoint}/${flowchartId}/nodes/${target.id}/options`)
+            .then(response => {
+                const nodeOptions = response.data;
+                console.log(nodeOptions);
+                if (nodeOptions.editor == null) {
+                    // open default editor
+                    console.log('open default editor');
+                    defaultEditor = window.open('defaultEditor.html', '_blank');
+                    defaultEditor.onload = () => {
+                        defaultEditor.postMessage(nodeOptions, '*');
+                    }
+                }
+                else {
+                    // open custom editor
+                    customEditor = window.open(nodeOptions.editor, '_blank');
+                    customEditor.onload = () => {
+                        customEditor.postMessage(nodeOptions, '*');
+                    }
+                }
+            }
+            )
+            .catch(error => console.error('Error:', error));
+    }
+});
