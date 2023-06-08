@@ -16,6 +16,16 @@ class Serializable(ABC):
     def deserialize(self, *args, **kwargs) -> "Serializable":
         pass
 
+    def update(self, data: dict[Any, Any]):
+        """
+        Updates the object with the given data.
+        """
+        for key, value in data.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+            else:
+                raise ValueError(f"Unknown attribute {key}")
+
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({self.serialize()})"
 

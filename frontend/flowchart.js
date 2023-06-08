@@ -3,7 +3,7 @@ const fabric = require('fabric').fabric;
 const { fromEvent, from, Observable } = require('rxjs');
 const { throttleTime } = require('rxjs/operators');
 
-const endpoint = "http://localhost:8000/flowcharts";  // Change the URL to match your API server
+const endpoint = "http://localhost:8000/flowcharts";
 
 const canvas = new fabric.Canvas('flowchartCanvas', {
     width: 800,
@@ -71,7 +71,7 @@ flowchart$.subscribe((response) => {
             originX: 'center',
             originY: 'center',
             centeredRotation: true,
-            hasControls: true,
+            hasControls: false,
             hasBorders: true,
             lockRotation: true,
             lockScalingX: true,
@@ -93,7 +93,7 @@ flowchart$.subscribe((response) => {
             stroke: '#2e2e2e',
             strokeWidth: 2,
             selectable: true,
-            evented: false,
+            evented: true,
             id: connector.id,
             type: 'connector'
         });
@@ -175,11 +175,13 @@ function createArrowhead(left, top, angle) {
         originY: 'center',
         hasBorders: false,
         hasControls: false,
+        lockMovementX: true,
+        lockMovementY: true,
+        selectable: true,
         angle: angle,
         width: 20,
         height: 20,
         fill: '#2e2e2e',
-        selectable: false,
         type: 'triangle'
     });
 }
@@ -193,6 +195,11 @@ mouseOver$.subscribe((event) => {
         target.item(0).set({ 'fill': '#a3c162', 'stroke': '#000000', 'width': 110, 'height': 110 });
         canvas.renderAll();
     }
+    else if (target.type === 'connector') {
+        // make connector thicker
+        target.set({ 'strokeWidth': 4 });
+        canvas.renderAll();
+    }
 });
 
 const mouseOut$ = fromFabricEvent(canvas, 'mouse:out');
@@ -202,6 +209,11 @@ mouseOut$.subscribe((event) => {
     if (target.type === 'node') {
         // lighten and make node border invisible, decrease size
         target.item(0).set({ 'fill': '#b4d273', 'stroke': '#2e2e2e', 'width': 100, 'height': 100 });
+        canvas.renderAll();
+    }
+    else if (target.type === 'connector') {
+        // make connector thinner
+        target.set({ 'strokeWidth': 2 });
         canvas.renderAll();
     }
 });

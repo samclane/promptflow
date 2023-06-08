@@ -268,3 +268,11 @@ def connect_nodes(flowchart_id: str, node_id: str, target_node_id: str) -> dict:
         return {"message": "Nodes connected", "connector": connector.serialize()}
     else:
         return {"message": "Nodes not connected"}
+
+
+@app.patch("/flowcharts/{flowchart_id}/nodes/{node_id}/")
+def update_node(flowchart_id: str, node_id: str, data: dict) -> dict:
+    flowchart = Flowchart.get_flowchart_by_id(flowchart_id, promptflow)
+    node = flowchart.find_node(node_id)
+    node.update(data)
+    return {"message": "Node updated", "node": node.serialize()}

@@ -5,12 +5,6 @@ html, body {
     overflow: hidden;
 }
 
-canvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-}
-
 body {
     font-family: Arial, sans-serif;
     background: #282C34;
