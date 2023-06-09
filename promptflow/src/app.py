@@ -233,6 +233,13 @@ def load_from(file: UploadFile = File(...)) -> dict:
     else:
         promptflow.logger.info("No file selected to load from")
         return {"message": "No file selected to load from"}
+    
+
+@app.get("/nodes/types")
+def get_node_types() -> dict:
+    """Get all node types."""
+    node_types = NodeBase.get_all_node_types()
+    return {"node_types": node_types}
 
 
 @app.post("/flowcharts/{flowchart_id}/nodes/add")

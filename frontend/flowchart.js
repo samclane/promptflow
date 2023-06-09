@@ -9,7 +9,7 @@ const canvas = new fabric.Canvas('flowchartCanvas', {
     width: 800,
     height: 600,
     backgroundColor: '#3B4048',
-    selectionColor: 'blue',
+    selectionColor: '#2e2e2e',
     selectionLineWidth: 2,
     preserveObjectStacking: true
 });
@@ -230,7 +230,6 @@ doubleClick$.subscribe((event) => {
                 console.log(nodeOptions);
                 if (nodeOptions.editor == null) {
                     // open default editor
-                    console.log('open default editor');
                     defaultEditor = window.open('defaultEditor.html', '_blank');
                     defaultEditor.onload = () => {
                         defaultEditor.postMessage(nodeOptions, '*');
@@ -247,4 +246,27 @@ doubleClick$.subscribe((event) => {
             )
             .catch(error => console.error('Error:', error));
     }
+});
+
+// listen for buttons
+const runButton = document.getElementById('toolbar-button-run');
+const runButtonClick$ = fromEvent(runButton, 'click');
+runButtonClick$.subscribe(() => {
+    const flowchart = canvas.toJSON();
+    console.log(flowchart);
+    axios.get(`${endpoint}/${flowchartId}/run`, flowchart)
+        .then(response => {
+            console.log(response.data);
+        })
+        .catch(error => console.error('Error:', error));
+});
+
+const stopButton = document.getElementById('toolbar-button-stop');
+const stopButtonClick$ = fromEvent(stopButton, 'click');
+stopButtonClick$.subscribe(() => {
+    axios.get(`${endpoint}/${flowchartId}/stop`)
+        .then(response => {
+            console.log(response.data);
+        })
+        .catch(error => console.error('Error:', error));
 });

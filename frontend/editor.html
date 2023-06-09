@@ -16,11 +16,13 @@
     <div id="editor" style="width: 800px; height: 600px;"></div>
     <script src="./node_modules/monaco-editor/min/vs/loader.js"></script>
     <script>
+        // get the language from the URL
+        const language = window.location.search.substr(1) || 'plaintext';
         require.config({ paths: { 'vs': 'node_modules/monaco-editor/min/vs' }});
         require(['vs/editor/editor.main'], function() {
             var editor = monaco.editor.create(document.getElementById('editor'), {
                 value: "",
-                language: 'plaintext'
+                language: language,
             });
         });
     </script>

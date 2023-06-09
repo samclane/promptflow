@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Dynamic Options Menu</title>
+    <title>Node Options Menu</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -81,7 +81,7 @@
         // Listen for postMessage
         window.addEventListener('message', (event) => {
             // For security, check the origin
-            // if (event.origin !== 'http://example.com') return; // Replace with the origin you expect
+            // if (event.origin !== 'http://localhost:8000') return; // Replace with the origin you expect
 
             // Get the data from the event
             const data = event.data;

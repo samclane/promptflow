@@ -46,6 +46,18 @@ class NodeBase(Serializable, ABC):
         self.center_x = center_x
         self.center_y = center_y
 
+    @classmethod
+    def get_all_node_types(cls) -> list[str]:
+        """
+        Return a list of all node types.
+        """
+        # get all subclasses of NodeBase
+        subclasses = NodeBase.__subclasses__()
+        # filter out abstract classes
+        subclasses = [subclass for subclass in subclasses if not subclass.__abstractmethods__]
+        # get the name of each subclass
+        return [subclass.__name__ for subclass in subclasses]
+
     def __eq__(self, __o: object) -> bool:
         if isinstance(__o, NodeBase):
             return self.id == __o.id
