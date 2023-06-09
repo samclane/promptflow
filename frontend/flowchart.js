@@ -3,7 +3,7 @@ const fabric = require('fabric').fabric;
 const { from, Observable } = require('rxjs');
 const { throttleTime } = require('rxjs/operators');
 
-const endpoint = "http://localhost:8000/flowcharts";
+const endpoint = "http://localhost:8000";
 
 const canvas = new fabric.Canvas('flowchartCanvas', {
     width: 800,
@@ -15,7 +15,7 @@ const canvas = new fabric.Canvas('flowchartCanvas', {
 });
 
 const flowchartId = window.localStorage.getItem('flowchartId');
-const flowchart$ = from(axios.get(`${endpoint}/${flowchartId}`));
+const flowchart$ = from(axios.get(`${endpoint}/flowcharts/${flowchartId}`));
 
 flowchart$.subscribe((response) => {
     const flowchart = response.data.flowchart;
@@ -107,6 +107,21 @@ flowchart$.subscribe((response) => {
     });
 
 });
+
+// Fetch node types from the endpoint and populate the dropdown
+const nodeTypes$ = from(axios.get(`${endpoint}/nodes/types`));
+
+nodeTypes$.subscribe((response) => {
+    const nodeTypes = response.data['node_types'];
+    const nodeTypeDropdown = document.getElementById('node-type-dropdown');
+    nodeTypes.forEach((nodeType) => {
+        const option = document.createElement('option');
+        option.value = nodeType;
+        option.text = nodeType;
+        nodeTypeDropdown.appendChild(option);
+    });
+});
+
 
 
 function resizeCanvas() {
@@ -224,7 +239,7 @@ doubleClick$.subscribe((event) => {
     if (!target) return;
     if (target.type === 'node') {
         // get node options from backend
-        const nodeOptions = axios.get(`${endpoint}/${flowchartId}/nodes/${target.id}/options`)
+        const nodeOptions = axios.get(`${endpoint}/flowcharts/${flowchartId}/nodes/${target.id}/options`)
             .then(response => {
                 const nodeOptions = response.data;
                 console.log(nodeOptions);
@@ -254,7 +269,7 @@ const runButtonClick$ = fromEvent(runButton, 'click');
 runButtonClick$.subscribe(() => {
     const flowchart = canvas.toJSON();
     console.log(flowchart);
-    axios.get(`${endpoint}/${flowchartId}/run`, flowchart)
+    axios.get(`${endpoint}/flowcharts/${flowchartId}/run`, flowchart)
         .then(response => {
             console.log(response.data);
         })
@@ -264,9 +279,82 @@ runButtonClick$.subscribe(() => {
 const stopButton = document.getElementById('toolbar-button-stop');
 const stopButtonClick$ = fromEvent(stopButton, 'click');
 stopButtonClick$.subscribe(() => {
-    axios.get(`${endpoint}/${flowchartId}/stop`)
+    axios.get(`${endpoint}/flowcharts/${flowchartId}/stop`)
         .then(response => {
             console.log(response.data);
+        })
+        .catch(error => console.error('Error:', error));
+});
+
+const addNodebutton = document.getElementById('toolbar-button-add-node');
+const addNodeButtonClick$ = fromEvent(addNodebutton, 'click');
+addNodeButtonClick$.subscribe(() => {
+    console.log(document.getElementById('node-type-dropdown').value);
+    axios.post(`${endpoint}/flowcharts/${flowchartId}/nodes/add`, { 'classname': document.getElementById('node-type-dropdown').value })
+        .then(response => {
+            console.log(response.data);
+            const node = response.data['node'];
+            const rect = new fabric.Rect({
+                left: node.center_x,
+                top: node.center_y,
+                width: 100,
+                height: 100,
+                fill: '#b4d273',
+                stroke: '#2e2e2e',
+                strokeWidth: 2,
+                originX: 'center',
+                originY: 'center',
+                centeredRotation: true,
+                hasControls: false,
+                hasBorders: false,
+                lockRotation: true,
+                lockScalingX: true,
+                lockScalingY: true,
+                lockUniScaling: true,
+                selectable: true,
+                hoverCursor: 'pointer',
+                id: node.id,
+                type: 'node'
+            });
+            const text = new fabric.Text(node.label, {
+                left: node.center_x,
+                top: node.center_y,
+                fontSize: 16,
+                fontFamily: 'Arial',
+                fill: '#2e2e2e',
+                originX: 'center',
+                originY: 'center',
+                centeredRotation: true,
+                hasControls: false,
+                hasBorders: false,
+                lockRotation: true,
+                lockScalingX: true,
+                lockScalingY: true,
+                lockUniScaling: true,
+                selectable: true,
+                hoverCursor: 'pointer',
+                id: node.id,
+                type: 'node'
+            });
+            const group = new fabric.Group([rect, text], {
+                left: node.center_x,
+                top: node.center_y,
+                originX: 'center',
+                originY: 'center',
+                centeredRotation: true,
+                hasControls: false,
+                hasBorders: true,
+                lockRotation: true,
+                lockScalingX: true,
+                lockScalingY: true,
+                lockUniScaling: true,
+                selectable: true,
+                hoverCursor: 'pointer',
+                id: node.id,
+                type: 'node'
+            });
+            group.id = node.id;
+            canvas.add(group);
         })
         .catch(error => console.error('Error:', error));
 });

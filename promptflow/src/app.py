@@ -241,10 +241,14 @@ def get_node_types() -> dict:
     node_types = NodeBase.get_all_node_types()
     return {"node_types": node_types}
 
+# Force FastAPI to accept a JSON body for the node type
+class NodeType(BaseModel):
+    classname: str
+
 
 @app.post("/flowcharts/{flowchart_id}/nodes/add")
-def add_node(flowchart_id: str, classname: str) -> dict:
-    node_cls = eval(classname)
+def add_node(flowchart_id: str, nodetype: NodeType) -> dict:
+    node_cls = eval(nodetype.classname)
     if not node_cls:
         return {"message": "Node not added: invalid classname"}
     flowchart = Flowchart.get_flowchart_by_id(flowchart_id, promptflow)
