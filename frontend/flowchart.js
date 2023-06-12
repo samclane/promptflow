@@ -1,7 +1,7 @@
 const axios = require('axios');
 const fabric = require('fabric').fabric;
 const { from, Observable } = require('rxjs');
-const { throttleTime } = require('rxjs/operators');
+const { throttleTime, debounceTime } = require('rxjs/operators');
 
 const endpoint = "http://localhost:8000";
 
@@ -17,73 +17,187 @@ const canvas = new fabric.Canvas('flowchartCanvas', {
 const flowchartId = window.localStorage.getItem('flowchartId');
 const flowchart$ = from(axios.get(`${endpoint}/flowcharts/${flowchartId}`));
 
+function createNode(node) {
+    const rect = new fabric.Rect({
+        left: node.center_x,
+        top: node.center_y,
+        width: 100,
+        height: 100,
+        fill: '#b4d273',
+        stroke: '#2e2e2e',
+        strokeWidth: 2,
+        originX: 'center',
+        originY: 'center',
+        centeredRotation: true,
+        hasControls: false,
+        hasBorders: false,
+        lockRotation: true,
+        lockScalingX: true,
+        lockScalingY: true,
+        lockUniScaling: true,
+        selectable: true,
+        hoverCursor: 'pointer',
+        id: node.id,
+        type: 'node-rect'
+    });
+
+    const text = new fabric.Text(node.label, {
+        left: node.center_x,
+        top: node.center_y,
+        fontSize: 16,
+        fontFamily: 'Arial',
+        fill: '#2e2e2e',
+        originX: 'center',
+        originY: 'center',
+        centeredRotation: true,
+        hasControls: false,
+        hasBorders: false,
+        lockRotation: true,
+        lockScalingX: true,
+        lockScalingY: true,
+        lockUniScaling: true,
+        selectable: false,
+        hoverCursor: 'pointer',
+        id: node.id,
+        type: 'node-text'
+    });
+
+    const group = new fabric.Group([rect, text], {
+        left: node.center_x,
+        top: node.center_y,
+        originX: 'center',
+        originY: 'center',
+        centeredRotation: true,
+        hasControls: false,
+        hasBorders: true,
+        lockRotation: true,
+        lockScalingX: true,
+        lockScalingY: true,
+        lockUniScaling: true,
+        selectable: true,
+        hoverCursor: 'pointer',
+        id: node.id,
+        type: 'node'
+    });
+    canvas.add(group);
+}
+
+function drawButtons(target) {
+    const buttonWidth = 20;
+    const buttonHeight = 20;
+    const buttonOffset = 5;
+
+    const deleteButton = new fabric.Rect({
+        left: target.left + target.width / 2 - buttonWidth / 2,
+        top: target.top - target.height / 2 - buttonHeight / 2 - buttonOffset,
+        width: buttonWidth,
+        height: buttonHeight,
+        fill: '#2e2e2e',
+        originX: 'center',
+        originY: 'center',
+        centeredRotation: true,
+        hasControls: false,
+        hasBorders: false,
+        lockRotation: true,
+        lockScalingX: true,
+        lockScalingY: true,
+        lockUniScaling: true,
+        selectable: true,
+        hoverCursor: 'pointer',
+        id: target.id,
+        type: 'node-delete-button'
+    });
+
+    const deleteButtonText = new fabric.Text('X', {
+        left: target.left + target.width / 2 - buttonWidth / 2,
+        top: target.top - target.height / 2 - buttonHeight / 2 - buttonOffset,
+        fontSize: 16,
+        fontFamily: 'Arial',
+        fill: '#b4d273',
+        originX: 'center',
+        originY: 'center',
+        centeredRotation: true,
+        hasControls: false,
+        hasBorders: false,
+        lockRotation: true,
+        lockScalingX: true,
+        lockScalingY: true,
+        lockUniScaling: true,
+        selectable: true,
+        hoverCursor: 'pointer',
+        id: target.id,
+        type: 'node-delete-button-text'
+    });
+
+    const connectorButton = new fabric.Rect({
+        left: target.left + target.width / 2 - buttonWidth / 2,
+        top: target.top + target.height / 2 + buttonHeight / 2 + buttonOffset,
+        width: buttonWidth,
+        height: buttonHeight,
+        fill: '#2e2e2e',
+        originX: 'center',
+        originY: 'center',
+        centeredRotation: true,
+        hasControls: false,
+        hasBorders: false,
+        lockRotation: true,
+        lockScalingX: true,
+        lockScalingY: true,
+        lockUniScaling: true,
+        selectable: true,
+        hoverCursor: 'pointer',
+        id: target.id,
+        type: 'node-connector-button'
+    });
+
+    const connectorButtonText = new fabric.Text('+', {
+        left: target.left + target.width / 2 - buttonWidth / 2,
+        top: target.top + target.height / 2 + buttonHeight / 2 + buttonOffset,
+        fontSize: 16,
+        fontFamily: 'Arial',
+        fill: '#b4d273',
+        originX: 'center',
+        originY: 'center',
+        centeredRotation: true,
+        hasControls: false,
+        hasBorders: false,
+        lockRotation: true,
+        lockScalingX: true,
+        lockScalingY: true,
+        lockUniScaling: true,
+        selectable: true,
+        hoverCursor: 'pointer',
+        id: target.id,
+        type: 'node-connector-button-text'
+    });
+
+    canvas.add(deleteButton);
+    canvas.add(deleteButtonText);
+    canvas.add(connectorButton);
+    canvas.add(connectorButtonText);
+}
+
+function hideButtons() {
+    canvas.getObjects('node-connector-button').forEach((button) => {
+        button.visible = false;
+    });
+    canvas.getObjects('node-delete-button').forEach((button) => {
+        button.visible = false;
+    });
+    canvas.getObjects('node-connector-button-text').forEach((button) => {
+        button.visible = false;
+    });
+    canvas.getObjects('node-delete-button-text').forEach((button) => {
+        button.visible = false;
+    });
+    canvas.renderAll();
+}
+
 flowchart$.subscribe((response) => {
     const flowchart = response.data.flowchart;
 
     flowchart.nodes.forEach((node) => {
-        const rect = new fabric.Rect({
-            left: node.center_x,
-            top: node.center_y,
-            width: 100,
-            height: 100,
-            fill: '#b4d273',
-            stroke: '#2e2e2e',
-            strokeWidth: 2,
-            originX: 'center',
-            originY: 'center',
-            centeredRotation: true,
-            hasControls: false,
-            hasBorders: false,
-            lockRotation: true,
-            lockScalingX: true,
-            lockScalingY: true,
-            lockUniScaling: true,
-            selectable: true,
-            hoverCursor: 'pointer',
-            id: node.id,
-            type: 'node'
-        });
-
-        const text = new fabric.Text(node.label, {
-            left: node.center_x,
-            top: node.center_y,
-            fontSize: 16,
-            fontFamily: 'Arial',
-            fill: '#2e2e2e',
-            originX: 'center',
-            originY: 'center',
-            centeredRotation: true,
-            hasControls: false,
-            hasBorders: false,
-            lockRotation: true,
-            lockScalingX: true,
-            lockScalingY: true,
-            lockUniScaling: true,
-            selectable: true,
-            hoverCursor: 'pointer',
-            id: node.id,
-            type: 'node'
-        });
-
-        const group = new fabric.Group([rect, text], {
-            left: node.center_x,
-            top: node.center_y,
-            originX: 'center',
-            originY: 'center',
-            centeredRotation: true,
-            hasControls: false,
-            hasBorders: true,
-            lockRotation: true,
-            lockScalingX: true,
-            lockScalingY: true,
-            lockUniScaling: true,
-            selectable: true,
-            hoverCursor: 'pointer',
-            id: node.id,
-            type: 'node'
-        });
-        group.id = node.id;
-        canvas.add(group);
+        createNode(node);
     });
 
     flowchart.connectors.forEach((connector) => {
@@ -106,7 +220,11 @@ flowchart$.subscribe((response) => {
         canvas.add(arrowhead);
     });
 
+
+
 });
+
+
 
 // Fetch node types from the endpoint and populate the dropdown
 const nodeTypes$ = from(axios.get(`${endpoint}/nodes/types`));
@@ -205,10 +323,9 @@ const mouseOver$ = fromFabricEvent(canvas, 'mouse:over');
 mouseOver$.subscribe((event) => {
     const target = event.target;
     if (!target) return;
+    console.log(target);
     if (target.type === 'node') {
-        // darken and make node border visible, increase size
-        target.item(0).set({ 'fill': '#a3c162', 'stroke': '#000000', 'width': 110, 'height': 110 });
-        canvas.renderAll();
+        drawButtons(target);
     }
     else if (target.type === 'connector') {
         // make connector thicker
@@ -218,21 +335,20 @@ mouseOver$.subscribe((event) => {
 });
 
 const mouseOut$ = fromFabricEvent(canvas, 'mouse:out');
-mouseOut$.subscribe((event) => {
+
+mouseOut$.pipe(
+    debounceTime(300)
+).subscribe((event) => {
     const target = event.target;
     if (!target) return;
     if (target.type === 'node') {
-        // lighten and make node border invisible, decrease size
-        target.item(0).set({ 'fill': '#b4d273', 'stroke': '#2e2e2e', 'width': 100, 'height': 100 });
-        canvas.renderAll();
-    }
-    else if (target.type === 'connector') {
+        hideButtons();
+    } else if (target.type === 'connector') {
         // make connector thinner
         target.set({ 'strokeWidth': 2 });
         canvas.renderAll();
     }
 });
-
 const doubleClick$ = fromFabricEvent(canvas, 'mouse:dblclick');
 doubleClick$.subscribe((event) => {
     const target = event.target;
@@ -292,69 +408,8 @@ addNodeButtonClick$.subscribe(() => {
     console.log(document.getElementById('node-type-dropdown').value);
     axios.post(`${endpoint}/flowcharts/${flowchartId}/nodes/add`, { 'classname': document.getElementById('node-type-dropdown').value })
         .then(response => {
-            console.log(response.data);
             const node = response.data['node'];
-            const rect = new fabric.Rect({
-                left: node.center_x,
-                top: node.center_y,
-                width: 100,
-                height: 100,
-                fill: '#b4d273',
-                stroke: '#2e2e2e',
-                strokeWidth: 2,
-                originX: 'center',
-                originY: 'center',
-                centeredRotation: true,
-                hasControls: false,
-                hasBorders: false,
-                lockRotation: true,
-                lockScalingX: true,
-                lockScalingY: true,
-                lockUniScaling: true,
-                selectable: true,
-                hoverCursor: 'pointer',
-                id: node.id,
-                type: 'node'
-            });
-            const text = new fabric.Text(node.label, {
-                left: node.center_x,
-                top: node.center_y,
-                fontSize: 16,
-                fontFamily: 'Arial',
-                fill: '#2e2e2e',
-                originX: 'center',
-                originY: 'center',
-                centeredRotation: true,
-                hasControls: false,
-                hasBorders: false,
-                lockRotation: true,
-                lockScalingX: true,
-                lockScalingY: true,
-                lockUniScaling: true,
-                selectable: true,
-                hoverCursor: 'pointer',
-                id: node.id,
-                type: 'node'
-            });
-            const group = new fabric.Group([rect, text], {
-                left: node.center_x,
-                top: node.center_y,
-                originX: 'center',
-                originY: 'center',
-                centeredRotation: true,
-                hasControls: false,
-                hasBorders: true,
-                lockRotation: true,
-                lockScalingX: true,
-                lockScalingY: true,
-                lockUniScaling: true,
-                selectable: true,
-                hoverCursor: 'pointer',
-                id: node.id,
-                type: 'node'
-            });
-            group.id = node.id;
-            canvas.add(group);
+            createNode(node);
         })
         .catch(error => console.error('Error:', error));
 });
