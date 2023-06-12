@@ -193,6 +193,26 @@ function hideButtons() {
     canvas.renderAll();
 }
 
+function deleteNodeFromCanvas(nodeId) {
+    const node = canvas.getObjects('node').find(node => node.id === nodeId);
+    const line = canvas.getObjects('connector').find(line => line.node1 === nodeId || line.node2 === nodeId);
+    const arrowhead = canvas.getObjects('triangle').find(arrowhead => arrowhead.id === line.node2.id);
+    canvas.remove(node);
+    canvas.remove(line);
+    canvas.remove(arrowhead);
+    hideButtons();
+    canvas.renderAll();
+}
+
+function deleteNode(nodeId) {
+    axios.post(`${endpoint}/flowcharts/${flowchartId}/nodes/${nodeId}/remove`)
+        .then(response => {
+            console.log(response.data);
+        })
+        .catch(error => console.error('Error:', error));
+    deleteNodeFromCanvas(nodeId);
+};
+
 flowchart$.subscribe((response) => {
     const flowchart = response.data.flowchart;
 
@@ -412,4 +432,14 @@ addNodeButtonClick$.subscribe(() => {
             createNode(node);
         })
         .catch(error => console.error('Error:', error));
+});
+
+const deleteNodeButtonClick$ = fromFabricEvent(canvas, 'mouse:down');
+deleteNodeButtonClick$.subscribe((event) => {
+    console.log(event);
+    const target = event.target;
+    if (!target) return;
+    if (target.type.startsWith('node-delete-button')) {
+        deleteNode(target.id);
+    }
 });
