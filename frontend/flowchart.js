@@ -1,6 +1,6 @@
 const axios = require('axios');
 const fabric = require('fabric').fabric;
-const { from, Observable } = require('rxjs');
+const { from, Observable, merge } = require('rxjs');
 const { throttleTime, debounceTime } = require('rxjs/operators');
 
 const endpoint = "http://localhost:8000";
@@ -441,5 +441,31 @@ deleteNodeButtonClick$.subscribe((event) => {
     if (!target) return;
     if (target.type.startsWith('node-delete-button')) {
         deleteNode(target.id);
+    }
+});
+
+const mouseLeave$ = fromEvent(document, 'mouseleave');
+const mouseOutOrLeave$ = merge(mouseOut$, mouseLeave$);
+
+mouseOutOrLeave$.pipe(
+    debounceTime(300)
+).subscribe((event) => {
+    const target = event.target;
+    
+    // When mouse leaves the window
+    if (event.type === 'mouseleave') {
+        console.log("leave")
+        hideButtons();
+        return;
+    }
+
+    // When mouse leaves the canvas
+    if (!target) return;
+    if (target.type === 'node') {
+        hideButtons();
+    } else if (target.type === 'connector') {
+        // make connector thinner
+        target.set({ 'strokeWidth': 2 });
+        canvas.renderAll();
     }
 });
