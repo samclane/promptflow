@@ -1,7 +1,9 @@
 const axios = require('axios');
 const fabric = require('fabric').fabric;
-const { from, Observable, merge } = require('rxjs');
+const { from, Observable, merge, fromEventPattern } = require('rxjs');
 const { throttleTime, debounceTime } = require('rxjs/operators');
+
+let connector;
 
 const endpoint = "http://localhost:8000";
 
@@ -213,6 +215,74 @@ function deleteNode(nodeId) {
     deleteNodeFromCanvas(nodeId);
 };
 
+function beginPartialConnector(event) {
+    const target = event.target;
+    if (!target) return;
+    if (target.type.startsWith('node-connector-button') || target.type.startsWith('node-connector-button-text')) {
+        console.log(target);
+        connector = new fabric.Line([target.left, target.top, event.pointer.x, event.pointer.y], {
+            stroke: '#ffffff',
+            strokeWidth: 2,
+            selectable: true,
+            evented: true,
+            type: 'connector'
+        });
+        connector.node1 = target.id;
+        canvas.add(connector);
+        canvas.renderAll();
+            // Subscribe to the mouse:up event
+    const mouseDown$ = fromEventPattern(
+        (handler) => canvas.on('mouse:down', handler),
+        (handler) => canvas.off('mouse:down', handler)
+    );
+
+    mouseDown$.subscribe((event) => {
+        const target = event.target;
+        if (!target) return;
+        if (target.type.startsWith('node') && target.type !== 'node-connector-button' && target.type !== 'node-connector-button-text') {
+            connector.node2 = target.id;
+            axios.post(`${endpoint}/flowcharts/${flowchartId}/nodes/${connector.node1}/connect`, { 'target_node_id': connector.node2 })
+                .then(response => {
+                    const connector = response.data['connector'];
+                    start_node = canvas.getObjects('node').find(node => node.id === connector.node1);
+                    end_node = canvas.getObjects('node').find(node => node.id === connector.node2);
+                    const line = new fabric.Line([start_node.center_x, start_node.center_y, end_node.center_x, end_node.center_y], {
+                        stroke: '#2e2e2e',
+                        strokeWidth: 2,
+                        selectable: true,
+                        evented: true,
+                        id: connector.id,
+                        type: 'connector'
+                    });
+                    line.node1 = connector.node1;
+                    line.node2 = connector.node2;
+                    canvas.add(line);
+                    const angle = Math.atan2(connector.node2.top - connector.node1.top, connector.node2.left - connector.node1.left) * 180 / Math.PI + 90;
+                    arrowhead = createArrowhead(end_node.center_x, end_node.center_y, angle);
+                    arrowhead.id = connector.node2.id;
+                    canvas.add(arrowhead);
+                })
+                .catch(error => console.error('Error:', error));
+        }
+        canvas.remove(connector);
+        canvas.renderAll();
+    });
+    }
+    // Create an observable for the mouse:move event using fromEventPattern
+    const mouseMove$ = fromEventPattern(
+        (handler) => canvas.on('mouse:move', handler),
+        (handler) => canvas.off('mouse:move', handler)
+    );
+
+    // Subscribe to the mouseMove$ observable
+    mouseMove$.subscribe((event) => {
+        connector.set({ 'x2': event.pointer.x, 'y2': event.pointer.y });
+        canvas.renderAll();
+    });
+
+
+}
+
 flowchart$.subscribe((response) => {
     const flowchart = response.data.flowchart;
 
@@ -310,13 +380,15 @@ const moving$ = fromFabricEvent(canvas, 'object:moving');
 moving$.subscribe((event) => {
     const group = event.target;
 
-    const line = canvas.getObjects('connector').find(line => line.node1 === group.id || line.node2 === group.id);
-    const arrowhead = canvas.getObjects('triangle').find(arrowhead => arrowhead.id === line.node2.id);
-    if (line) {
+    const lines = canvas.getObjects('connector').filter(line => line.node1 === group.id || line.node2 === group.id);
+    for (const line of lines) {
+        const arrowheads = canvas.getObjects('triangle').filter(arrowhead => arrowhead.id === line.node2.id);
         const start_node = canvas.getObjects('node').find(group => group.id === line.node1);
         const end_node = canvas.getObjects('node').find(group => group.id === line.node2);
         line.set({ 'x1': start_node.left, 'y1': start_node.top, 'x2': end_node.left, 'y2': end_node.top });
-        arrowhead.set({ 'left': end_node.left, 'top': end_node.top, 'angle': Math.atan2(end_node.top - start_node.top, end_node.left - start_node.left) * 180 / Math.PI + 90 });
+        for (const arrowhead of arrowheads) {
+            arrowhead.set({ 'left': end_node.left, 'top': end_node.top, 'angle': Math.atan2(end_node.top - start_node.top, end_node.left - start_node.left) * 180 / Math.PI + 90 });
+        }
     }
 });
 
@@ -343,7 +415,6 @@ const mouseOver$ = fromFabricEvent(canvas, 'mouse:over');
 mouseOver$.subscribe((event) => {
     const target = event.target;
     if (!target) return;
-    console.log(target);
     if (target.type === 'node') {
         drawButtons(target);
     }
@@ -378,7 +449,6 @@ doubleClick$.subscribe((event) => {
         const nodeOptions = axios.get(`${endpoint}/flowcharts/${flowchartId}/nodes/${target.id}/options`)
             .then(response => {
                 const nodeOptions = response.data;
-                console.log(nodeOptions);
                 if (nodeOptions.editor == null) {
                     // open default editor
                     defaultEditor = window.open('defaultEditor.html', '_blank');
@@ -404,7 +474,6 @@ const runButton = document.getElementById('toolbar-button-run');
 const runButtonClick$ = fromEvent(runButton, 'click');
 runButtonClick$.subscribe(() => {
     const flowchart = canvas.toJSON();
-    console.log(flowchart);
     axios.get(`${endpoint}/flowcharts/${flowchartId}/run`, flowchart)
         .then(response => {
             console.log(response.data);
@@ -425,7 +494,6 @@ stopButtonClick$.subscribe(() => {
 const addNodebutton = document.getElementById('toolbar-button-add-node');
 const addNodeButtonClick$ = fromEvent(addNodebutton, 'click');
 addNodeButtonClick$.subscribe(() => {
-    console.log(document.getElementById('node-type-dropdown').value);
     axios.post(`${endpoint}/flowcharts/${flowchartId}/nodes/add`, { 'classname': document.getElementById('node-type-dropdown').value })
         .then(response => {
             const node = response.data['node'];
@@ -436,11 +504,18 @@ addNodeButtonClick$.subscribe(() => {
 
 const deleteNodeButtonClick$ = fromFabricEvent(canvas, 'mouse:down');
 deleteNodeButtonClick$.subscribe((event) => {
-    console.log(event);
     const target = event.target;
     if (!target) return;
     if (target.type.startsWith('node-delete-button')) {
         deleteNode(target.id);
+    }
+});
+
+const addConnectorButtonClick$ = fromFabricEvent(canvas, 'mouse:down');
+addConnectorButtonClick$.subscribe((event) => {
+    if (!event.target) return;
+    if (event.target.type.startsWith('node-connector-button')) {
+        beginPartialConnector(event);
     }
 });
 
@@ -454,7 +529,6 @@ mouseOutOrLeave$.pipe(
     
     // When mouse leaves the window
     if (event.type === 'mouseleave') {
-        console.log("leave")
         hideButtons();
         return;
     }

@@ -268,11 +268,15 @@ def remove_node(node_id: str, flowchart_id: str) -> dict:
     return {"message": "Node removed", "node": node.serialize()}
 
 
+class NodeData(BaseModel):
+    target_node_id: str
+
+
 @app.post("/flowcharts/{flowchart_id}/nodes/{node_id}/connect")
-def connect_nodes(flowchart_id: str, node_id: str, target_node_id: str) -> dict:
+def connect_nodes(flowchart_id: str, node_id: str, target_node_id: NodeData) -> dict:
     flowchart = Flowchart.get_flowchart_by_id(flowchart_id, promptflow)
     node = flowchart.find_node(node_id)
-    target_node = flowchart.find_node(target_node_id)
+    target_node = flowchart.find_node(target_node_id.target_node_id)
     if node and target_node:
         connector = Connector(node, target_node)
         flowchart.add_connector(connector)
