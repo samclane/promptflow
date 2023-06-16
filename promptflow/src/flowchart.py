@@ -65,7 +65,14 @@ class Flowchart:
     description: str
     master: Any
 
-    def __init__(self, master, init_nodes: bool = True, id: Optional[str] = None):
+    def __init__(
+        self,
+        master,
+        init_nodes: bool = True,
+        id: Optional[str] = None,
+        name: Optional[str] = None,
+        description: Optional[str] = None,
+    ):
         self.id = id or str(uuid.uuid1())
         self.master = master
         self.graph = nx.DiGraph()
@@ -81,6 +88,8 @@ class Flowchart:
             self.add_node(InitNode(self, 70, 100, "Init"))
             self.add_node(StartNode(self, 70, 300, "Start"))
 
+        self.name = name or "Untitled"
+        self.description = description or "No description"
         # insert into database
         self.save_to_db()
 
