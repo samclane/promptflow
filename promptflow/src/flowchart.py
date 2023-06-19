@@ -63,18 +63,15 @@ class Flowchart:
     id: str
     name: str
     description: str
-    master: Any
 
     def __init__(
         self,
-        master,
         init_nodes: bool = True,
         id: Optional[str] = None,
         name: Optional[str] = None,
         description: Optional[str] = None,
     ):
         self.id = id or str(uuid.uuid1())
-        self.master = master
         self.graph = nx.DiGraph()
         self.nodes: list[NodeBase] = []
         self.connectors: list[Connector] = []
@@ -94,7 +91,7 @@ class Flowchart:
         self.save_to_db()
 
     @classmethod
-    def get_flowchart_by_id(cls, id, master):
+    def get_flowchart_by_id(cls, id):
         """
         Return a flowchart by id
         """
@@ -105,10 +102,10 @@ class Flowchart:
         conn.close()
         if not flowchart:
             raise ValueError(f"No flowchart with id {id} found")
-        return cls.deserialize(json.loads(flowchart[1]), master)
+        return cls.deserialize(json.loads(flowchart[1]))
 
     @classmethod
-    def get_all_flowcharts(cls, master):
+    def get_all_flowcharts(cls):
         """
         Return all flowcharts
         """
@@ -118,18 +115,18 @@ class Flowchart:
         flowcharts = c.fetchall()
         conn.close()
         return [
-            cls.deserialize(json.loads(flowchart[1]), master)
+            cls.deserialize(json.loads(flowchart[1]))
             for flowchart in flowcharts
         ]
 
     @classmethod
     def deserialize(
-        cls, data: dict[str, Any], master, pan=(0, 0), zoom=1.0
+        cls, data: dict[str, Any], pan=(0, 0), zoom=1.0
     ) -> Flowchart:
         """
         Deserialize a flowchart from a dict
         """
-        flowchart = cls(master, init_nodes=False, id=data["id"])
+        flowchart = cls(init_nodes=False, id=data["id"])
         for node_data in data["nodes"]:
             node = eval(node_data["classname"]).deserialize(flowchart, node_data)
             x_offset = pan[0]
@@ -191,7 +188,7 @@ class Flowchart:
                 return node
         raise ValueError(f"No node with id {node_id} found")
 
-    def add_node(self, node: NodeBase, offset: tuple[int, int] = (0, 0)) -> None:
+    def add_node(self, node: NodeBase, offset: tuple[int, int] = (0, 0)) -> NodeBase:
         """
         Safely insert a node into the flowchart
         """
@@ -204,8 +201,9 @@ class Flowchart:
         self.selected_element = node
         self.is_dirty = True
         self.save_to_db()
+        return node
 
-    def add_connector(self, connector: Connector) -> None:
+    def add_connector(self, connector: Connector) -> Connector:
         """
         Safely insert a connector into the flowchart
         """
@@ -216,6 +214,7 @@ class Flowchart:
         self.selected_element = connector
         self.is_dirty = True
         self.save_to_db()
+        return connector
 
     def initialize(self, state: State) -> Optional[State]:
         """
