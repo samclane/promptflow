@@ -39,3 +39,12 @@ class ServerInputNode(NodeBase):
         with http.server.HTTPServer((self.host, int(self.port)), Handler) as httpd:
             httpd.handle_request()
             return httpd.data
+
+    def serialize(self) -> dict[str, Any]:
+        return super().serialize() | {"host": self.host, "port": self.port}
+
+    def get_options(self) -> dict[str, Any]:
+        base_options = super().get_options()
+        base_options["options"]["host"] = self.host
+        base_options["options"]["port"] = self.port
+        return base_options

@@ -67,6 +67,12 @@ class HttpNode(NodeBase):
             "request_type": self.request_type,
         }
 
+    def get_options(self) -> dict[str, Any]:
+        base_options = super().get_options()
+        base_options["options"]["url"] = self.url
+        base_options["options"]["request_type"] = self.request_type
+        return base_options
+
 
 class JSONRequestNode(NodeBase):
     """
@@ -110,6 +116,12 @@ class JSONRequestNode(NodeBase):
             "key": self.key,
             "request_type": self.request_type,
         }
+
+    def get_options(self) -> dict[str, Any]:
+        base_options = super().get_options()
+        base_options["options"]["key"] = self.key
+        base_options["options"]["request_type"] = self.request_type
+        return base_options
 
 
 class ScrapeNode(NodeBase):
@@ -173,3 +185,8 @@ class ScrapeNode(NodeBase):
         return super().serialize() | {
             "key": self.key,
         }
+
+    def get_options(self) -> dict[str, Any]:
+        base_options = super().get_options()
+        base_options["options"]["key"] = self.key
+        return base_options

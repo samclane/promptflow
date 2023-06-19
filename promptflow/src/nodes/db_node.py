@@ -88,6 +88,15 @@ class DBNode(NodeBase, ABC):
         self.interface.interface.connect()
         return state.result
 
+    def get_options(self) -> dict[str, Any]:
+        base_options = super().get_options()
+        base_options["options"]["dbname"] = self.dbname
+        base_options["options"]["user"] = self.user
+        base_options["options"]["password"] = self.password
+        base_options["options"]["host"] = self.host
+        base_options["options"]["port"] = self.port
+        return base_options
+
 
 class SQLiteNode(DBNode):
     node_color = monokai.GREEN
@@ -116,6 +125,11 @@ class PGMLNode(DBNode):
         self.interface = DBConnectionSingleton(PgMLInterface)
         super().__init__(flowchart, center_x, center_y, label, **kwargs)
         self.model = "gpt2-instruct-dolly"
+
+    def get_options(self) -> dict[str, Any]:
+        base_options = super().get_options()
+        base_options["options"]["model"] = self.model
+        return base_options
 
 
 class SQLiteQueryNode(DBNode):

@@ -37,6 +37,16 @@ class AssertNode(NodeBase):
         assert eval(self.assertion.text, globals(), state.snapshot), "Assertion failed"
         return state.result
 
+    def serialize(self) -> dict:
+        return super().serialize() | {
+            "assertion": self.assertion.serialize(),
+        }
+
+    def get_options(self) -> dict[str, Any]:
+        base_options = super().get_options()
+        base_options["options"]["assertion"] = self.assertion.serialize()
+        return base_options
+
 
 class LoggingNode(NodeBase):
     """
@@ -61,6 +71,16 @@ class LoggingNode(NodeBase):
         debug_str = self.debug_str.text.format(state=state)
         self.logger.info(debug_str)
         return state.result  # return the result of the previous node
+
+    def serialize(self) -> dict:
+        return super().serialize() | {
+            "debug_str": self.debug_str.serialize(),
+        }
+
+    def get_options(self) -> dict[str, Any]:
+        base_options = super().get_options()
+        base_options["options"]["debug_str"] = self.debug_str.serialize()
+        return base_options
 
 
 class InterpreterNode(NodeBase):

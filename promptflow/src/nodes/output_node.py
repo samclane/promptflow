@@ -23,6 +23,18 @@ class FileOutput(NodeBase):
             f.write(state.result)
         return state.result
 
+    def serialize(self) -> dict[str, Any]:
+        return super().serialize() | {
+            "filename": self.filename,
+            "mode": self.mode,
+        }
+
+    def get_options(self) -> dict[str, Any]:
+        base_options = super().get_options()
+        base_options["options"]["filename"] = self.filename
+        base_options["options"]["mode"] = self.mode
+        return base_options
+
 
 class JSONFileOutput(NodeBase):
     """
@@ -56,3 +68,10 @@ class JSONFileOutput(NodeBase):
             "data_key": self.data_key,
             "mode": self.mode,
         }
+
+    def get_options(self) -> dict[str, Any]:
+        base_options = super().get_options()
+        base_options["options"]["filename_key"] = self.filename_key
+        base_options["options"]["data_key"] = self.data_key
+        base_options["options"]["mode"] = self.mode
+        return base_options

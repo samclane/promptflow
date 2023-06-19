@@ -33,6 +33,11 @@ class HistoryNode(NodeBase):
             "role": self.role_var,
         }
 
+    def get_options(self) -> dict[str, Any]:
+        base_options = super().get_options()
+        base_options["options"]["role"] = self.role_var
+        return base_options
+
 
 class ManualHistoryNode(NodeBase):
     """
@@ -56,6 +61,12 @@ class ManualHistoryNode(NodeBase):
 
     def serialize(self):
         return super().serialize() | {"manual_history": self.manual_history}
+
+    def get_options(self) -> dict[str, Any]:
+        base_options = super().get_options()
+        # todo make this a better serialization
+        base_options["options"]["manual_history"] = self.manual_history
+        return base_options
 
 
 class HistoryWindow(NodeBase, ABC):
@@ -124,6 +135,11 @@ class WindowedHistoryNode(HistoryWindow):
     def serialize(self):
         return super().serialize() | {"window": self.window}
 
+    def get_options(self) -> dict[str, Any]:
+        base_options = super().get_options()
+        base_options["options"]["window"] = self.window
+        return base_options
+
 
 class DynamicWindowedHistoryNode(HistoryWindow):
     """
@@ -161,3 +177,8 @@ class DynamicWindowedHistoryNode(HistoryWindow):
 
     def serialize(self):
         return super().serialize() | {"target": self.target}
+
+    def get_options(self) -> dict[str, Any]:
+        base_options = super().get_options()
+        base_options["options"]["target"] = self.target
+        return base_options

@@ -199,6 +199,17 @@ class OpenAINode(NodeBase):
         total = prompt_cost + completion_cost
         return total
 
+    def get_options(self) -> dict[str, Any]:
+        base_options = super().get_options()
+        base_options["options"]["model"] = self.model
+        base_options["options"]["temperature"] = self.temperature
+        base_options["options"]["top_p"] = self.top_p
+        base_options["options"]["n"] = self.n
+        base_options["options"]["max_tokens"] = self.max_tokens
+        base_options["options"]["presence_penalty"] = self.presence_penalty
+        base_options["options"]["frequency_penalty"] = self.frequency_penalty
+        return base_options
+
 
 class ClaudeNode(NodeBase):
     def __init__(self, *args, **kwargs):
@@ -250,6 +261,12 @@ class ClaudeNode(NodeBase):
         total = prompt_cost + completion_cost
         return total
 
+    def get_options(self) -> dict[str, Any]:
+        base_options = super().get_options()
+        base_options["options"]["model"] = self.model
+        base_options["options"]["max_tokens"] = self.max_tokens
+        return base_options
+
 
 class GoogleVertexNode(NodeBase):
     """
@@ -295,3 +312,8 @@ class GoogleVertexNode(NodeBase):
         completion_cost = completion_cost_1k[self.model] * max_completion_tokens / 1000
         total = prompt_cost + completion_cost
         return total
+
+    def get_options(self) -> dict[str, Any]:
+        base_options = super().get_options()
+        base_options["options"]["model"] = self.model
+        return base_options

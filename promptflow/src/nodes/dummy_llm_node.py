@@ -3,6 +3,7 @@ Simulates an LLMNode, but does not actually send any data to the LLM.
 """
 from promptflow.src.nodes.llm_node import OpenAINode
 from promptflow.src.state import State
+from typing import Any
 
 
 class DummyNode(OpenAINode):
@@ -17,3 +18,8 @@ class DummyNode(OpenAINode):
 
     def _completion(self, prompt: str, state: State) -> str:
         return self.dummy_string
+
+    def get_options(self) -> dict[str, Any]:
+        base_options = super().get_options()
+        base_options["options"]["dummy_string"] = self.dummy_string
+        return base_options

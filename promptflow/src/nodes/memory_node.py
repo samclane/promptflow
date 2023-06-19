@@ -42,6 +42,11 @@ class PineconeNode(MemoryNode, ABC):
         )
         return state.result
 
+    def get_options(self) -> dict[str, Any]:
+        base_options = super().get_options()
+        base_options["options"]["index"] = self.index
+        return base_options
+
 
 class PineconeInsertNode(PineconeNode):
     """
@@ -80,3 +85,8 @@ class PineconeQueryNode(PineconeNode):
         for match in results["matches"]:
             result += f"{match['metadata']['text']}\n"
         return result
+
+    def get_options(self) -> dict[str, Any]:
+        base_options = super().get_options()
+        base_options["options"]["k"] = self.k
+        return base_options

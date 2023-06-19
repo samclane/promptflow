@@ -54,7 +54,9 @@ class NodeBase(Serializable, ABC):
         # get all subclasses of NodeBase
         subclasses = NodeBase.__subclasses__()
         # filter out abstract classes
-        subclasses = [subclass for subclass in subclasses if not subclass.__abstractmethods__]
+        subclasses = [
+            subclass for subclass in subclasses if not subclass.__abstractmethods__
+        ]
         # get the name of each subclass
         return [subclass.__name__ for subclass in subclasses]
 
@@ -207,10 +209,10 @@ class NodeBase(Serializable, ABC):
         Return the options for the node.
         """
         return {
-            "options" :{
+            "options": {
                 "label": self.label,
                 "center_x": self.center_x,
                 "center_y": self.center_y,
             },
-            "editor": None, 
+            "editor": None,
         }

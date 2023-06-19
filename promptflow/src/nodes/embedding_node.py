@@ -95,6 +95,12 @@ class EmbeddingNode(NodeBase, ABC):
         """
         return self.instructor_embeddings(string)
 
+    def get_options(self) -> dict[str, Any]:
+        base_options = super().get_options()
+        base_options["options"]["index_file"] = self.collection.index_file
+        base_options["options"]["label_file"] = self.collection.label_file
+        return base_options
+
 
 class EmbeddingInNode(EmbeddingNode):
     """
@@ -184,6 +190,12 @@ class EmbeddingQueryNode(EmbeddingNode):
             "result_separator": self.result_separator,
         }
 
+    def get_options(self) -> dict[str, Any]:
+        base_options = super().get_options()
+        base_options["options"]["n_results"] = self.n_results
+        base_options["options"]["result_separator"] = self.result_separator
+        return base_options
+
 
 class EmbeddingsIngestNode(EmbeddingNode):
     """
@@ -231,3 +243,9 @@ class EmbeddingsIngestNode(EmbeddingNode):
             "filename": self.filename,
             "label_file": self.label_file,
         }
+
+    def get_options(self) -> dict[str, Any]:
+        base_options = super().get_options()
+        base_options["options"]["filename"] = self.filename
+        base_options["options"]["label_file"] = self.label_file
+        return base_options

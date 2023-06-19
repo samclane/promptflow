@@ -42,3 +42,8 @@ class DateNode(NodeBase):
         date_time = datetime.datetime.now().strftime(self.datetime_format)
         self.logger.info("Date node %s has state %s", self.label, state)
         return date_time
+
+    def get_options(self) -> dict[str, Any]:
+        base_options = super().get_options()
+        base_options["options"]["datetime_format"] = self.datetime_format
+        return base_options

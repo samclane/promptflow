@@ -33,6 +33,11 @@ class EnvNode(NodeBase):
             "filename": self.filename,
         }
 
+    def get_options(self) -> dict[str, Any]:
+        base_options = super().get_options()
+        base_options["options"]["filename"] = self.filename
+        return base_options
+
 
 class ManualEnvNode(NodeBase):
     """
@@ -60,3 +65,9 @@ class ManualEnvNode(NodeBase):
             "key": self.key,
             "val": self.val,
         }
+
+    def get_options(self) -> dict[str, Any]:
+        base_options = super().get_options()
+        base_options["options"]["key"] = self.key
+        base_options["options"]["val"] = self.val
+        return base_options

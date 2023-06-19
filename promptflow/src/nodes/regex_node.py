@@ -34,6 +34,16 @@ class RegexNode(NodeBase):
             return ""
         return search.group(0)
 
+    def serialize(self) -> dict:
+        return super().serialize() | {
+            "regex": self.regex,
+        }
+
+    def get_options(self) -> dict[str, Any]:
+        base_options = super().get_options()
+        base_options["options"]["regex"] = self.regex
+        return base_options
+
 
 class TagNode(NodeBase):
     """
@@ -59,3 +69,15 @@ class TagNode(NodeBase):
 
         start_index += len(self.start_tag)
         return content[start_index:end_index]
+
+    def serialize(self) -> dict:
+        return super().serialize() | {
+            "start_tag": self.start_tag,
+            "end_tag": self.end_tag,
+        }
+
+    def get_options(self) -> dict[str, Any]:
+        base_options = super().get_options()
+        base_options["options"]["start_tag"] = self.start_tag
+        base_options["options"]["end_tag"] = self.end_tag
+        return base_options
