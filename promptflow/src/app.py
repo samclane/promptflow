@@ -228,7 +228,7 @@ def load_from(file: UploadFile = File(...)) -> dict:
                             node["label_file"], path=os.getcwd()
                         )
                         node["label_file"] = label_file
-                flowchart = Flowchart.deserialize(data, promptflow)
+                flowchart = Flowchart.deserialize(data)
                 return {"flowchart": flowchart.serialize()}
     else:
         promptflow.logger.info("No file selected to load from")
