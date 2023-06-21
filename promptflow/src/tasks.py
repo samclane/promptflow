@@ -26,4 +26,3 @@ def run_flowchart(self, flowchart_id: str) -> dict:
     except Exception as e:
         logging.error(f"Task failed: run_flowchart, Error: {str(e)}")
         raise self.retry(exc=e)
-

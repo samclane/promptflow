@@ -97,7 +97,7 @@ class Flowchart:
         """
         conn = sqlite3.connect("flowcharts.db")
         c = conn.cursor()
-        c.execute("SELECT * FROM flowcharts WHERE id=?", (id,))
+        c.execute("SELECT * FROM graphs WHERE id=?", (id,))
         flowchart = c.fetchone()
         conn.close()
         if not flowchart:
@@ -111,7 +111,7 @@ class Flowchart:
         """
         conn = sqlite3.connect("flowcharts.db")
         c = conn.cursor()
-        c.execute("SELECT * FROM flowcharts")
+        c.execute("SELECT * FROM graphs")
         flowcharts = c.fetchall()
         conn.close()
         return [cls.deserialize(json.loads(flowchart[1])) for flowchart in flowcharts]
@@ -475,6 +475,6 @@ class Flowchart:
         """
         conn = sqlite3.connect("flowcharts.db")
         c = conn.cursor()
-        c.execute("DELETE FROM flowcharts WHERE id=?", (self.id,))
+        c.execute("DELETE FROM graphs WHERE id=?", (self.id,))
         conn.commit()
         conn.close()

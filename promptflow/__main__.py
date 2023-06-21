@@ -6,7 +6,6 @@ from promptflow.src.options import Options
 
 
 def main(*args, **kwargs):
-
     app = PromptFlowApp()
 
 

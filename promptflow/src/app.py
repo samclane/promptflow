@@ -88,12 +88,8 @@ promptflow = PromptFlowApp()
 # create the table of flowcharts if it doesn't exist
 conn = sqlite3.connect("flowcharts.db")
 c = conn.cursor()
-c.execute(
-    """CREATE TABLE IF NOT EXISTS flowcharts (
-    id TEXT PRIMARY KEY NOT NULL UNIQUE,
-    data TEXT NOT NULL
-)"""
-)
+with open("promptflow/sql/initialize_schema.sql", "r") as f:
+    c.executescript(f.read())
 conn.commit()
 conn.close()
 
