@@ -18,7 +18,7 @@ def run_flowchart(self, flowchart_id: str) -> dict:
         logging.info("Flowchart initialized")
 
         state = init_state
-        flowchart.run(state, callback=self.update_state)
+        flowchart.run(state)
 
         logging.info("Finished running flowchart")
         logging.info("Task completed: run_flowchart")
@@ -27,7 +27,3 @@ def run_flowchart(self, flowchart_id: str) -> dict:
         logging.error(f"Task failed: run_flowchart, Error: {str(e)}")
         raise self.retry(exc=e)
 
-
-def update_state(self, state: State):
-    """Update the state of the flowchart."""
-    print(state.serialize())

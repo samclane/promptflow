@@ -228,7 +228,6 @@ class Flowchart:
         self,
         state: Optional[State],
         queue: Optional[Queue[NodeBase]] = None,
-        callback: Optional[Callable[[State], None]] = None,
     ) -> Optional[State]:
         """
         Given a state, run the flowchart and update the state
@@ -262,8 +261,6 @@ class Flowchart:
                     pass
                 thread.join()
                 output = state.result
-                if callback:
-                    callback(state)
             except Exception as node_err:
                 self.logger.error(
                     f"Error running node {cur_node.label}: {node_err}", exc_info=True
