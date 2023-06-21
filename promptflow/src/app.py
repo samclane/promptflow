@@ -6,7 +6,7 @@ flowcharts.
 import json
 import logging
 import sqlite3
-from fastapi import FastAPI, Response, File, UploadFile
+from fastapi import FastAPI, Response, File, UploadFile, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 import os
 import zipfile
@@ -57,6 +57,7 @@ from promptflow.src.nodes.image_node import (
 from promptflow.src.connectors.connector import Connector
 from promptflow.src.connectors.partial_connector import PartialConnector
 from promptflow.src.state import State
+from promptflow.src.tasks import run_flowchart
 from promptflow.src.text_data import TextData
 from pydantic import BaseModel
 
@@ -139,18 +140,10 @@ def delete_flowchart(flowchart_id: str) -> dict:
 
 
 @app.get("/flowcharts/{flowchart_id}/run")
-def run_flowchart(flowchart_id: str) -> dict:
-    """Execute the flowchart."""
-    promptflow.logger.info("Running flowchart")
-    flowchart = Flowchart.get_flowchart_by_id(flowchart_id)
-    init_state = State()
-    init_state = flowchart.initialize(init_state)
-    final_state = flowchart.run(init_state)
-    promptflow.logger.info("Finished running flowchart")
-    if final_state:
-        return {"state": final_state.serialize()}
-    else:
-        return {"state": None}
+def run_flowchart_endpoint(flowchart_id: str, background_tasks: BackgroundTasks):
+    """Queue the flowchart execution as a background task."""
+    task = run_flowchart.apply_async((flowchart_id,))
+    return {"message": "Flowchart execution started", "task_id": str(task.id)}
 
 
 @app.get("/flowcharts/{flowchart_id}/stop")

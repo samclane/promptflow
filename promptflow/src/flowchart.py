@@ -8,7 +8,7 @@ import json
 import logging
 import threading
 from queue import Queue
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 import networkx as nx
 from promptflow.src.nodes.node_base import NodeBase
 from promptflow.src.nodes.start_node import InitNode, StartNode
@@ -114,15 +114,10 @@ class Flowchart:
         c.execute("SELECT * FROM flowcharts")
         flowcharts = c.fetchall()
         conn.close()
-        return [
-            cls.deserialize(json.loads(flowchart[1]))
-            for flowchart in flowcharts
-        ]
+        return [cls.deserialize(json.loads(flowchart[1])) for flowchart in flowcharts]
 
     @classmethod
-    def deserialize(
-        cls, data: dict[str, Any], pan=(0, 0), zoom=1.0
-    ) -> Flowchart:
+    def deserialize(cls, data: dict[str, Any], pan=(0, 0), zoom=1.0) -> Flowchart:
         """
         Deserialize a flowchart from a dict
         """
@@ -233,6 +228,7 @@ class Flowchart:
         self,
         state: Optional[State],
         queue: Optional[Queue[NodeBase]] = None,
+        callback: Optional[Callable[[State], None]] = None,
     ) -> Optional[State]:
         """
         Given a state, run the flowchart and update the state
@@ -266,6 +262,8 @@ class Flowchart:
                     pass
                 thread.join()
                 output = state.result
+                if callback:
+                    callback(state)
             except Exception as node_err:
                 self.logger.error(
                     f"Error running node {cur_node.label}: {node_err}", exc_info=True
