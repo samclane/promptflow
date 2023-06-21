@@ -7,6 +7,7 @@ import uuid
 import json
 import logging
 import threading
+import time
 from queue import Queue
 from typing import Any, Callable, Optional
 import networkx as nx
@@ -62,6 +63,7 @@ class Flowchart:
 
     id: str
     name: str
+    created: float
     description: str
 
     def __init__(
@@ -72,6 +74,7 @@ class Flowchart:
         description: Optional[str] = None,
     ):
         self.id = id or str(uuid.uuid1())
+        self.created = time.time()
         self.graph = nx.DiGraph()
         self.nodes: list[NodeBase] = []
         self.connectors: list[Connector] = []
@@ -337,11 +340,14 @@ class Flowchart:
         """
         conn = sqlite3.connect("flowcharts.db")
         c = conn.cursor()
-        data = self.serialize()
         c.execute(
-            "INSERT OR REPLACE INTO flowcharts (id, data) VALUES (?, ?)",
-            (self.id, json.dumps(data)),
+            "INSERT OR REPLACE INTO graphs (id, name, created) VALUES (?, ?)",
+            (self.id, self.name, self.created),
         )
+        for node in self.nodes:
+            node.save_to_db()
+        for connector in self.connectors:
+            connector.save_to_db()
         conn.commit()
         conn.close()
 

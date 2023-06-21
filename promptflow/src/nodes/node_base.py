@@ -1,6 +1,7 @@
 """
 Base class for all nodes
 """
+import sqlite3
 from typing import TYPE_CHECKING, Any
 from abc import ABC, abstractmethod
 import logging
@@ -88,6 +89,16 @@ class NodeBase(Serializable, ABC):
     @label.setter
     def label(self, label: str):
         self._label = label
+
+    def save_to_db(self):
+        conn = sqlite3.connect("flowcharts.db")
+        c = conn.cursor()
+        c.execute(
+            "INSERT OR REPLACE INTO nodes VALUES (?, ?, ?, ?)",
+            (self.id, self.__class__.__name__, self.flowchart.id, self.label),
+        )
+        conn.commit()
+        conn.close()
 
     def get_center(
         self, offset_x: float = 0, offset_y: float = 0
