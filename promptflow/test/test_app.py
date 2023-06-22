@@ -26,7 +26,7 @@ def test_delete_flowchart(create_test_flowchart):
 def test_run_flowchart(create_test_flowchart):
     response = client.get(f"/flowcharts/{create_test_flowchart}/run")
     assert response.status_code == 200
-    assert "state" in response.json()
+    assert "started" in response.json()['message']
 
 
 def test_stop_flowchart(create_test_flowchart):
