@@ -1,6 +1,7 @@
 """
 Base class for all nodes
 """
+import json
 import sqlite3
 from typing import TYPE_CHECKING, Any
 from abc import ABC, abstractmethod
@@ -46,6 +47,8 @@ class NodeBase(Serializable, ABC):
         # create the label
         self.center_x = center_x
         self.center_y = center_y
+
+        self.node_type_id = kwargs.get("node_type_id") or str(uuid.uuid1())
 
     @classmethod
     def get_all_node_types(cls) -> list[str]:
@@ -95,7 +98,15 @@ class NodeBase(Serializable, ABC):
         c = conn.cursor()
         c.execute(
             "INSERT OR REPLACE INTO nodes VALUES (?, ?, ?, ?)",
-            (self.id, self.__class__.__name__, self.flowchart.id, self.label),
+            (self.id, self.node_type_id, self.flowchart.id, self.label),
+        )
+        c.execute(
+            "INSERT OR REPLACE INTO node_types VALUES (?, ?, ?)",
+            (
+                str(self.node_type_id),
+                json.dumps(self.serialize()),
+                self.__class__.__name__,
+            ),
         )
         conn.commit()
         conn.close()

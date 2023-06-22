@@ -95,11 +95,11 @@ class Connector(Serializable):
         conn = sqlite3.connect("flowcharts.db")
         c = conn.cursor()
         c.execute(
-            "INSERT INTO branches VALUES (?, ?, ?, ?, ?)",
+            "INSERT OR REPLACE INTO branches VALUES (?, ?, ?, ?, ?)",
             (
                 self.id,
                 self.node1.id,
-                self.condition,
+                self.condition.text,
                 self.condition_label,
                 self.node2.id,
             ),

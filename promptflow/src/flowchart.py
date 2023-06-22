@@ -64,17 +64,17 @@ class Flowchart:
     id: str
     name: str
     created: float
-    description: str
 
     def __init__(
         self,
         init_nodes: bool = True,
         id: Optional[str] = None,
         name: Optional[str] = None,
-        description: Optional[str] = None,
+        created: Optional[float] = None,
     ):
         self.id = id or str(uuid.uuid1())
-        self.created = time.time()
+        self.name = name or "Untitled"
+        self.created = created or time.time()
         self.graph = nx.DiGraph()
         self.nodes: list[NodeBase] = []
         self.connectors: list[Connector] = []
@@ -88,8 +88,6 @@ class Flowchart:
             self.add_node(InitNode(self, 70, 100, "Init"))
             self.add_node(StartNode(self, 70, 300, "Start"))
 
-        self.name = name or "Untitled"
-        self.description = description or "No description"
         # insert into database
         self.save_to_db()
 
@@ -102,10 +100,36 @@ class Flowchart:
         c = conn.cursor()
         c.execute("SELECT * FROM graphs WHERE id=?", (id,))
         flowchart = c.fetchone()
+        flowchart = cls(
+            init_nodes=False, id=flowchart[0], name=flowchart[1], created=flowchart[2]
+        )
+        c.execute("SELECT * FROM nodes WHERE graph_id=?", (id,))
+        node_results = c.fetchall()
+        for node in node_results:
+            node_type = c.execute(
+                "SELECT * FROM node_types WHERE id=?", (node[1],)
+            ).fetchone()
+            n = eval(node_type[2]).deserialize(flowchart, json.loads(node_type[1]))
+            n.id = node[0]
+            n.label = node[3]
+            flowchart.add_node(n, (n.center_x, n.center_y))
+
+        for node_id in map(lambda n: n.id, flowchart.nodes):
+            connector_results = c.execute(
+                "SELECT * FROM branches WHERE node=?", (node_id,)
+            ).fetchall()
+            for connector in connector_results:
+                node1 = flowchart.find_node(connector[1])
+                node2 = flowchart.find_node(connector[4])
+                conditional = connector[2]
+                flowchart.add_connector(
+                    Connector(
+                        node1, node2, TextData(connector[3], conditional, flowchart)
+                    )
+                )
+        conn.commit()
         conn.close()
-        if not flowchart:
-            raise ValueError(f"No flowchart with id {id} found")
-        return cls.deserialize(json.loads(flowchart[1]))
+        return flowchart
 
     @classmethod
     def get_all_flowcharts(cls):
@@ -117,7 +141,7 @@ class Flowchart:
         c.execute("SELECT * FROM graphs")
         flowcharts = c.fetchall()
         conn.close()
-        return [cls.deserialize(json.loads(flowchart[1])) for flowchart in flowcharts]
+        return [cls.get_flowchart_by_id(flowchart[0]) for flowchart in flowcharts]
 
     @classmethod
     def deserialize(cls, data: dict[str, Any], pan=(0, 0), zoom=1.0) -> Flowchart:
@@ -341,15 +365,15 @@ class Flowchart:
         conn = sqlite3.connect("flowcharts.db")
         c = conn.cursor()
         c.execute(
-            "INSERT OR REPLACE INTO graphs (id, name, created) VALUES (?, ?)",
+            "INSERT OR REPLACE INTO graphs (id, name, created) VALUES (?, ?, ?)",
             (self.id, self.name, self.created),
         )
+        conn.commit()
+        conn.close()
         for node in self.nodes:
             node.save_to_db()
         for connector in self.connectors:
             connector.save_to_db()
-        conn.commit()
-        conn.close()
 
     def remove_node(self, node: NodeBase) -> None:
         """
