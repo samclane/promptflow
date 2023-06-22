@@ -124,7 +124,10 @@ class Flowchart:
                 conditional = connector[2]
                 flowchart.add_connector(
                     Connector(
-                        node1, node2, TextData(connector[3], conditional, flowchart)
+                        node1,
+                        node2,
+                        TextData(connector[3], conditional, flowchart),
+                        connector[0],
                     )
                 )
         conn.commit()

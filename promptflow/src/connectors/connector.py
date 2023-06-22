@@ -31,10 +31,11 @@ class Connector(Serializable):
         node1: NodeBase,
         node2: NodeBase,
         condition: Optional[TextData | dict] = None,
+        id: Optional[str] = None,
     ):
         self.node1 = node1
         self.node2 = node2
-        self.id = str(uuid.uuid1())
+        self.id = id or str(uuid.uuid1())
         self.flowchart = node1.flowchart
         node1.output_connectors.append(self)
         node2.input_connectors.append(self)
@@ -49,7 +50,9 @@ class Connector(Serializable):
         if condition.text == "":
             condition.text = DEFAULT_COND_TEMPLATE
         self.condition: TextData = condition
-        self.condition_label: Optional[int] = None
+        self.condition_label: Optional[int] = (
+            None if is_condition_default(condition) else condition.label
+        )
 
     @property
     def label(self) -> str:
@@ -61,6 +64,7 @@ class Connector(Serializable):
 
     def serialize(self):
         return {
+            "id": self.id,
             "node1": self.node1.id,
             "node2": self.node2.id,
             "condition": self.condition.serialize(),
