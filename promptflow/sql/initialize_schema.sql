@@ -1,18 +1,11 @@
 BEGIN TRANSACTION;
+PRAGMA foreign_keys = ON;
 
 -- Graphs
 CREATE TABLE IF NOT EXISTS graphs (
     id SERIAL PRIMARY KEY,
     name TEXT UNIQUE,
     created TIMESTAMP
-);
-
--- Nodes
-CREATE TABLE IF NOT EXISTS nodes (
-    id SERIAL PRIMARY KEY,
-    node_type_id INTEGER REFERENCES node_types(id),
-    graph_id INTEGER REFERENCES graphs(id),
-    label TEXT
 );
 
 -- Node Types
@@ -22,13 +15,27 @@ CREATE TABLE IF NOT EXISTS node_types (
     name TEXT UNIQUE
 );
 
+-- Nodes
+CREATE TABLE IF NOT EXISTS nodes (
+    id SERIAL PRIMARY KEY,
+    node_type_id INTEGER,
+    graph_id INTEGER,
+    label TEXT,
+    FOREIGN KEY (node_type_id) REFERENCES node_types(id),
+    FOREIGN KEY(graph_id) REFERENCES graphs(id)
+);
+
+
+
 -- Branches
 CREATE TABLE IF NOT EXISTS branches (
     id SERIAL PRIMARY KEY,
-    node INTEGER REFERENCES nodes(id),
     conditional TEXT,
     label TEXT,
-    next_node INTEGER REFERENCES nodes(id)
+    node INTEGER,
+    next_node INTEGER,
+    FOREIGN KEY (node) REFERENCES nodes(id),
+    FOREIGN KEY (next_node) REFERENCES nodes(id)
 );
 
 COMMIT;
