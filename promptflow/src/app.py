@@ -103,6 +103,23 @@ def get_flowcharts() -> list[dict]:
     return [chart.serialize() for chart in flowcharts]
 
 
+class FlowchartJson(BaseModel):
+    """A flowchart json file"""
+
+    flowchart: dict
+
+
+@app.post("/flowcharts")
+def upload_flowchart_json(flowchart_json: FlowchartJson) -> dict:
+    """Upload a flowchart json file."""
+    promptflow.logger.info("Uploading flowchart")
+    try:
+        flowchart = Flowchart.deserialize(flowchart_json.flowchart)
+    except ValueError:
+        return {"message": "Invalid flowchart json file"}
+    return {"flowchart": flowchart.serialize()}
+
+
 @app.get("/flowcharts/{flowchart_id}")
 def get_flowchart(flowchart_id: str) -> dict:
     """Get a flowchart by id."""
