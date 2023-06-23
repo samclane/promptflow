@@ -6,7 +6,8 @@ flowcharts.
 import json
 import logging
 import sqlite3
-from fastapi import FastAPI, Response, File, UploadFile, BackgroundTasks
+from fastapi import FastAPI, HTTPException, Response, File, UploadFile, BackgroundTasks
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 import os
 import zipfile
@@ -88,7 +89,7 @@ promptflow = PromptFlowApp()
 # create the table of flowcharts if it doesn't exist
 conn = sqlite3.connect("flowcharts.db")
 c = conn.cursor()
-with open("promptflow/sql/initialize_schema.sql", "r") as f:
+with open("promptflow/sql/initialize_schema.sql", "r", encoding="utf-8") as f:
     c.executescript(f.read())
 conn.commit()
 conn.close()
@@ -121,7 +122,7 @@ def create_flowchart() -> dict:
     return {"flowchart": flowchart.serialize()}
 
 
-@app.post("/flowcharts/{flowchart_id}/delete")
+@app.delete("/flowcharts/{flowchart_id}")
 def delete_flowchart(flowchart_id: str) -> dict:
     """
     Delete the flowchart with the given id.
@@ -289,3 +290,11 @@ def update_node_options(flowchart_id: str, node_id: str, data: dict) -> dict:
     node = flowchart.find_node(node_id)
     node.update(data)
     return {"message": "Node options updated", "node": node.serialize()}
+
+
+@app.exception_handler(HTTPException)
+def handle_exception(request, exc):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"message": str(exc.detail)},
+    )

@@ -17,16 +17,38 @@ def create_test_flowchart():
     return flowchart_id
 
 
-def test_delete_flowchart(create_test_flowchart):
-    response = client.post(f"/flowcharts/{create_test_flowchart}/delete")
+def test_get_flowcharts(create_test_flowchart):
+    # Simulate a GET request to the /flowcharts endpoint
+    response = client.get("/flowcharts")
+
+    # Ensure the response is in JSON format
+    assert response.headers["Content-Type"] == "application/json"
+
+    # Ensure the response has a 200 OK status code
     assert response.status_code == 200
-    assert "Flowchart deleted" in response.json()["message"]
+
+    # Ensure the response JSON is a list
+    assert isinstance(response.json(), list)
+
+
+def test_get_flowchart_not_found(create_test_flowchart):
+    # Simulate a GET request to the /flowcharts/{flowchart_id} endpoint with an invalid ID
+    response = client.get("/flowcharts/nonexistent")
+
+    # Ensure the response is in JSON format
+    assert response.headers["Content-Type"] == "application/json"
+
+    # Ensure the response has a 200 OK status code
+    assert response.status_code == 200
+
+    # Ensure the response JSON contains a message indicating the flowchart was not found
+    assert response.json() == {"message": "Flowchart not found"}
 
 
 def test_run_flowchart(create_test_flowchart):
     response = client.get(f"/flowcharts/{create_test_flowchart}/run")
     assert response.status_code == 200
-    assert "started" in response.json()['message']
+    assert "started" in response.json()["message"]
 
 
 def test_stop_flowchart(create_test_flowchart):

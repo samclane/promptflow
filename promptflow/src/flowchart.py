@@ -100,6 +100,8 @@ class Flowchart:
         c = conn.cursor()
         c.execute("SELECT * FROM graphs WHERE id=?", (id,))
         flowchart = c.fetchone()
+        if flowchart is None:
+            raise ValueError(f"Flowchart with id {id} does not exist")
         flowchart = cls(
             init_nodes=False, id=flowchart[0], name=flowchart[1], created=flowchart[2]
         )
