@@ -111,6 +111,8 @@ class Flowchart:
             node_type = c.execute(
                 "SELECT * FROM node_types WHERE id=?", (node[1],)
             ).fetchone()
+            if node_type is None:
+                raise ValueError(f"Node type with id {node[1]} does not exist")
             n = eval(node_type[2]).deserialize(flowchart, json.loads(node_type[1]))
             n.id = node[0]
             n.label = node[3]
