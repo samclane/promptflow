@@ -2,6 +2,7 @@ from promptflow.src.celery_app import celery_app
 from promptflow.src.flowchart import Flowchart
 from promptflow.src.state import State
 import logging
+import traceback
 
 
 @celery_app.task(bind=True, name="promptflow.src.app.run_flowchart")
@@ -24,5 +25,5 @@ def run_flowchart(self, flowchart_id: str) -> dict:
         logging.info("Task completed: run_flowchart")
         return {"state": "COMPLETED"}
     except Exception as e:
-        logging.error(f"Task failed: run_flowchart, Error: {str(e)}")
+        logging.error(f"Task failed: run_flowchart, Error: {str(traceback.format_exc())}")
         raise self.retry(exc=e)
