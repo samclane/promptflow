@@ -17,6 +17,7 @@ class_shape = "box"
 class_color = "lightblue"
 attribute_shape = "ellipse"
 attribute_color = "lightgray"
+primary_key_color = "yellow"
 
 # Iterate over the tables and their columns
 for table in tables:
@@ -34,13 +35,27 @@ for table in tables:
         column_name = column[1]
         column_type = column[2]
         attribute_node_name = f"{table_name}.{column_name}"
-        graph.node(
-            attribute_node_name,
-            label=f"{column_name}: {column_type}",
-            shape=attribute_shape,
-            style="filled",
-            fillcolor=attribute_color,
-        )
+
+        # Check if the column is a primary key
+        is_primary_key = column[5] == 1
+
+        if is_primary_key:
+            graph.node(
+                attribute_node_name,
+                label=f"{column_name}: {column_type}",
+                shape=attribute_shape,
+                style="filled",
+                fillcolor=primary_key_color,
+            )
+        else:
+            graph.node(
+                attribute_node_name,
+                label=f"{column_name}: {column_type}",
+                shape=attribute_shape,
+                style="filled",
+                fillcolor=attribute_color,
+            )
+
         graph.edge(table_name, attribute_node_name)
 
     # Get foreign key constraints for the current table
@@ -58,7 +73,6 @@ for table in tables:
             f"{target_table}.{target_column}",
             constraint="false",
             dir="forward",
-            arrowhead="vee",
         )
 
 # Save the graph as a PDF file
