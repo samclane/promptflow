@@ -25,5 +25,7 @@ def run_flowchart(self, flowchart_id: str) -> dict:
         logging.info("Task completed: run_flowchart")
         return {"state": "COMPLETED"}
     except Exception as e:
-        logging.error(f"Task failed: run_flowchart, Error: {str(traceback.format_exc())}")
+        logging.error(
+            f"Task failed: run_flowchart, Error: {str(traceback.format_exc())}"
+        )
         raise self.retry(exc=e)

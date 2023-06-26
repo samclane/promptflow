@@ -63,11 +63,7 @@ class PromptNode(NodeBase):
     def deserialize(cls, flowchart: "Flowchart", data: dict) -> "PromptNode":
         return cls(
             flowchart,
-            data["center_x"],
-            data["center_y"],
-            data["label"],
-            prompt=data["prompt"],
-            id=data["id"],
+            **data,
         )
 
     def cost(self, state: State):

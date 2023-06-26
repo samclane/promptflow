@@ -97,25 +97,34 @@ class Flowchart:
         Return a flowchart by id
         """
         conn = sqlite3.connect("flowcharts.db")
+        conn.row_factory = sqlite3.Row
         c = conn.cursor()
         c.execute("SELECT * FROM graphs WHERE id=?", (id,))
         flowchart = c.fetchone()
         if flowchart is None:
             raise ValueError(f"Flowchart with id {id} does not exist")
         flowchart = cls(
-            init_nodes=False, id=flowchart[0], name=flowchart[1], created=flowchart[2]
+            init_nodes=False,
+            id=flowchart["id"],
+            name=flowchart["name"],
+            created=flowchart["created"],
         )
         c.execute("SELECT * FROM nodes WHERE graph_id=?", (id,))
         node_results = c.fetchall()
         for node in node_results:
             node_type = c.execute(
-                "SELECT * FROM node_types WHERE id=?", (node[1],)
+                "SELECT * FROM node_types WHERE id=?", (node["node_type_id"],)
             ).fetchone()
             if node_type is None:
-                raise ValueError(f"Node type with id {node[1]} does not exist")
-            n = eval(node_type[2]).deserialize(flowchart, json.loads(node_type[1]))
-            n.id = node[0]
-            n.label = node[3]
+                raise ValueError(
+                    f"Node type with id {node['node_type_id']} does not exist"
+                )
+            n = eval(node_type["name"]).deserialize(
+                flowchart,
+                json.loads(node_type["metadata"]) | {"node_type_id": node_type["id"]},
+            )
+            n.id = node["id"]
+            n.label = node["label"]
             flowchart.add_node(n, (n.center_x, n.center_y))
 
         for node_id in map(lambda n: n.id, flowchart.nodes):
@@ -123,15 +132,14 @@ class Flowchart:
                 "SELECT * FROM branches WHERE node=?", (node_id,)
             ).fetchall()
             for connector in connector_results:
-                node1 = flowchart.find_node(connector[1])
-                node2 = flowchart.find_node(connector[4])
-                conditional = connector[2]
+                node1 = flowchart.find_node(connector["node"])
+                node2 = flowchart.find_node(connector["target"])
                 flowchart.add_connector(
                     Connector(
                         node1,
                         node2,
-                        TextData(connector[3], conditional, flowchart),
-                        connector[0],
+                        TextData(connector["label"], connector['conditional'], flowchart),
+                        connector["id"],
                     )
                 )
         conn.commit()

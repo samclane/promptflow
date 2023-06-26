@@ -34,15 +34,9 @@ class StartNode(NodeBase):
 
         super().__init__(flowchart, center_x, center_y, label, **kwargs)
 
-    @staticmethod
-    def deserialize(flowchart: "Flowchart", data: dict):
-        return StartNode(
-            flowchart,
-            data["center_x"],
-            data["center_y"],
-            data["label"],
-            id=data.get("id", str(uuid.uuid4())),
-        )
+    @classmethod
+    def deserialize(cls, flowchart: "Flowchart", data: dict):
+        return cls(flowchart, **data)
 
     def run_subclass(self, before_result: Any, state) -> str:
         return ""
