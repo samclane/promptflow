@@ -107,6 +107,25 @@ class DatabaseConfig(BaseModel):
         return value
 
 
+class GraphNamesAndIds(BaseModel):
+    id: int
+    name: str
+
+    def hydrate(row: Dict[str, Any]):
+        return GraphNamesAndIds(
+            row['id'],
+            row.get('name')
+        )
+
+def row_results_to_class_list(class_name, list_of_rows):
+    return [
+        class_name.hydrae(dict(zip(row)))
+        for row in list_of_rows
+    ]
+
+def row_results_to_class(class_name, list_of_rows):
+    return row_results_to_class_list(class_name, list_of_rows)[0]
+
 class PostgresInterface:
     def __init__(self, config: DatabaseConfig):
         self.conn = psycopg2.connect(
@@ -117,11 +136,13 @@ class PostgresInterface:
         )
         self.cursor = self.conn.cursor()
 
-    def get_graph_view(self) -> List[GraphView]:  # todo deprecate this method  
-        self.cursor.execute("SELECT * FROM graph_view")  # todo select id,name from graph_view  for function get_graph_view
+    def get_graph_names_and_ids(self) -> List[GraphNamesAndIds]:  # todo deprecate this method  
+        self.cursor.execute("SELECT graph_id as id, name FROM graph_view")  # todo select id,name from graph_view  for function get_graph_view
         # todo for function get_graph_view_to_flowchart_list select id,name from graph_view where id = input_id
         rows = self.cursor.fetchall()
+        return row_results_to_class_list(GraphNamesAndIds, rows)
 
+        """
         # Getting column names
         column_names = [desc[0] for desc in self.cursor.description]
 
@@ -138,8 +159,9 @@ class PostgresInterface:
                 print(f"Validation error for row {row}: {e}")
 
         return graph_views
+        """
 
-    def graph_view_to_flowchart_list(
+    def build_flowchart_from_graph_view(
         self, graph_view: List[GraphView]
     ) -> List[Flowchart]:
         flowcharts: List[Flowchart] = []
@@ -163,7 +185,11 @@ class PostgresInterface:
         return flowcharts
     
     def get_flowchart_by_id(self, id):
-        pass
+        self.cursor.execute("SELECT * FROM graph_view where id=%s", (id,))  # todo select id,name from graph_view  for function get_graph_view
+        # todo for function get_graph_view_to_flowchart_list select id,name from graph_view where id = input_id
+        rows = self.cursor.fetchall()
+        graph_nodes = row_results_to_class_list(GraphView, rows)
+
     
     def get_all_flowchart_ids_and_names(self):
         pass
