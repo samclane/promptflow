@@ -52,7 +52,7 @@ class DatabaseConfig(BaseModel):
         return value
 
 
-class PostgresConnector:
+class PostgresInterface:
     def __init__(self, config: DatabaseConfig):
         self.conn = psycopg2.connect(
             host=config.host,
