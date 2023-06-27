@@ -1,6 +1,6 @@
-from pydantic import BaseModel, ValidationError, validator
+from pydantic import BaseModel, validator, constr, conint, ValidationError
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional, Dict, Any, List
 import psycopg2
 
 from promptflow.src.flowchart import Flowchart
@@ -9,16 +9,35 @@ from promptflow.src.nodes.test_nodes import LoggingNode
 
 
 class GraphView(BaseModel):
-    graph_id: int
+    graph_id: conint(gt=0)
     created: datetime
-    graph_name: str
-    node_label: str
-    node_type_metadata: Optional[dict]
-    node_type_name: str
-    next_node: Optional[int]
-    current_node: int
+    graph_name: constr(min_length=1)
+    node_label: constr(min_length=1)
+    node_type_metadata: Optional[Dict[str, Any]]
+    node_type_name: constr(min_length=1)
+    next_node: Optional[conint(gt=0)]
+    current_node: conint(gt=0)
     conditional: Optional[str]
     has_conditional: bool
+
+    @validator("created")
+    def validate_created(cls, value):
+        if value > datetime.now():
+            raise ValueError("created must be in the past")
+        return value
+
+    @validator("node_type_metadata")
+    def validate_node_type_metadata(cls, value):
+        if value is not None:
+            if not isinstance(value, dict):
+                raise TypeError("node_type_metadata must be a dictionary")
+        return value
+
+    @validator("has_conditional")
+    def validate_has_conditional(cls, value, values):
+        if value and "conditional" not in values:
+            raise ValueError("conditional must be provided if has_conditional is True")
+        return value
 
 
 class DatabaseConfig(BaseModel):
