@@ -1,12 +1,23 @@
-import sqlite3
+import psycopg2
 from graphviz import Graph
 
-# Connect to the SQLite database
-conn = sqlite3.connect("flowcharts.db")
+# Connect to the PostgreSQL database
+conn = psycopg2.connect(
+    host="172.18.0.3",
+    database="promptflow",
+    user="postgres",
+    password="postgres"
+)
 cursor = conn.cursor()
 
 # Get the table names
-cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
+cursor.execute(
+    """
+    SELECT table_name
+    FROM information_schema.tables
+    WHERE table_schema = 'public'
+    """
+)
 tables = cursor.fetchall()
 
 # Create a graph
@@ -22,52 +33,56 @@ primary_key_color = "yellow"
 # Iterate over the tables and their columns
 for table in tables:
     table_name = table[0]
-    graph.node(
-        table_name, shape=class_shape, style="filled", fillcolor=class_color
-    )  # Add table node (class) to the graph
+    graph.node(table_name, shape=class_shape, style="filled", fillcolor=class_color)
 
     # Get the column names and types for the current table
-    cursor.execute(f"PRAGMA table_info('{table_name}')")
+    cursor.execute(
+        f"""
+        SELECT column_name, data_type
+        FROM information_schema.columns
+        WHERE table_name = '{table_name}'
+        """
+    )
     columns = cursor.fetchall()
 
     # Add columns as child nodes (attributes) to the table node
     for column in columns:
-        column_name = column[1]
-        column_type = column[2]
+        column_name, column_type = column
         attribute_node_name = f"{table_name}.{column_name}"
-
-        # Check if the column is a primary key
-        is_primary_key = column[5] == 1
-
-        if is_primary_key:
-            graph.node(
-                attribute_node_name,
-                label=f"{column_name}: {column_type}",
-                shape=attribute_shape,
-                style="filled",
-                fillcolor=primary_key_color,
-            )
-        else:
-            graph.node(
-                attribute_node_name,
-                label=f"{column_name}: {column_type}",
-                shape=attribute_shape,
-                style="filled",
-                fillcolor=attribute_color,
-            )
-
+        graph.node(
+            attribute_node_name,
+            label=f"{column_name}: {column_type}",
+            shape=attribute_shape,
+            style="filled",
+            fillcolor=attribute_color,
+        )
         graph.edge(table_name, attribute_node_name)
 
-    # Get foreign key constraints for the current table
-    cursor.execute(f"PRAGMA foreign_key_list('{table_name}')")
+    # Get foreign key relationships for the current table
+    cursor.execute(
+        f"""
+        SELECT
+            kcu.column_name,
+            ccu.table_name AS foreign_table_name,
+            ccu.column_name AS foreign_column_name
+        FROM
+            information_schema.table_constraints AS tc
+            JOIN information_schema.key_column_usage AS kcu
+                ON tc.constraint_name = kcu.constraint_name
+            JOIN information_schema.constraint_column_usage AS ccu
+                ON ccu.constraint_name = tc.constraint_name
+        WHERE
+            constraint_type = 'FOREIGN KEY' AND tc.table_name='{table_name}';
+        """
+    )
     foreign_keys = cursor.fetchall()
 
     # Add foreign key relationships to the graph
     for foreign_key in foreign_keys:
         source_table = table_name
-        source_column = foreign_key[3]
-        target_table = foreign_key[2]
-        target_column = foreign_key[4]
+        source_column = foreign_key[0]
+        target_table = foreign_key[1]
+        target_column = foreign_key[2]
         graph.edge(
             f"{source_table}.{source_column}",
             f"{target_table}.{target_column}",
