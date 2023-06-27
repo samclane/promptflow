@@ -3,6 +3,10 @@ from datetime import datetime
 from typing import Optional, List
 import psycopg2
 
+from promptflow.src.flowchart import Flowchart
+from promptflow.src.nodes.input_node import InputNode
+from promptflow.src.nodes.test_nodes import LoggingNode
+
 
 class GraphView(BaseModel):
     graph_id: int
@@ -78,3 +82,26 @@ class PostgresConnector:
                 print(f"Validation error for row {row}: {e}")
 
         return graph_views
+
+    def graph_view_to_flowchart_list(
+        self, graph_view: List[GraphView]
+    ) -> List[Flowchart]:
+        flowcharts: List[Flowchart] = []
+        for row in graph_view:
+            if row.graph_id not in [x.id for x in flowcharts]:
+                flowchart = Flowchart(False, row.graph_id, row.graph_name, row.created)
+                flowcharts.append(flowchart)
+            else:
+                # Find the flowchart with the same graph_id
+                flowchart = next((x for x in flowcharts if x.id == row.graph_id), None)
+                if flowchart is None:
+                    raise ValueError(
+                        f"Flowchart with graph_id {row.graph_id} not found"
+                    )
+            node = eval(row.node_type_name).deserialize(
+                flowchart,
+                row.node_type_metadata
+                | {"label": row.node_label, "center_x": 0, "center_y": 0},
+            )
+            flowchart.add_node(node)
+        return flowcharts

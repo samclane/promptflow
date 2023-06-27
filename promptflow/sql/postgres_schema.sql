@@ -50,7 +50,7 @@ CREATE OR REPLACE VIEW graph_view AS
 
 /*
 INSERT INTO graphs ("name") VALUES ('Frankie''s Graph');
-INSERT INTO node_types (metadata, name) VALUES ('{}'::jsonb, 'Input Node'), ('{}'::jsonb, 'Print Node');
+INSERT INTO node_types (metadata, name) VALUES ('{}'::jsonb, 'InputNode'), ('{}'::jsonb, 'LoggingNode');
 INSERT INTO nodes (node_type_id, graph_id, "label") VALUES (1, 1, 'Input'), (2, 1, 'Output');
 INSERT INTO branches (conditional, "label", node, next_node) VALUES ('', 'Print It', 1, 2);
 
