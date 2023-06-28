@@ -42,7 +42,7 @@ def test_get_flowchart_not_found(create_test_flowchart):
     assert response.status_code == 200
 
     # Ensure the response JSON contains a message indicating the flowchart was not found
-    assert response.json() == {"message": "Flowchart not found"}
+    assert response.json()["message"] == "Flowchart not found"
 
 
 def test_run_flowchart(create_test_flowchart):

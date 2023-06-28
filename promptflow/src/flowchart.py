@@ -9,13 +9,16 @@ import logging
 import threading
 import time
 from queue import Queue
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, TYPE_CHECKING
 import networkx as nx
 from promptflow.src.node_map import node_map
 from promptflow.src.nodes.node_base import NodeBase
 from promptflow.src.nodes.start_node import InitNode, StartNode
 from promptflow.src.connectors.connector import Connector
 from promptflow.src.connectors.partial_connector import PartialConnector
+
+if TYPE_CHECKING:
+    from promptflow.src.postgres_interface import PostgresInterface
 from promptflow.src.state import State
 from promptflow.src.text_data import TextData
 from pydantic import BaseModel
@@ -57,76 +60,11 @@ class Flowchart:
         self.save_to_db()
 
     @classmethod
-    def get_flowchart_by_id(cls, id):
+    def get_flowchart_by_id(cls, id, interface: PostgresInterface):
         """
         Return a flowchart by id
         """
-        conn = sqlite3.connect("flowcharts.db")
-        conn.row_factory = sqlite3.Row
-        c = conn.cursor()
-        c.execute("SELECT * FROM graphs WHERE id=?", (id,))
-        flowchart = c.fetchone()
-        if flowchart is None:
-            raise ValueError(f"Flowchart with id {id} does not exist")
-        flowchart = cls(
-            init_nodes=False,
-            id=flowchart["id"],
-            name=flowchart["name"],
-            created=flowchart["created"],
-        )
-        c.execute("SELECT * FROM nodes WHERE graph_id=?", (id,))
-        node_results = c.fetchall()
-        for node in node_results:
-            node_type = c.execute(
-                "SELECT * FROM node_types WHERE id=?", (node["node_type_id"],)
-            ).fetchone()
-            if node_type is None:
-                raise ValueError(
-                    f"Node type with id {node['node_type_id']} does not exist"
-                )
-            node_class = node_map.get(node_type["name"])
-            if node_class is None:
-                raise ValueError(f"Node type {node_type['name']} does not exist")
-            n = node_class.deserialize(
-                flowchart,
-                json.loads(node_type["metadata"]) | {"node_type_id": node_type["id"]},
-            )
-            n.id = node["id"]
-            n.label = node["label"]
-            flowchart.add_node(n, (n.center_x, n.center_y))
-
-        for node_id in map(lambda n: n.id, flowchart.nodes):
-            connector_results = c.execute(
-                "SELECT * FROM branches WHERE node=?", (node_id,)
-            ).fetchall()
-            for connector in connector_results:
-                node1 = flowchart.find_node(connector["node"])
-                node2 = flowchart.find_node(connector["target"])
-                flowchart.add_connector(
-                    Connector(
-                        node1,
-                        node2,
-                        TextData(
-                            connector["label"], connector["conditional"], flowchart
-                        ),
-                        connector["id"],
-                    )
-                )
-        conn.commit()
-        conn.close()
-        return flowchart
-
-    @classmethod
-    def get_all_flowcharts(cls):
-        """
-        Return all flowcharts
-        """
-        conn = sqlite3.connect("flowcharts.db")
-        c = conn.cursor()
-        c.execute("SELECT * FROM graphs")
-        flowcharts = c.fetchall()
-        conn.close()
-        return [cls.get_flowchart_by_id(flowchart[0]) for flowchart in flowcharts]
+        return interface.get_flowchart_by_id(id)
 
     @classmethod
     def deserialize(cls, data: dict[str, Any], pan=(0, 0), zoom=1.0) -> Flowchart:
