@@ -11,44 +11,9 @@ import time
 from queue import Queue
 from typing import Any, Callable, Optional
 import networkx as nx
+from promptflow.src.node_map import node_map
 from promptflow.src.nodes.node_base import NodeBase
 from promptflow.src.nodes.start_node import InitNode, StartNode
-from promptflow.src.nodes.input_node import InputNode, FileInput, JSONFileInput
-from promptflow.src.nodes.func_node import FuncNode
-from promptflow.src.nodes.llm_node import OpenAINode, ClaudeNode, GoogleVertexNode
-from promptflow.src.nodes.date_node import DateNode
-from promptflow.src.nodes.random_number import RandomNode
-from promptflow.src.nodes.history_node import (
-    HistoryNode,
-    ManualHistoryNode,
-    HistoryWindow,
-    WindowedHistoryNode,
-    DynamicWindowedHistoryNode,
-)
-from promptflow.src.nodes.dummy_llm_node import DummyNode
-from promptflow.src.nodes.prompt_node import PromptNode
-from promptflow.src.nodes.embedding_node import (
-    EmbeddingInNode,
-    EmbeddingQueryNode,
-    EmbeddingsIngestNode,
-)
-from promptflow.src.nodes.test_nodes import AssertNode, LoggingNode, InterpreterNode
-from promptflow.src.nodes.env_node import EnvNode, ManualEnvNode
-from promptflow.src.nodes.audio_node import WhispersNode, ElevenLabsNode
-from promptflow.src.nodes.db_node import PGQueryNode, SQLiteQueryNode, PGGenerateNode
-from promptflow.src.nodes.structured_data_node import JsonNode, JsonerizerNode
-from promptflow.src.nodes.websearch_node import SerpApiNode, GoogleSearchNode
-from promptflow.src.nodes.output_node import FileOutput, JSONFileOutput
-from promptflow.src.nodes.http_node import HttpNode, JSONRequestNode, ScrapeNode
-from promptflow.src.nodes.server_node import ServerInputNode
-from promptflow.src.nodes.memory_node import PineconeInsertNode, PineconeQueryNode
-from promptflow.src.nodes.image_node import (
-    DallENode,
-    CaptionNode,
-    OpenImageFile,
-    JSONImageFile,
-    SaveImageNode,
-)
 from promptflow.src.connectors.connector import Connector
 from promptflow.src.connectors.partial_connector import PartialConnector
 from promptflow.src.state import State
@@ -119,7 +84,10 @@ class Flowchart:
                 raise ValueError(
                     f"Node type with id {node['node_type_id']} does not exist"
                 )
-            n = eval(node_type["name"]).deserialize(
+            node_class = node_map.get(node_type["name"])
+            if node_class is None:
+                raise ValueError(f"Node type {node_type['name']} does not exist")
+            n = node_class.deserialize(
                 flowchart,
                 json.loads(node_type["metadata"]) | {"node_type_id": node_type["id"]},
             )
