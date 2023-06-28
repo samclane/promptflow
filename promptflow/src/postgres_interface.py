@@ -4,44 +4,7 @@ from typing import Optional, Dict, Any, List
 import psycopg2
 
 from promptflow.src.flowchart import Flowchart
-from promptflow.src.nodes.node_base import NodeBase
-from promptflow.src.nodes.start_node import InitNode, StartNode
-from promptflow.src.nodes.input_node import InputNode, FileInput, JSONFileInput
-from promptflow.src.nodes.func_node import FuncNode
-from promptflow.src.nodes.llm_node import OpenAINode, ClaudeNode, GoogleVertexNode
-from promptflow.src.nodes.date_node import DateNode
-from promptflow.src.nodes.random_number import RandomNode
-from promptflow.src.nodes.history_node import (
-    HistoryNode,
-    ManualHistoryNode,
-    HistoryWindow,
-    WindowedHistoryNode,
-    DynamicWindowedHistoryNode,
-)
-from promptflow.src.nodes.dummy_llm_node import DummyNode
-from promptflow.src.nodes.prompt_node import PromptNode
-from promptflow.src.nodes.embedding_node import (
-    EmbeddingInNode,
-    EmbeddingQueryNode,
-    EmbeddingsIngestNode,
-)
-from promptflow.src.nodes.test_nodes import AssertNode, LoggingNode, InterpreterNode
-from promptflow.src.nodes.env_node import EnvNode, ManualEnvNode
-from promptflow.src.nodes.audio_node import WhispersNode, ElevenLabsNode
-from promptflow.src.nodes.db_node import PGQueryNode, SQLiteQueryNode, PGGenerateNode
-from promptflow.src.nodes.structured_data_node import JsonNode, JsonerizerNode
-from promptflow.src.nodes.websearch_node import SerpApiNode, GoogleSearchNode
-from promptflow.src.nodes.output_node import FileOutput, JSONFileOutput
-from promptflow.src.nodes.http_node import HttpNode, JSONRequestNode, ScrapeNode
-from promptflow.src.nodes.server_node import ServerInputNode
-from promptflow.src.nodes.memory_node import PineconeInsertNode, PineconeQueryNode
-from promptflow.src.nodes.image_node import (
-    DallENode,
-    CaptionNode,
-    OpenImageFile,
-    JSONImageFile,
-    SaveImageNode,
-)
+from promptflow.src.node_map import node_map
 
 
 class GraphView(BaseModel):
@@ -112,19 +75,16 @@ class GraphNamesAndIds(BaseModel):
     name: str
 
     def hydrate(row: Dict[str, Any]):
-        return GraphNamesAndIds(
-            row['id'],
-            row.get('name')
-        )
+        return GraphNamesAndIds(row["id"], row.get("name"))
+
 
 def row_results_to_class_list(class_name, list_of_rows):
-    return [
-        class_name.hydrae(dict(zip(row)))
-        for row in list_of_rows
-    ]
+    return [class_name.hydrate(dict(zip(row))) for row in list_of_rows]
+
 
 def row_results_to_class(class_name, list_of_rows):
     return row_results_to_class_list(class_name, list_of_rows)[0]
+
 
 class PostgresInterface:
     def __init__(self, config: DatabaseConfig):
@@ -136,8 +96,12 @@ class PostgresInterface:
         )
         self.cursor = self.conn.cursor()
 
-    def get_graph_names_and_ids(self) -> List[GraphNamesAndIds]:  # todo deprecate this method  
-        self.cursor.execute("SELECT graph_id as id, name FROM graph_view")  # todo select id,name from graph_view  for function get_graph_view
+    def get_graph_names_and_ids(
+        self,
+    ) -> List[GraphNamesAndIds]:  # todo deprecate this method
+        self.cursor.execute(
+            "SELECT graph_id as id, name FROM graph_view"
+        )  # todo select id,name from graph_view  for function get_graph_view
         # todo for function get_graph_view_to_flowchart_list select id,name from graph_view where id = input_id
         rows = self.cursor.fetchall()
         return row_results_to_class_list(GraphNamesAndIds, rows)
@@ -176,23 +140,34 @@ class PostgresInterface:
                     raise ValueError(
                         f"Flowchart with graph_id {row.graph_id} not found"
                     )
-            node = eval(row.node_type_name).deserialize(
+            node_cls = node_map.get(row.node_type_name)
+            if node_cls is None:
+                raise ValueError(
+                    f"Node type {row.node_type_name} not found in node_map"
+                )
+            node = node_cls.deserialize(
                 flowchart,
-                row.node_type_metadata
-                | {"label": row.node_label, "center_x": 0, "center_y": 0},  # todo remove center_x and center_y
+                (row.node_type_metadata or {})
+                | {
+                    "label": row.node_label,
+                    "center_x": 0,
+                    "center_y": 0,
+                },  # todo remove center_x and center_y
             )
             flowchart.add_node(node)
         return flowcharts
-    
+
     def get_flowchart_by_id(self, id):
-        self.cursor.execute("SELECT * FROM graph_view where id=%s", (id,))  # todo select id,name from graph_view  for function get_graph_view
+        self.cursor.execute(
+            "SELECT * FROM graph_view where id=%s", (id,)
+        )  # todo select id,name from graph_view  for function get_graph_view
         # todo for function get_graph_view_to_flowchart_list select id,name from graph_view where id = input_id
         rows = self.cursor.fetchall()
         graph_nodes = row_results_to_class_list(GraphView, rows)
 
-    
     def get_all_flowchart_ids_and_names(self):
         pass
+
 
 if __name__ == "__main__":
     config = DatabaseConfig(
@@ -201,6 +176,6 @@ if __name__ == "__main__":
     postgres_interface = PostgresInterface(config)
     graph_view = postgres_interface.get_graph_view()
     flowcharts = postgres_interface.graph_view_to_flowchart_list(graph_view)
-    # print all nodes 
+    # print all nodes
     for flowchart in flowcharts:
         print(flowchart.nodes)

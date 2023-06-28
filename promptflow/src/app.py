@@ -12,49 +12,11 @@ from fastapi.middleware.cors import CORSMiddleware
 import os
 import zipfile
 from promptflow.src.flowchart import Flowchart
-
-from promptflow.src.nodes.embedding_node import (
-    EmbeddingsIngestNode,
-)
-from promptflow.src.state import State
+from promptflow.src.nodes.embedding_node import EmbeddingsIngestNode
 from promptflow.src.nodes.node_base import NodeBase
-from promptflow.src.nodes.start_node import InitNode, StartNode
-from promptflow.src.nodes.input_node import InputNode, FileInput, JSONFileInput
-from promptflow.src.nodes.func_node import FuncNode
-from promptflow.src.nodes.llm_node import OpenAINode, ClaudeNode, GoogleVertexNode
-from promptflow.src.nodes.date_node import DateNode
-from promptflow.src.nodes.random_number import RandomNode
-from promptflow.src.nodes.history_node import (
-    HistoryNode,
-    ManualHistoryNode,
-    HistoryWindow,
-    WindowedHistoryNode,
-    DynamicWindowedHistoryNode,
-)
-from promptflow.src.nodes.dummy_llm_node import DummyNode
-from promptflow.src.nodes.prompt_node import PromptNode
-from promptflow.src.nodes.embedding_node import (
-    EmbeddingInNode,
-    EmbeddingQueryNode,
-    EmbeddingsIngestNode,
-)
-from promptflow.src.nodes.test_nodes import AssertNode, LoggingNode, InterpreterNode
-from promptflow.src.nodes.env_node import EnvNode, ManualEnvNode
-from promptflow.src.nodes.audio_node import WhispersNode, ElevenLabsNode
-from promptflow.src.nodes.db_node import PGQueryNode, SQLiteQueryNode, PGGenerateNode
-from promptflow.src.nodes.structured_data_node import JsonNode, JsonerizerNode
-from promptflow.src.nodes.websearch_node import SerpApiNode, GoogleSearchNode
-from promptflow.src.nodes.output_node import FileOutput, JSONFileOutput
-from promptflow.src.nodes.http_node import HttpNode, JSONRequestNode, ScrapeNode
-from promptflow.src.nodes.server_node import ServerInputNode
-from promptflow.src.nodes.memory_node import PineconeInsertNode, PineconeQueryNode
-from promptflow.src.nodes.image_node import (
-    DallENode,
-    CaptionNode,
-    OpenImageFile,
-    JSONImageFile,
-    SaveImageNode,
-)
+from promptflow.src.node_map import node_map
+
+from promptflow.src.state import State
 from promptflow.src.connectors.connector import Connector
 from promptflow.src.connectors.partial_connector import PartialConnector
 from promptflow.src.state import State
@@ -256,7 +218,7 @@ class NodeType(BaseModel):
 
 @app.post("/flowcharts/{flowchart_id}/nodes/add")
 def add_node(flowchart_id: str, nodetype: NodeType) -> dict:
-    node_cls = eval(nodetype.classname)
+    node_cls = node_map.get(nodetype.classname)
     if not node_cls:
         return {"message": "Node not added: invalid classname"}
     flowchart = Flowchart.get_flowchart_by_id(flowchart_id)
