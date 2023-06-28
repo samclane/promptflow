@@ -75,11 +75,11 @@ class GraphNamesAndIds(BaseModel):
     name: str
 
     def hydrate(row: Dict[str, Any]):
-        return GraphNamesAndIds(row["id"], row.get("name"))
+        return GraphNamesAndIds(id=row["id"], name=row.get("name"))
 
 
 def row_results_to_class_list(class_name, list_of_rows):
-    return [class_name.hydrate(dict(zip(row))) for row in list_of_rows]
+    return [class_name.hydrate({"id": row[0], "name": row[1]}) for row in list_of_rows]
 
 
 def row_results_to_class(class_name, list_of_rows):
@@ -95,12 +95,20 @@ class PostgresInterface:
             password=config.password,
         )
         self.cursor = self.conn.cursor()
+        self.init_schema()
+
+    def init_schema(self):
+        """
+        Run the initialize_schema.sql script to create the tables and functions
+        """
+        self.cursor.execute(open("promptflow/sql/postgres_schema.sql", "r").read())
+        self.conn.commit()
 
     def get_graph_names_and_ids(
         self,
     ) -> List[GraphNamesAndIds]:  # todo deprecate this method
         self.cursor.execute(
-            "SELECT graph_id as id, name FROM graph_view"
+            "SELECT graph_id as id, graph_name FROM graph_view"
         )  # todo select id,name from graph_view  for function get_graph_view
         # todo for function get_graph_view_to_flowchart_list select id,name from graph_view where id = input_id
         rows = self.cursor.fetchall()
@@ -174,8 +182,5 @@ if __name__ == "__main__":
         host="172.18.0.3", database="postgres", user="postgres", password="postgres"
     )
     postgres_interface = PostgresInterface(config)
-    graph_view = postgres_interface.get_graph_view()
-    flowcharts = postgres_interface.graph_view_to_flowchart_list(graph_view)
-    # print all nodes
-    for flowchart in flowcharts:
-        print(flowchart.nodes)
+    graph_views = postgres_interface.get_graph_names_and_ids()
+    print(graph_views)

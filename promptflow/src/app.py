@@ -5,7 +5,6 @@ flowcharts.
 """
 import json
 import logging
-import sqlite3
 from fastapi import FastAPI, HTTPException, Response, File, UploadFile, BackgroundTasks
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -48,13 +47,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 promptflow = PromptFlowApp()
-# create the table of flowcharts if it doesn't exist
-conn = sqlite3.connect("flowcharts.db")
-c = conn.cursor()
-with open("promptflow/sql/initialize_schema.sql", "r", encoding="utf-8") as f:
-    c.executescript(f.read())
-conn.commit()
-conn.close()
 
 
 @app.get("/flowcharts")
