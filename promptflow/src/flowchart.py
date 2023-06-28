@@ -138,7 +138,9 @@ class Flowchart:
                     Connector(
                         node1,
                         node2,
-                        TextData(connector["label"], connector['conditional'], flowchart),
+                        TextData(
+                            connector["label"], connector["conditional"], flowchart
+                        ),
                         connector["id"],
                     )
                 )
