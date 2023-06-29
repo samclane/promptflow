@@ -22,19 +22,26 @@ CREATE TABLE IF NOT EXISTS graphs (
 -- Nodes
 CREATE TABLE IF NOT EXISTS nodes (
     id SERIAL PRIMARY KEY NOT NULL,
+    uid TEXT NOT NULL,
     node_type_id INTEGER REFERENCES node_types (id) ON UPDATE CASCADE ON DELETE CASCADE NOT NULL,
     graph_id INTEGER REFERENCES graphs (id) ON UPDATE CASCADE ON DELETE CASCADE NOT NULL,
     "label" TEXT NOT NULL,
-    metadata JSONB NOT NULL
+    metadata JSONB NOT NULL,
+    UNIQUE (graph_id, uid)
 );
+
+CREATE INDEX IF NOT EXISTS idx_nodes_graph_id_and_uid ON nodes(graph_id, uid);
 
 -- Branches
 CREATE TABLE IF NOT EXISTS branches (
     id SERIAL PRIMARY KEY NOT NULL,
     conditional TEXT NOT NULL,
-    label TEXT NOT NULL,
-    node INTEGER REFERENCES nodes(id) ON UPDATE CASCADE ON DELETE CASCADE NOT NULL,
-    next_node INTEGER REFERENCES nodes(id) ON UPDATE CASCADE ON DELETE CASCADE NOT NULL
+    "label" TEXT NOT NULL,
+    graph_id integer NOT NULL, 
+    node TEXT NOT NULL,
+    next_node TEXT NOT NULL,
+    FOREIGN KEY (graph_id, node) REFERENCES nodes(graph_id, uid) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (graph_id, next_node) REFERENCES nodes(graph_id, uid) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 -- Views
@@ -47,7 +54,7 @@ CREATE OR REPLACE VIEW graph_view AS
     n.metadata AS node_type_metadata,
     nt."name" AS node_type_name,
     b.next_node AS next_node,
-    n.id AS current_node,
+    n.uid AS current_node,
     b.conditional AS conditional,
     (SELECT COALESCE(b.conditional != '', FALSE)) AS has_conditional,
     b."label" AS branch_label,
@@ -55,16 +62,17 @@ CREATE OR REPLACE VIEW graph_view AS
   FROM graphs g
   JOIN nodes n ON n.graph_id=g.id
   JOIN node_types nt ON nt.id=n.node_type_id
-  LEFT OUTER JOIN branches b ON b.node=n.id;
+  LEFT OUTER JOIN branches b ON b.node=n.uid;
 
 -- Functions
 CREATE OR REPLACE FUNCTION upsert_graph(p_input JSONB)
-RETURNS TABLE (graph_id integer, graph_name TEXT)
+RETURNS TABLE (graph_id integer, created timestamp, graph_name TEXT, node_label TEXT, node_metadata jsonb, node_type_name TEXT, next_node TEXT, current_node TEXT, conditional TEXT, has_conditional boolean, branch_label TEXT, branch_id integer)
 LANGUAGE plpgsql
 AS $$
 DECLARE
   v_name text := p_input->>'name';
   nodes jsonb := p_input->'nodes';
+  branches jsonb := p_input->'branches';
   g_id integer;
 BEGIN
     IF v_name IS NULL THEN RAISE EXCEPTION 'Name is required for upsert'; END IF;  
@@ -76,68 +84,54 @@ BEGIN
 
     DELETE FROM nodes n WHERE n.graph_id=g_id;
   
-    INSERT INTO nodes ("node_type_id", "graph_id", "label", "metadata") 
-    SELECT  
+    INSERT INTO nodes ("uid", "node_type_id", "graph_id", "label", "metadata") 
+    SELECT
+      (j->>'uid')::TEXT,
       (j->>'node_type_id')::integer,
       g_id,
       j->>'name',
       j->'metadata'
     FROM 
       jsonb_array_elements(nodes) j;
-  
+    
+    INSERT INTO branches ("conditional", "label", "graph_id", "node", "next_node")
+    SELECT
+      b->>'conditional',
+      b->>'label',
+      g_id,
+      b->>'prev',
+      b->>'next'
+    FROM jsonb_array_elements(branches) b;
+    
     -- Return the ID of the new graph
     RETURN 
       query 
-    SELECT 
-      g_id,
-      v_name;
+    SELECT * FROM graph_view gv WHERE gv.graph_id=g_id;
 END;
 $$;
 
 /*
-DROP FUNCTION upsert_graph;
 SELECT * FROM upsert_graph('{
   "name": "Frankie''s Graph",
   "nodes": [
     {
-      "name": "Start",
+      "uid": "a",
+      "name": "Start!!!!!!!!!",
       "node_type_id": 1,
       "metadata": {}
     },
     {
+      "uid": "b",
       "name": "Special Print",
       "node_type_id": 3,
       "metadata": {}
     }
+  ],
+  "branches": [
+    { "prev": "a", "next": "b", "conditional": "", "label": "Whatever" }
   ]
 }'::jsonb);
-;
-
-SELECT * FROM graphs g, nodes n WHERE n.graph_id=g.id;
-
--- BELOW HERE IS TESTING --
- 
-
-select * from node_types;
-select * from graph_view;
- 
-// Upsert Graph Input 
-
-{
-  "name": "Frankie's Graph",
-  "nodes": [
-    {
-      "name": "Start",
-      "node_type_id": 2,
-      "metadata": {
-        "something": 123
-      }
-    }
-  ]
-}
- 
- 
- */
+*/
 
 /*
 INSERT INTO graphs ("name") VALUES ('Frankie''s Graph');
