@@ -51,15 +51,20 @@ CREATE OR REPLACE VIEW graph_view AS
   LEFT OUTER JOIN branches b ON b.node=n.id;
 
 -- Functions
-CREATE OR REPLACE FUNCTION create_new_graph(p_name TEXT, OUT p_id INTEGER)
+CREATE OR REPLACE FUNCTION create_new_graph(p_input JSONB, OUT p_id INTEGER)
   RETURNS INTEGER
   LANGUAGE plpgsql
 AS $$
+DECLARE
+    v_name TEXT;
 BEGIN
 
-    -- Insert a new graph with the given name
+    -- Extract the name from the JSONB input
+    v_name := p_input ->> 'name';
+
+    -- Insert a new graph with the extracted name
     INSERT INTO graphs (name)
-    VALUES (p_name)
+    VALUES (v_name)
     RETURNING id INTO p_id;
 
     -- Return the ID of the new graph

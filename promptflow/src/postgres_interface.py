@@ -215,16 +215,16 @@ class PostgresInterface:
         """
         Creates a new flowchart in the database.
         """
-        name = "New Flowchart" + str(datetime.now())
+        name = {"name": "New Flowchart" + str(datetime.now())}
         self.cursor.execute(
             """
             SELECT create_new_graph(%s)
             """,
-            (name,),
+            (str(name),),
         )
         self.conn.commit()
         id = self.cursor.fetchone()[0]
-        return Flowchart(id=id, name=name, created=datetime.now())
+        return Flowchart(id=id, name=name["name"], created=datetime.now())
 
     @staticmethod
     def get_or_create_flowchart(
