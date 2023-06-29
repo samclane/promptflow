@@ -6,7 +6,6 @@ import sqlite3
 from typing import TYPE_CHECKING, Any
 from abc import ABC, abstractmethod
 import logging
-import uuid
 
 from promptflow.src.state import State
 from promptflow.src.serializable import Serializable
@@ -37,7 +36,9 @@ class NodeBase(Serializable, ABC):
         self.logger = logging.getLogger(__name__)
         self.logger.info("Creating node %s", label)
         self.flowchart = flowchart
-        self.id: str = kwargs.get("id") or str(uuid.uuid1())
+        self.id: str = kwargs.get("id", None)
+        if self.id is None:
+            raise ValueError("id must be specified")
 
         self._label = label
         self.input_connectors: list[Connector] = []
@@ -48,7 +49,9 @@ class NodeBase(Serializable, ABC):
         self.center_x = center_x
         self.center_y = center_y
 
-        self.node_type_id = kwargs.get("node_type_id") or str(uuid.uuid1())
+        self.node_type_id = kwargs.get("node_type_id", None)
+        if self.node_type_id is None:
+            raise ValueError("node_type_id must be specified")
 
     @classmethod
     def get_all_node_types(cls) -> list[str]:
@@ -178,6 +181,7 @@ class NodeBase(Serializable, ABC):
             "center_x": self.center_x,
             "center_y": self.center_y,
             "classname": self.__class__.__name__,
+            "node_type_id": self.node_type_id,
         }
 
     def delete(self):
@@ -193,7 +197,6 @@ class NodeBase(Serializable, ABC):
         """
         self.logger.info(f"Copying node {self.label}")
         data = self.serialize()
-        data["id"] = uuid.uuid4()
         data["label"] = f"{data['label']} copy"
         new_node = self.deserialize(self.flowchart, data)
         return new_node

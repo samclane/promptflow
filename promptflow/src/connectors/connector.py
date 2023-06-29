@@ -5,7 +5,6 @@ between two nodes in the flowchart.
 import math
 import logging
 import sqlite3
-import uuid
 from typing import Optional, Tuple
 
 from promptflow.src.nodes.start_node import StartNode
@@ -35,7 +34,7 @@ class Connector(Serializable):
     ):
         self.node1 = node1
         self.node2 = node2
-        self.id = id or str(uuid.uuid1())
+        self.id = id
         self.flowchart = node1.flowchart
         node1.output_connectors.append(self)
         node2.input_connectors.append(self)

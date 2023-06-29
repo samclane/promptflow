@@ -100,7 +100,7 @@ def get_flowchart(flowchart_id: str) -> dict:
 def create_flowchart() -> dict:
     """Create a new flowchart."""
     promptflow.logger.info("Creating flowchart")
-    flowchart = Flowchart()
+    flowchart = interface.new_flowchart()
     return {"flowchart": flowchart.serialize()}
 
 

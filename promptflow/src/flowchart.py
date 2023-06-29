@@ -3,7 +3,6 @@ This module contains the Flowchart class, which manages the nodes and connectors
 """
 from __future__ import annotations
 import sqlite3
-import uuid
 import json
 import logging
 import threading
@@ -29,18 +28,19 @@ class Flowchart:
     Holds the nodes and connectors of a flowchart.
     """
 
-    id: str
+    id: int
     name: str
     created: float
 
     def __init__(
         self,
-        init_nodes: bool = True,
-        id: Optional[str] = None,
+        id: int = None,
         name: Optional[str] = None,
         created: Optional[float] = None,
     ):
-        self.id = id or str(uuid.uuid1())
+        self.id = id
+        if not self.id:
+            raise Exception("Flowchart id not provided")
         self.name = name or "Untitled"
         self.created = created or time.time()
         self.graph = nx.DiGraph()
@@ -51,10 +51,6 @@ class Flowchart:
 
         self._selected_element: Optional[NodeBase | Connector] = None
         self._partial_connector: Optional[PartialConnector] = None
-
-        if init_nodes:
-            self.add_node(InitNode(self, 70, 100, "Init"))
-            self.add_node(StartNode(self, 70, 300, "Start"))
 
         # insert into database
         self.save_to_db()
@@ -71,7 +67,7 @@ class Flowchart:
         """
         Deserialize a flowchart from a dict
         """
-        flowchart = cls(init_nodes=False, id=data["id"])
+        flowchart = cls(id=data["id"])
         for node_data in data["nodes"]:
             node = eval(node_data["classname"]).deserialize(flowchart, node_data)
             x_offset = pan[0]
@@ -126,7 +122,7 @@ class Flowchart:
 
     def find_node(self, node_id: str) -> NodeBase:
         """
-        Given a node uuid, find and return the node
+        Given a node id, find and return the node
         """
         for node in self.nodes:
             if node.id == node_id:

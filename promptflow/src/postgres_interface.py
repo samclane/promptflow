@@ -211,6 +211,21 @@ class PostgresInterface:
 
         return flowcharts
 
+    def new_flowchart(self) -> Flowchart:
+        """
+        Creates a new flowchart in the database.
+        """
+        name = "New Flowchart" + str(datetime.now())
+        self.cursor.execute(
+            """
+            SELECT create_new_graph(%s)
+            """,
+            (name,),
+        )
+        self.conn.commit()
+        id = self.cursor.fetchone()[0]
+        return Flowchart(id=id, name=name, created=datetime.now())
+
     @staticmethod
     def get_or_create_flowchart(
         flowcharts: List[Flowchart], row: GraphView
@@ -228,7 +243,7 @@ class PostgresInterface:
         existing_ids = [x.id for x in flowcharts]
 
         if row.graph_id not in existing_ids:
-            flowchart = Flowchart(False, row.graph_id, row.graph_name, row.created)
+            flowchart = Flowchart(row.graph_id, row.graph_name, row.created)
             flowcharts.append(flowchart)
         else:
             flowchart = next((x for x in flowcharts if x.id == row.graph_id), None)
@@ -257,6 +272,7 @@ class PostgresInterface:
                 "label": row.node_label,
                 "center_x": 0,
                 "center_y": 0,
+                "id": row.current_node,
             },
         )
 

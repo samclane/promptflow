@@ -29,6 +29,8 @@ CREATE TABLE IF NOT EXISTS branches (
     next_node INTEGER REFERENCES nodes(id) NOT NULL
 );
 
+
+-- Views
 CREATE OR REPLACE VIEW graph_view AS
   SELECT
     g.id AS graph_id,
@@ -47,6 +49,31 @@ CREATE OR REPLACE VIEW graph_view AS
   JOIN nodes n ON n.graph_id=g.id
   JOIN node_types nt ON nt.id=n.node_type_id
   LEFT OUTER JOIN branches b ON b.node=n.id;
+
+-- Functions
+CREATE OR REPLACE FUNCTION create_new_graph(p_name TEXT, OUT p_id INTEGER)
+  RETURNS INTEGER
+  LANGUAGE plpgsql
+AS $$
+BEGIN
+
+    -- Insert a new graph with the given name
+    INSERT INTO graphs (name)
+    VALUES (p_name)
+    RETURNING id INTO p_id;
+
+    -- Return the ID of the new graph
+    RETURN;
+
+EXCEPTION
+    WHEN unique_violation THEN
+        RAISE NOTICE 'A graph with the same name already exists.';
+    WHEN others THEN
+        RAISE NOTICE 'An error occurred while creating the graph.';
+
+END;
+$$;
+
 
 -- BELOW HERE IS TESTING --
 
