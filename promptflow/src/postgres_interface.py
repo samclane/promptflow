@@ -2,9 +2,12 @@ from pydantic import BaseModel, validator, constr, conint
 from datetime import datetime
 from typing import Optional, Dict, Any, List
 import psycopg2
+from promptflow.src.connectors.connector import Connector
 
 from promptflow.src.flowchart import Flowchart
 from promptflow.src.node_map import node_map
+from promptflow.src.nodes.node_base import NodeBase
+from promptflow.src.text_data import TextData
 
 
 class GraphView(BaseModel):
@@ -34,6 +37,8 @@ class GraphView(BaseModel):
     current_node: conint(gt=0)
     conditional: Optional[str]
     has_conditional: bool
+    branch_label: Optional[str]
+    branch_id: Optional[conint(gt=0)]
 
     @validator("created")
     def validate_created(cls, value):
@@ -52,6 +57,18 @@ class GraphView(BaseModel):
     def validate_has_conditional(cls, value, values):
         if value and "conditional" not in values:
             raise ValueError("conditional must be provided if has_conditional is True")
+        return value
+
+    @validator("branch_label")
+    def validate_branch_label(cls, value, values):
+        if value and "branch_id" not in values:
+            raise ValueError("branch_id must be provided if branch_label is True")
+        return value
+
+    @validator("branch_id")
+    def validate_branch_id(cls, value, values):
+        if value and "branch_label" not in values:
+            raise ValueError("branch_label must be provided if branch_id is True")
         return value
 
 
@@ -136,6 +153,7 @@ class PostgresInterface:
     Interface for interacting with a PostgreSQL database.
 
     Attributes:
+        config (DatabaseConfig): The configuration for the database connection.
         conn: The connection to the PostgreSQL database.
         cursor: The cursor for executing SQL queries.
     """
@@ -161,8 +179,12 @@ class PostgresInterface:
         """
         Run the initialize_schema.sql script to create the tables and functions
         """
-        self.cursor.execute(open("promptflow/sql/postgres_schema.sql", "r").read())
-        self.conn.commit()
+        try:
+            with open("promptflow/sql/postgres_schema.sql", "r") as file:
+                self.cursor.execute(file.read())
+                self.conn.commit()
+        except Exception as e:
+            print(f"Error initializing schema: {e}")
 
     def build_flowcharts_from_graph_view(
         self, graph_view: List[GraphView]
@@ -181,6 +203,11 @@ class PostgresInterface:
         for row in graph_view:
             flowchart = self.get_or_create_flowchart(flowcharts, row)
             self.add_node_to_flowchart(flowchart, row)
+
+        # Todo: Add connectors to flowchart in a single pass
+        for row in graph_view:
+            flowchart = self.get_or_create_flowchart(flowcharts, row)
+            self.add_connector_to_flowchart(flowchart, row)
 
         return flowcharts
 
@@ -211,7 +238,7 @@ class PostgresInterface:
         return flowchart
 
     @staticmethod
-    def add_node_to_flowchart(flowchart: Flowchart, row: GraphView):
+    def add_node_to_flowchart(flowchart: Flowchart, row: GraphView) -> NodeBase:
         """
         Add a node to the flowchart.
 
@@ -234,6 +261,39 @@ class PostgresInterface:
         )
 
         flowchart.add_node(node)
+
+        return node
+
+    def add_connector_to_flowchart(self, flowchart: Flowchart, row: GraphView):
+        """
+        Add a connection between two nodes to the flowchart.
+
+        Args:
+            flowchart (Flowchart): The flowchart to which the connection will be added.
+            row (GraphView): The graph view containing connection information.
+        """
+        # check if the connector is already in the flowchart
+        if not row.branch_id:
+            return
+        if row.branch_id in map(lambda x: x.id, flowchart.connectors):
+            return
+        if not row.current_node or not row.next_node:
+            return
+        src_node = flowchart.find_node(row.current_node)
+        dst_node = flowchart.find_node(row.next_node)
+        if src_node and dst_node:
+            connector = Connector(
+                src_node,
+                dst_node,
+                TextData(row.branch_label, row.conditional, flowchart)
+                if row.conditional
+                else None,
+                row.branch_id,
+            )
+            flowchart.add_connector(connector)
+        else:
+            # defer adding the connector until both nodes are in the flowchart
+            self.deferred_connectors.append(row)
 
     def get_flowchart_by_id(self, id) -> Flowchart:
         """

@@ -1,6 +1,6 @@
 -- Graphs
 CREATE TABLE IF NOT EXISTS graphs (
-    id SERIAL PRIMARY KEY NOT NULL,
+    id SERIAL PRIMARY KEY NOT NULL DEFAULT 1,
     name TEXT UNIQUE NOT NULL,
     created TIMESTAMP NOT NULL DEFAULT current_timestamp
 );
@@ -40,7 +40,9 @@ CREATE OR REPLACE VIEW graph_view AS
     b.next_node AS next_node,
     n.id AS current_node,
     b.conditional AS conditional,
-    (SELECT COALESCE(b.conditional != '', FALSE)) AS has_conditional
+    (SELECT COALESCE(b.conditional != '', FALSE)) AS has_conditional,
+    b."label" AS branch_label,
+    b.id AS branch_id
   FROM graphs g
   JOIN nodes n ON n.graph_id=g.id
   JOIN node_types nt ON nt.id=n.node_type_id
