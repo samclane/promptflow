@@ -8,7 +8,6 @@ CREATE TABLE IF NOT EXISTS graphs (
 -- Node Types
 CREATE TABLE IF NOT EXISTS node_types (
     id SERIAL PRIMARY KEY NOT NULL,
-    metadata JSONB NOT NULL,
     name TEXT UNIQUE NOT NULL
 );
 
@@ -17,7 +16,8 @@ CREATE TABLE IF NOT EXISTS nodes (
     id SERIAL PRIMARY KEY NOT NULL,
     node_type_id INTEGER REFERENCES node_types (id) NOT NULL,
     graph_id INTEGER REFERENCES graphs (id) NOT NULL,
-    "label" TEXT NOT NULL
+    "label" TEXT NOT NULL,
+    metadata JSONB NOT NULL
 );
 
 -- Branches

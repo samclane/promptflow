@@ -1,3 +1,4 @@
+import json
 from pydantic import BaseModel, validator, constr, conint
 from datetime import datetime
 from typing import Optional, Dict, Any, List
@@ -220,7 +221,7 @@ class PostgresInterface:
             """
             SELECT create_new_graph(%s)
             """,
-            (str(name),),
+            (json.dumps(name),),
         )
         self.conn.commit()
         id = self.cursor.fetchone()[0]
