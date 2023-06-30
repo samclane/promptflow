@@ -219,7 +219,7 @@ class PostgresInterface:
         name = {"name": "New Flowchart" + str(datetime.now())}
         self.cursor.callproc(
             """
-            SELECT * FROM upsert_graph(%s)
+            upsert_graph
             """,
             [json.dumps(name),],
         )

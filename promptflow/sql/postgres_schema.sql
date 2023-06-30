@@ -10,7 +10,7 @@ INSERT INTO node_types (name) VALUES
   ('Start'),
   ('Input'),
   ('Print')
-;
+ON CONFLICT (name) DO UPDATE SET name=EXCLUDED.name;
 
 -- Graphs
 CREATE TABLE IF NOT EXISTS graphs (
