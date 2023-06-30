@@ -4,7 +4,6 @@ between two nodes in the flowchart.
 """
 import math
 import logging
-import sqlite3
 from typing import Optional, Tuple
 
 from promptflow.src.nodes.start_node import StartNode
@@ -95,20 +94,7 @@ class Connector(Serializable):
         return False
 
     def save_to_db(self):
-        conn = sqlite3.connect("flowcharts.db")
-        c = conn.cursor()
-        c.execute(
-            "INSERT OR REPLACE INTO branches VALUES (?, ?, ?, ?, ?)",
-            (
-                self.id,
-                self.node1.id,
-                self.condition.text,
-                self.condition_label,
-                self.node2.id,
-            ),
-        )
-        conn.commit()
-        conn.close()
+        pass
 
 
 def is_condition_default(condition: TextData) -> bool:

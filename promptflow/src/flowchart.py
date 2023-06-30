@@ -2,7 +2,6 @@
 This module contains the Flowchart class, which manages the nodes and connectors of a flowchart.
 """
 from __future__ import annotations
-import sqlite3
 import json
 import logging
 import threading
@@ -281,18 +280,7 @@ class Flowchart:
         """
         Save the flowchart to the database
         """
-        conn = sqlite3.connect("flowcharts.db")
-        c = conn.cursor()
-        c.execute(
-            "INSERT OR REPLACE INTO graphs (id, name, created) VALUES (?, ?, ?)",
-            (self.id, self.name, self.created),
-        )
-        conn.commit()
-        conn.close()
-        for node in self.nodes:
-            node.save_to_db()
-        for connector in self.connectors:
-            connector.save_to_db()
+        pass
 
     def remove_node(self, node: NodeBase) -> None:
         """
