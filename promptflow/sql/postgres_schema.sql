@@ -60,8 +60,8 @@ CREATE OR REPLACE VIEW graph_view AS
     b."label" AS branch_label,
     b.id AS branch_id
   FROM graphs g
-  JOIN nodes n ON n.graph_id=g.id
-  JOIN node_types nt ON nt.id=n.node_type_id
+  LEFT JOIN nodes n ON n.graph_id=g.id
+  LEFT JOIN node_types nt ON nt.id=n.node_type_id
   LEFT OUTER JOIN branches b ON b.node=n.uid;
 
 -- Functions

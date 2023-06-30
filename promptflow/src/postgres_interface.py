@@ -216,7 +216,9 @@ class PostgresInterface:
         """
         Creates a new flowchart in the database.
         """
-        name = {"name": "New Flowchart" + str(datetime.now())}
+        name = {"name": "New Flowchart" + str(datetime.now()),
+                "nodes": [],
+                "branches": [],}
         self.cursor.callproc(
             """
             upsert_graph
