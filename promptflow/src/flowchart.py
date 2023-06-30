@@ -69,7 +69,7 @@ class Flowchart:
         """
         flowchart = cls(id=data["id"])
         for node_data in data["nodes"]:
-            node = eval(node_data["classname"]).deserialize(flowchart, node_data)
+            node = node_map[node_data["classname"]].deserialize(flowchart, node_data)
             x_offset = pan[0]
             y_offset = pan[1]
             flowchart.add_node(node, (x_offset, y_offset))

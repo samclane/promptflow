@@ -217,11 +217,11 @@ class PostgresInterface:
         Creates a new flowchart in the database.
         """
         name = {"name": "New Flowchart" + str(datetime.now())}
-        self.cursor.execute(
+        self.cursor.callproc(
             """
-            SELECT create_new_graph(%s)
+            SELECT * FROM upsert_graph(%s)
             """,
-            (json.dumps(name),),
+            [json.dumps(name),],
         )
         self.conn.commit()
         id = self.cursor.fetchone()[0]
