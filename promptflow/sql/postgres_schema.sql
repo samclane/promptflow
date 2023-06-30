@@ -7,9 +7,9 @@ CREATE TABLE IF NOT EXISTS node_types (
 CREATE INDEX IF NOT EXISTS idx_node_types_name ON node_types(name);
 
 INSERT INTO node_types (name) VALUES 
-  ('Start'),
-  ('Input'),
-  ('Print')
+  ('StartNode'),
+  ('InputNode'),
+  ('PrintNode')
 ON CONFLICT (name) DO UPDATE SET name=EXCLUDED.name;
 
 -- Graphs

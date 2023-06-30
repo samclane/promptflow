@@ -230,6 +230,15 @@ class PostgresInterface:
         self.conn.commit()
         id = self.cursor.fetchone()[0]
         return Flowchart(id=id, name=name["name"], created=datetime.now())
+    
+    def get_node_type_id(self, classname):
+        self.cursor.execute(
+            """
+            SELECT id FROM node_types WHERE name = %s
+            """,
+            [classname],
+        )
+        return self.cursor.fetchone()[0]
 
     @staticmethod
     def get_or_create_flowchart(

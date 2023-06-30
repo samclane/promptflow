@@ -225,7 +225,8 @@ def add_node(flowchart_id: str, nodetype: NodeType) -> dict:
     if not node_cls:
         return {"message": "Node not added: invalid classname"}
     flowchart = Flowchart.get_flowchart_by_id(flowchart_id, interface)
-    node = node_cls(flowchart, 0, 0, nodetype.classname)
+    node_type_id = interface.get_node_type_id(nodetype.classname)
+    node = node_cls(flowchart, 0, 0, nodetype.classname, node_type_id=node_type_id)
     if node:
         flowchart.add_node(node)
         return {"message": "Node added", "node": node.serialize()}

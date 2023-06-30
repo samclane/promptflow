@@ -4,6 +4,7 @@ Base class for all nodes
 from typing import TYPE_CHECKING, Any
 from abc import ABC, abstractmethod
 import logging
+from uuid import uuid4
 
 from promptflow.src.state import State
 from promptflow.src.serializable import Serializable
@@ -34,9 +35,7 @@ class NodeBase(Serializable, ABC):
         self.logger = logging.getLogger(__name__)
         self.logger.info("Creating node %s", label)
         self.flowchart = flowchart
-        self.id: str = kwargs.get("id", None)
-        if self.id is None:
-            raise ValueError("id must be specified")
+        self.id: str = kwargs.get("id", uuid4().hex)
 
         self._label = label
         self.input_connectors: list[Connector] = []
