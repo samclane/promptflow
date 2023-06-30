@@ -1,7 +1,7 @@
 import json
 from pydantic import BaseModel, validator, constr, conint
 from datetime import datetime
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any, List, Tuple
 import psycopg2
 from promptflow.src.connectors.connector import Connector
 
@@ -31,46 +31,41 @@ class GraphView(BaseModel):
     graph_id: conint(gt=0)
     created: datetime
     graph_name: constr(min_length=1)
-    node_label: constr(min_length=1)
+    node_label: Optional[constr(min_length=1)]
     node_type_metadata: Optional[Dict[str, Any]]
-    node_type_name: constr(min_length=1)
+    node_type_name: Optional[constr(min_length=1)]
     next_node: Optional[conint(gt=0)]
-    current_node: conint(gt=0)
+    current_node: Optional[conint(gt=0)]
     conditional: Optional[str]
     has_conditional: bool
     branch_label: Optional[str]
     branch_id: Optional[conint(gt=0)]
 
-    @validator("created")
-    def validate_created(cls, value):
-        if value > datetime.now():
-            raise ValueError("created must be in the past")
-        return value
+    @staticmethod
+    def hydrate(row: Tuple[Any, ...]) -> "GraphView":
+        """
+        Hydrates a GraphView instance from a dictionary representing a database row.
 
-    @validator("node_type_metadata")
-    def validate_node_type_metadata(cls, value):
-        if value is not None:
-            if not isinstance(value, dict):
-                raise TypeError("node_type_metadata must be a dictionary")
-        return value
+        Args:
+            row (Dict[str, Any]): Dictionary representing a database row.
 
-    @validator("has_conditional")
-    def validate_has_conditional(cls, value, values):
-        if value and "conditional" not in values:
-            raise ValueError("conditional must be provided if has_conditional is True")
-        return value
-
-    @validator("branch_label")
-    def validate_branch_label(cls, value, values):
-        if value and "branch_id" not in values:
-            raise ValueError("branch_id must be provided if branch_label is True")
-        return value
-
-    @validator("branch_id")
-    def validate_branch_id(cls, value, values):
-        if value and "branch_label" not in values:
-            raise ValueError("branch_label must be provided if branch_id is True")
-        return value
+        Returns:
+            GraphView: A GraphView instance populated with the data from the row.
+        """
+        return GraphView(
+            graph_id=row[0],
+            created=row[1],
+            graph_name=row[2],
+            node_label=row[3],
+            node_type_metadata=row[4],
+            node_type_name=row[5],
+            next_node=row[6],
+            current_node=row[7],
+            conditional=row[8],
+            has_conditional=row[9],
+            branch_label=row[10],
+            branch_id=row[11],
+        )
 
 
 class DatabaseConfig(BaseModel):
@@ -127,8 +122,8 @@ class GraphNamesAndIds(BaseModel):
     name: str
 
     @staticmethod
-    def hydrate(row: Dict[str, Any]):
-        return GraphNamesAndIds(id=row["id"], name=row.get("name") or "")
+    def hydrate(row: Tuple[Any, ...]):
+        return GraphNamesAndIds(id=row[0], name=row[1])
 
 
 def row_results_to_class_list(class_name, list_of_rows):
@@ -142,7 +137,7 @@ def row_results_to_class_list(class_name, list_of_rows):
     Returns:
         List[BaseModel]: A list of class instances.
     """
-    return [class_name.hydrate({"id": row[0], "name": row[1]}) for row in list_of_rows]
+    return [class_name.hydrate(row) for row in list_of_rows]
 
 
 def row_results_to_class(class_name, list_of_rows):
@@ -203,12 +198,15 @@ class PostgresInterface:
 
         for row in graph_view:
             flowchart = self.get_or_create_flowchart(flowcharts, row)
-            self.add_node_to_flowchart(flowchart, row)
+            if row.current_node:
+                self.add_node_to_flowchart(flowchart, row)
+            flowcharts.append(flowchart)
 
         # Todo: Add connectors to flowchart in a single pass
         for row in graph_view:
-            flowchart = self.get_or_create_flowchart(flowcharts, row)
-            self.add_connector_to_flowchart(flowchart, row)
+            flowchart = list(filter(lambda x: x.id == row.graph_id, flowcharts))[0]
+            if row.next_node:
+                self.add_connector_to_flowchart(flowchart, row)
 
         return flowcharts
 
@@ -216,14 +214,18 @@ class PostgresInterface:
         """
         Creates a new flowchart in the database.
         """
-        name = {"name": "New Flowchart" + str(datetime.now()),
-                "nodes": [],
-                "branches": [],}
+        name = {
+            "name": "New Flowchart" + str(datetime.now()),
+            "nodes": [],
+            "branches": [],
+        }
         self.cursor.callproc(
             """
             upsert_graph
             """,
-            [json.dumps(name),],
+            [
+                json.dumps(name),
+            ],
         )
         self.conn.commit()
         id = self.cursor.fetchone()[0]
@@ -310,9 +312,6 @@ class PostgresInterface:
                 row.branch_id,
             )
             flowchart.add_connector(connector)
-        else:
-            # defer adding the connector until both nodes are in the flowchart
-            self.deferred_connectors.append(row)
 
     def get_flowchart_by_id(self, id) -> Flowchart:
         """
