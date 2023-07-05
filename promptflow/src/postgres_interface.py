@@ -190,12 +190,13 @@ class DBInterface(ABC):
 
     @abstractmethod
     def get_node_type_id(self, classname):
-        pass
+        """
+        Returns the node type ID for the given node type.
+        """
 
-    @staticmethod
     @abstractmethod
     def get_or_create_flowchart(
-        flowcharts: List[Flowchart], row: GraphView
+        self, flowcharts: List[Flowchart], row: GraphView
     ) -> Flowchart:
         """
         Get the flowchart with the matching graph_id from the list or create a new one if it doesn't exist.
@@ -253,6 +254,15 @@ class DBInterface(ABC):
             List[GraphNamesAndIds]: A list of all flowchart IDs and names.
         """
 
+    @abstractmethod
+    def save_flowchart(self, flowchart: Flowchart):
+        """
+        Saves the flowchart to the database.
+
+        Args:
+            flowchart (Flowchart): The flowchart to save.
+        """
+
 
 class PostgresInterface(DBInterface):
     """
@@ -265,13 +275,7 @@ class PostgresInterface(DBInterface):
     """
 
     def __init__(self, config: DatabaseConfig):
-        """
-        Initialize the PostgresInterface with a given configuration.
-
-        Args:
-            config (DatabaseConfig): The configuration for the database connection.
-        """
-        self.config: DatabaseConfig = config
+        super().__init__(config)
         self.conn = psycopg2.connect(
             host=config.host,
             database=config.database,
@@ -282,9 +286,6 @@ class PostgresInterface(DBInterface):
         self.init_schema()
 
     def init_schema(self):
-        """
-        Run the initialize_schema.sql script to create the tables and functions
-        """
         try:
             with open("promptflow/sql/postgres_schema.sql", "r") as file:
                 self.cursor.execute(file.read())
@@ -295,15 +296,6 @@ class PostgresInterface(DBInterface):
     def build_flowcharts_from_graph_view(
         self, graph_view: List[GraphView]
     ) -> List[Flowchart]:
-        """
-        Builds flowcharts from the graph views.
-
-        Args:
-            graph_view (List[GraphView]): List of graph views.
-
-        Returns:
-            List[Flowchart]: List of constructed flowcharts.
-        """
         flowcharts: List[Flowchart] = []
 
         for row in graph_view:
@@ -321,9 +313,6 @@ class PostgresInterface(DBInterface):
         return flowcharts
 
     def new_flowchart(self) -> Flowchart:
-        """
-        Creates a new flowchart in the database.
-        """
         name = {
             "name": "New Flowchart" + str(datetime.now()),
             "nodes": [],
@@ -339,7 +328,9 @@ class PostgresInterface(DBInterface):
         )
         self.conn.commit()
         id = self.cursor.fetchone()[0]
-        return Flowchart(id=id, name=name["name"], created=datetime.now())
+        return Flowchart(
+            interface=self, id=id, name=name["name"], created=datetime.now()
+        )
 
     def get_node_type_id(self, classname):
         self.cursor.execute(
@@ -350,24 +341,13 @@ class PostgresInterface(DBInterface):
         )
         return self.cursor.fetchone()[0]
 
-    @staticmethod
     def get_or_create_flowchart(
-        flowcharts: List[Flowchart], row: GraphView
+        self, flowcharts: List[Flowchart], row: GraphView
     ) -> Flowchart:
-        """
-        Get the flowchart with the matching graph_id from the list or create a new one if it doesn't exist.
-
-        Args:
-            flowcharts (List[Flowchart]): List of flowcharts.
-            row (GraphView): The graph view to process.
-
-        Returns:
-            Flowchart: The flowchart that corresponds to the graph_id.
-        """
         existing_ids = [x.id for x in flowcharts]
 
         if row.graph_id not in existing_ids:
-            flowchart = Flowchart(row.graph_id, row.graph_name, row.created)
+            flowchart = Flowchart(self, row.graph_id, row.graph_name, row.created)
             flowcharts.append(flowchart)
         else:
             flowchart = next((x for x in flowcharts if x.id == row.graph_id), None)
@@ -378,13 +358,6 @@ class PostgresInterface(DBInterface):
 
     @staticmethod
     def add_node_to_flowchart(flowchart: Flowchart, row: GraphView) -> NodeBase:
-        """
-        Add a node to the flowchart.
-
-        Args:
-            flowchart (Flowchart): The flowchart to which the node will be added.
-            row (GraphView): The graph view containing node information.
-        """
         node_cls = node_map.get(row.node_type_name)
         if node_cls is None:
             raise ValueError(f"Node type {row.node_type_name} not found in node_map")
@@ -405,13 +378,6 @@ class PostgresInterface(DBInterface):
         return node
 
     def add_connector_to_flowchart(self, flowchart: Flowchart, row: GraphView):
-        """
-        Add a connection between two nodes to the flowchart.
-
-        Args:
-            flowchart (Flowchart): The flowchart to which the connection will be added.
-            row (GraphView): The graph view containing connection information.
-        """
         # check if the connector is already in the flowchart
         if not row.branch_id:
             return
@@ -433,15 +399,6 @@ class PostgresInterface(DBInterface):
             flowchart.add_connector(connector)
 
     def get_flowchart_by_id(self, id) -> Flowchart:
-        """
-        Gets the flowchart from the database with the given ID.
-
-        Args:
-            id (int): The ID of the flowchart to retrieve.
-
-        Returns:
-            Flowchart: The flowchart with the given ID.
-        """
         self.cursor.execute(
             "SELECT * FROM graph_view where graph_id=%s", (id,)
         )  # todo select id,name from graph_view  for function get_graph_view
@@ -454,3 +411,14 @@ class PostgresInterface(DBInterface):
         self.cursor.execute("SELECT graph_id, graph_name FROM graph_view")
         rows = self.cursor.fetchall()
         return row_results_to_class_list(GraphNamesAndIds, rows)
+
+    def save_flowchart(self, flowchart: Flowchart):
+        self.cursor.callproc(
+            """
+            upsert_graph
+            """,
+            [
+                json.dumps(flowchart.serialize()),
+            ],
+        )
+        self.conn.commit()

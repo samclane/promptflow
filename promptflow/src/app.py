@@ -78,7 +78,7 @@ def upload_flowchart_json(flowchart_json: FlowchartJson) -> dict:
     """Upload a flowchart json file."""
     promptflow.logger.info("Uploading flowchart")
     try:
-        flowchart = Flowchart.deserialize(flowchart_json.flowchart)
+        flowchart = Flowchart.deserialize(interface, flowchart_json.flowchart)
     except ValueError:
         return {"message": "Invalid flowchart json file"}
     return {"flowchart": flowchart.serialize()}
@@ -200,7 +200,7 @@ def load_from(file: UploadFile = File(...)) -> dict:
                             node["label_file"], path=os.getcwd()
                         )
                         node["label_file"] = label_file
-                flowchart = Flowchart.deserialize(data)
+                flowchart = Flowchart.deserialize(interface, data)
                 return {"flowchart": flowchart.serialize()}
     else:
         promptflow.logger.info("No file selected to load from")

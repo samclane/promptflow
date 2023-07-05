@@ -16,7 +16,7 @@ from promptflow.src.connectors.connector import Connector
 from promptflow.src.connectors.partial_connector import PartialConnector
 
 if TYPE_CHECKING:
-    from promptflow.src.postgres_interface import PostgresInterface
+    from promptflow.src.postgres_interface import DBInterface
 from promptflow.src.state import State
 from promptflow.src.text_data import TextData
 from pydantic import BaseModel
@@ -27,16 +27,19 @@ class Flowchart:
     Holds the nodes and connectors of a flowchart.
     """
 
+    interface: DBInterface
     id: int
     name: str
     created: float
 
     def __init__(
         self,
-        id: int = None,
+        interface: DBInterface,
+        id: Optional[int] = None,
         name: Optional[str] = None,
         created: Optional[float] = None,
     ):
+        self.interface = interface
         self.id = id
         if not self.id:
             raise Exception("Flowchart id not provided")
@@ -51,22 +54,31 @@ class Flowchart:
         self._selected_element: Optional[NodeBase | Connector] = None
         self._partial_connector: Optional[PartialConnector] = None
 
+        self.is_dirty = False
+
         # insert into database
         self.save_to_db()
 
     @classmethod
-    def get_flowchart_by_id(cls, id, interface: PostgresInterface):
+    def get_flowchart_by_id(cls, id, interface: DBInterface):
         """
         Return a flowchart by id
         """
         return interface.get_flowchart_by_id(id)
 
     @classmethod
-    def deserialize(cls, data: dict[str, Any], pan=(0, 0), zoom=1.0) -> Flowchart:
+    def deserialize(
+        cls, interface: DBInterface, data: dict[str, Any], pan=(0, 0)
+    ) -> Flowchart:
         """
         Deserialize a flowchart from a dict
         """
-        flowchart = cls(id=data["id"])
+        flowchart = cls(
+            interface,
+            id=data["id"],
+            name=data.get("name", "Untitled"),
+            created=data.get("created", time.time()),
+        )
         for node_data in data["nodes"]:
             node = node_map[node_data["classname"]].deserialize(flowchart, node_data)
             x_offset = pan[0]
@@ -267,6 +279,8 @@ class Flowchart:
         """
         data: dict[str, Any] = {
             "id": self.id,
+            "name": self.name,
+            "created": str(self.created),
         }
         data["nodes"] = []
         for node in self.nodes:
@@ -280,7 +294,8 @@ class Flowchart:
         """
         Save the flowchart to the database
         """
-        pass
+        self.logger.info(f"Saving flowchart {self.name} to database")
+        self.interface.save_flowchart(self)
 
     def remove_node(self, node: NodeBase) -> None:
         """
