@@ -1,96 +1,127 @@
 -- Node Types
-CREATE TABLE IF NOT EXISTS node_types (
-  id SERIAL PRIMARY KEY NOT NULL,
-  name TEXT UNIQUE NOT NULL
+create table if not exists node_types (
+  id SERIAL primary key not null,
+  name text unique not null
 );
 
-CREATE INDEX IF NOT EXISTS idx_node_types_name ON node_types(name);
+create index if not exists idx_node_types_name on
+node_types(name);
 
-INSERT INTO
-  node_types (name)
-VALUES
+insert
+	into
+	node_types (name)
+values
   ('StartNode'),
   ('InputNode'),
-  ('PrintNode') ON CONFLICT (name) DO
-UPDATE
-SET
-  name = EXCLUDED.name;
-
+  ('PrintNode') on
+conflict (name) do
+update
+set
+	name = EXCLUDED.name;
 -- Graphs
-CREATE TABLE IF NOT EXISTS graphs (
-  id SERIAL PRIMARY KEY NOT NULL,
-  name TEXT UNIQUE NOT NULL,
-  created TIMESTAMP NOT NULL DEFAULT current_timestamp
+create table if not exists graphs (
+  id SERIAL primary key not null,
+  name text unique not null,
+  created TIMESTAMP not null default current_timestamp
 );
-
 -- Nodes
-CREATE TABLE IF NOT EXISTS nodes (
-  id SERIAL PRIMARY KEY NOT NULL,
-  uid TEXT NOT NULL,
-  node_type_id INTEGER REFERENCES node_types (id) ON UPDATE CASCADE ON DELETE CASCADE NOT NULL,
-  graph_id INTEGER REFERENCES graphs (id) ON UPDATE CASCADE ON DELETE CASCADE NOT NULL,
-  "label" TEXT NOT NULL,
-  metadata JSONB NOT NULL,
-  UNIQUE (graph_id, uid)
+create table if not exists nodes (
+  id SERIAL primary key not null,
+  uid text not null,
+  node_type_id INTEGER references node_types (id) on
+update
+	cascade on
+	delete
+		cascade not null,
+		graph_id INTEGER references graphs (id) on
+		update
+			cascade on
+			delete
+				cascade not null,
+				"label" text not null,
+				metadata JSONB not null,
+				unique (graph_id,
+				uid)
 );
 
-CREATE INDEX IF NOT EXISTS idx_nodes_graph_id_and_uid ON nodes(graph_id, uid);
-
+create index if not exists idx_nodes_graph_id_and_uid on
+nodes(graph_id,
+uid);
 -- Branches
-CREATE TABLE IF NOT EXISTS branches (
-  id SERIAL PRIMARY KEY NOT NULL,
-  conditional TEXT NOT NULL,
-  "label" TEXT NOT NULL,
-  graph_id integer NOT NULL,
-  node TEXT NOT NULL,
-  next_node TEXT NOT NULL,
-  FOREIGN KEY (graph_id, node) REFERENCES nodes(graph_id, uid) ON DELETE CASCADE ON UPDATE CASCADE,
-  FOREIGN KEY (graph_id, next_node) REFERENCES nodes(graph_id, uid) ON DELETE CASCADE ON UPDATE CASCADE
+create table if not exists branches (
+  id SERIAL primary key not null,
+  conditional text not null,
+  "label" text not null,
+  graph_id integer not null,
+  node text not null,
+  next_node text not null,
+  foreign key (graph_id,
+node) references nodes(graph_id,
+uid) on
+delete
+	cascade on
+	update
+		cascade,
+		foreign key (graph_id,
+		next_node) references nodes(graph_id,
+		uid) on
+		delete
+			cascade on
+			update
+				cascade
 );
-
 -- Views
-CREATE
-OR REPLACE VIEW graph_view AS
-SELECT
-  g.id AS graph_id,
-  g.created AS created,
-  g."name" AS graph_name,
-  n."label" AS node_label,
-  n.metadata AS node_type_metadata,
-  nt."name" AS node_type_name,
-  b.next_node AS next_node,
-  n.uid AS current_node,
-  b.conditional AS conditional,
-  (
-    SELECT
-      COALESCE(b.conditional != '', FALSE)
-  ) AS has_conditional,
-  b."label" AS branch_label,
-  b.id AS branch_id,
-  n.node_type_id AS node_type_id
-FROM
-  graphs g
-  LEFT JOIN nodes n ON n.graph_id = g.id
-  LEFT JOIN node_types nt ON nt.id = n.node_type_id
-  LEFT OUTER JOIN branches b ON b.node = n.uid;
-
+create
+or replace
+view graph_view as
+select
+	g.id as graph_id,
+	g.created as created,
+	g."name" as graph_name,
+	n."label" as node_label,
+	n.metadata as node_type_metadata,
+	nt."name" as node_type_name,
+	b.next_node as next_node,
+	n.uid as current_node,
+	b.conditional as conditional,
+	(
+	select
+		coalesce(b.conditional != '', false)
+  ) as has_conditional,
+	b."label" as branch_label,
+	b.id as branch_id,
+	n.node_type_id as node_type_id
+from
+	graphs g
+left join nodes n on
+	n.graph_id = g.id
+left join node_types nt on
+	nt.id = n.node_type_id
+left outer join branches b on
+	b.node = n.uid;
 -- Functions
-CREATE
-OR REPLACE FUNCTION upsert_graph(p_input JSONB) RETURNS TABLE (
+create
+or replace
+function upsert_graph(p_input JSONB) 
+returns table (
   graph_id integer,
   created timestamp,
-  graph_name TEXT,
-  node_label TEXT,
+  graph_name text,
+  node_label text,
   node_metadata jsonb,
-  node_type_name TEXT,
-  next_node TEXT,
-  current_node TEXT,
-  conditional TEXT,
+  node_type_name text,
+  next_node text,
+  current_node text,
+  conditional text,
   has_conditional boolean,
-  branch_label TEXT,
+  branch_label text,
   branch_id integer,
   node_type_id integer
-) LANGUAGE plpgsql AS $ $ DECLARE v_name text := p_input ->> 'name';
+) 
+language plpgsql 
+as $$
+declare
+v_name text := p_input ->> 'name';
 
 nodes jsonb := p_input -> 'nodes';
 
@@ -98,114 +129,77 @@ branches jsonb := p_input -> 'branches';
 
 g_id integer;
 
-BEGIN IF v_name IS NULL THEN RAISE EXCEPTION 'Name is required for upsert';
+begin if v_name is null then raise exception 'Name is required for upsert';
+end if;
 
-END IF;
+select
+	g.id
+into
+	g_id
+from
+	graphs g
+where
+	g."name" = v_name;
 
-SELECT
-  g.id INTO g_id
-FROM
-  graphs g
-WHERE
-  g."name" = v_name;
+if g_id is null then
+insert
+	into
+	graphs ("name")
+values
+  (v_name) returning id
+into
+	g_id;
+end if;
 
-IF g_id IS NULL THEN
-INSERT INTO
-  graphs ("name")
-VALUES
-  (v_name) RETURNING id INTO g_id;
+delete
+from
+	nodes n
+where
+	n.graph_id = g_id;
 
-END IF;
-
-DELETE FROM
-  nodes n
-WHERE
-  n.graph_id = g_id;
-
-INSERT INTO
-  nodes (
+insert
+	into
+	nodes (
     "uid",
-    "node_type_id",
-    "graph_id",
-    "label",
-    "metadata"
+	"node_type_id",
+	"graph_id",
+	"label",
+	"metadata"
   )
-SELECT
-  (j ->> 'uid') :: TEXT,
-  (j ->> 'node_type_id') :: integer,
-  g_id,
-  j ->> 'label',
-  j -> 'metadata'
-FROM
-  jsonb_array_elements(nodes) j;
+select
+	(j ->> 'uid') :: text,
+	(j ->> 'node_type_id') :: integer,
+	g_id,
+	j ->> 'label',
+	j -> 'metadata'
+from
+	jsonb_array_elements(nodes) j;
 
-INSERT INTO
-  branches (
+insert
+	into
+	branches (
     "conditional",
-    "label",
-    "graph_id",
-    "node",
-    "next_node"
+	"label",
+	"graph_id",
+	"node",
+	"next_node"
   )
-SELECT
-  b ->> 'conditional',
-  b ->> 'label',
-  g_id,
-  b ->> 'prev',
-  b ->> 'next'
-FROM
-  jsonb_array_elements(branches) b;
-
+select
+	b ->> 'conditional',
+	b ->> 'label',
+	g_id,
+	b ->> 'prev',
+	b ->> 'next'
+from
+	jsonb_array_elements(branches) b;
 -- Return the ID of the new graph
-RETURN query
-SELECT
-  *
-FROM
-  graph_view gv
-WHERE
-  gv.graph_id = g_id;
+return query
+select
+	*
+from
+	graph_view gv
+where
+	gv.graph_id = g_id;
+end;
 
-END;
-
-$ $;
-
-/*
- SELECT * FROM upsert_graph('{
- "name": "Frankie''s Graph",
- "nodes": [
- {
- "uid": "a",
- "name": "Start!!!!!!!!!",
- "node_type_id": 1,
- "metadata": {}
- },
- {
- "uid": "b",
- "name": "Special Print",
- "node_type_id": 3,
- "metadata": {}
- }
- ],
- "branches": [
- { "prev": "a", "next": "b", "conditional": "", "label": "Whatever" }
- ]
- }'::jsonb);
- */
-/*
- INSERT INTO graphs ("name") VALUES ('Frankie''s Graph');
- INSERT INTO node_types (metadata, name) VALUES ('{}'::jsonb, 'InputNode'), ('{}'::jsonb, 'LoggingNode');
- INSERT INTO nodes (node_type_id, graph_id, "label") VALUES (1, 1, 'Input'), (2, 1, 'Output');
- INSERT INTO branches (conditional, "label", node, next_node) VALUES ('', 'Print It', 1, 2);
- 
- INSERT INTO graphs ("name") VALUES ('Sawyer''s Graph');
- INSERT INTO nodes (node_type_id, graph_id, "label") VALUES (1, 2, 'Input'), (2, 2, 'Output');
- INSERT INTO branches (conditional, "label", node, next_node) VALUES ('', 'Sawyer''s Print It', 3, 4);
- 
- SELECT * FROM graph_view WHERE graph_id=2;
- */
-/*
- DROP TABLE graphs CASCADE;
- DROP TABLE node_types CASCADE;
- DROP TABLE nodes CASCADE;
- DROP TABLE branches CASCADE;
- */
+$$;

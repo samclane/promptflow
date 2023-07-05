@@ -41,6 +41,7 @@ class GraphView(BaseModel):
     has_conditional: bool
     branch_label: Optional[str]
     branch_id: Optional[conint(gt=0)]
+    node_type_id: Optional[conint(gt=0)]
 
     @staticmethod
     def hydrate(row: Tuple[Any, ...]) -> "GraphView":
@@ -66,6 +67,7 @@ class GraphView(BaseModel):
             has_conditional=row[9],
             branch_label=row[10],
             branch_id=row[11],
+            node_type_id=row[12],
         )
 
 
@@ -370,6 +372,7 @@ class PostgresInterface(DBInterface):
                 "center_x": 0,
                 "center_y": 0,
                 "id": row.current_node,
+                "node_type_id": row.node_type_id,
             },
         )
 
