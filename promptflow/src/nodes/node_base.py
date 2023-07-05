@@ -159,11 +159,13 @@ class NodeBase(Serializable, ABC):
     def serialize(self) -> dict[str, Any]:
         return {
             "id": self.id,
+            "uid": self.id,
             "label": self.label,
             "center_x": self.center_x,
             "center_y": self.center_y,
             "classname": self.__class__.__name__,
             "node_type_id": self.node_type_id,
+            "metadata": {},
         }
 
     def delete(self):

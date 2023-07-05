@@ -35,8 +35,8 @@ class GraphView(BaseModel):
     node_label: Optional[constr(min_length=1)]
     node_type_metadata: Optional[Dict[str, Any]]
     node_type_name: Optional[constr(min_length=1)]
-    next_node: Optional[conint(gt=0)]
-    current_node: Optional[conint(gt=0)]
+    next_node: Optional[constr(min_length=1)]
+    current_node: Optional[constr(min_length=1)]
     conditional: Optional[str]
     has_conditional: bool
     branch_label: Optional[str]

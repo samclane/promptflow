@@ -42,7 +42,7 @@ class Flowchart:
         self.interface = interface
         self.id = id
         if not self.id:
-            raise Exception("Flowchart id not provided")
+            raise ValueError("Flowchart id not provided")
         self.name = name or "Untitled"
         self.created = created or time.time()
         self.graph = nx.DiGraph()
@@ -55,6 +55,7 @@ class Flowchart:
         self._partial_connector: Optional[PartialConnector] = None
 
         self.is_dirty = False
+        self.is_running = False
 
         # insert into database
         self.save_to_db()
@@ -420,13 +421,3 @@ class Flowchart:
         pos = algorithm(self.graph, scale=self.nodes[0].size_px * 10, **kwargs)
         for node in self.nodes:
             node.move_to(pos[node][0], pos[node][1])
-
-    def delete(self):
-        """
-        Remove the flowchart from the database.
-        """
-        conn = sqlite3.connect("flowcharts.db")
-        c = conn.cursor()
-        c.execute("DELETE FROM graphs WHERE id=?", (self.id,))
-        conn.commit()
-        conn.close()
