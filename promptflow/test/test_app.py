@@ -10,57 +10,61 @@ client = TestClient(app)
 
 
 @pytest.fixture
-def create_test_flowchart():
-    # Create a flowchart using the create endpoint
-    response = client.post(
-        "/flowcharts",
-        json={"flowchart": {"id": "1", "name": "test", "nodes": [], "connectors": []}},
-    )
-    flowchart_id = response.json()["flowchart"]["id"]
-    return flowchart_id
+def create_test_flowchart(request):
+    flowchart_type = request.param
 
+    if flowchart_type == "simple":
+        # Create a simple flowchart
+        response = client.post(
+            "/flowcharts",
+            json={
+                "flowchart": {"id": "1", "name": "test", "nodes": [], "connectors": []}
+            },
+        )
+        flowchart_id = response.json()["flowchart"]["id"]
 
-@pytest.fixture
-def create_advanced_flowchart():
-    # Create a flowchart object first
-    flowchart = {
-        "flowchart": {
-            "id": "1",
-            "name": "test",
-            "created": "2021-01-01T00:00:00.000000",
-            "nodes": [
-                {
-                    "id": "1",
-                    "uid": "1",
-                    "node_type_id": "103",
-                    "label": "Start",
-                    "metadata": {},
-                },
-                {
-                    "id": "2",
-                    "uid": "2",
-                    "node_type_id": "104",
-                    "label": "End",
-                    "metadata": {},
-                },
-            ],
-            "connectors": [
-                {
-                    "id": "1",
-                    "conditional": "True",
-                    "label": "True",
-                    "graph_id": "1",
-                    "node": "1",
-                    "next_node": "2",
-                }
-            ],
+    elif flowchart_type == "advanced":
+        flowchart = {
+            "flowchart": {
+                "id": "1",
+                "name": "test",
+                "created": "2021-01-01T00:00:00.000000",
+                "nodes": [
+                    {
+                        "id": "1",
+                        "uid": "1",
+                        "node_type_id": "103",
+                        "label": "Start",
+                        "classname": "StartNode",
+                        "metadata": {},
+                    },
+                    {
+                        "id": "2",
+                        "uid": "2",
+                        "node_type_id": "104",
+                        "classname": "InitNode",
+                        "label": "End",
+                        "metadata": {},
+                    },
+                ],
+                "connectors": [
+                    {
+                        "id": "1",
+                        "conditional": "True",
+                        "label": "True",
+                        "graph_id": "1",
+                        "node1": "1",
+                        "node2": "2",
+                    }
+                ],
+            }
         }
-    }
-    response = client.post("/flowcharts", json=flowchart)
-    flowchart_id = response.json()["flowchart"]["id"]
+        response = client.post("/flowcharts", json=flowchart)
+        flowchart_id = response.json()["flowchart"]["id"]
     return flowchart_id
 
 
+@pytest.mark.parametrize("create_test_flowchart", ["simple", "advanced"], indirect=True)
 def test_get_flowcharts(create_test_flowchart):
     # Simulate a GET request to the /flowcharts endpoint
     response = client.get("/flowcharts")
@@ -75,6 +79,7 @@ def test_get_flowcharts(create_test_flowchart):
     assert isinstance(response.json(), list)
 
 
+@pytest.mark.parametrize("create_test_flowchart", ["simple", "advanced"], indirect=True)
 def test_get_flowchart_not_found(create_test_flowchart):
     # Simulate a GET request to the /flowcharts/{flowchart_id} endpoint with an invalid ID
     response = client.get("/flowcharts/nonexistent")
@@ -89,30 +94,35 @@ def test_get_flowchart_not_found(create_test_flowchart):
     assert response.json()["message"] == "Flowchart not found"
 
 
+@pytest.mark.parametrize("create_test_flowchart", ["simple", "advanced"], indirect=True)
 def test_run_flowchart(create_test_flowchart):
     response = client.get(f"/flowcharts/{create_test_flowchart}/run")
     assert response.status_code == 200
     assert "started" in response.json()["message"]
 
 
+@pytest.mark.parametrize("create_test_flowchart", ["simple", "advanced"], indirect=True)
 def test_stop_flowchart(create_test_flowchart):
     response = client.get(f"/flowcharts/{create_test_flowchart}/stop")
     assert response.status_code == 200
     assert "Flowchart stopped" in response.json()["message"]
 
 
+@pytest.mark.parametrize("create_test_flowchart", ["simple", "advanced"], indirect=True)
 def test_clear_flowchart(create_test_flowchart):
     response = client.get(f"/flowcharts/{create_test_flowchart}/clear")
     assert response.status_code == 200
     assert "Flowchart cleared" in response.json()["message"]
 
 
+@pytest.mark.parametrize("create_test_flowchart", ["simple", "advanced"], indirect=True)
 def test_cost_flowchart(create_test_flowchart):
     response = client.get(f"/flowcharts/{create_test_flowchart}/cost")
     assert response.status_code == 200
     assert "cost" in response.json()
 
 
+@pytest.mark.parametrize("create_test_flowchart", ["simple", "advanced"], indirect=True)
 def test_save_as(create_test_flowchart):
     response = client.post(f"/flowcharts/{create_test_flowchart}/save_as")
     assert response.status_code in [200, 404]
@@ -130,6 +140,7 @@ def test_get_node_types():
     assert "node_types" in response.json()
 
 
+@pytest.mark.parametrize("create_test_flowchart", ["simple", "advanced"], indirect=True)
 def test_add_node(create_test_flowchart):
     data = {"classname": "InputNode"}
     response = client.post(f"/flowcharts/{create_test_flowchart}/nodes/add", json=data)
@@ -137,6 +148,7 @@ def test_add_node(create_test_flowchart):
     assert "Node added" in response.json()["message"]
 
 
+@pytest.mark.parametrize("create_test_flowchart", ["simple", "advanced"], indirect=True)
 def test_remove_node(create_test_flowchart):
     # First add a node
     node_data = {"classname": "InputNode"}
@@ -153,6 +165,7 @@ def test_remove_node(create_test_flowchart):
     assert "Node removed" in response.json()["message"]
 
 
+@pytest.mark.parametrize("create_test_flowchart", ["simple", "advanced"], indirect=True)
 def test_connect_nodes(create_test_flowchart):
     # Add two nodes first
     node1_data = {"classname": "InputNode"}
@@ -177,6 +190,7 @@ def test_connect_nodes(create_test_flowchart):
     assert "Nodes connected" in response.json()["message"]
 
 
+@pytest.mark.parametrize("create_test_flowchart", ["simple", "advanced"], indirect=True)
 def test_get_node_options(create_test_flowchart):
     # Add a node first
     node_data = {"classname": "InputNode"}
@@ -191,6 +205,7 @@ def test_get_node_options(create_test_flowchart):
     assert "options" in response.json()
 
 
+@pytest.mark.parametrize("create_test_flowchart", ["simple", "advanced"], indirect=True)
 def test_update_node_options(create_test_flowchart):
     options_data = {"label": "Test label"}
     # Add a node first
