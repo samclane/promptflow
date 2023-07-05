@@ -1,4 +1,5 @@
 import json
+from abc import ABC, abstractmethod
 from pydantic import BaseModel, validator, constr, conint
 from datetime import datetime
 from typing import Optional, Dict, Any, List, Tuple
@@ -141,10 +142,119 @@ def row_results_to_class_list(class_name, list_of_rows):
 
 
 def row_results_to_class(class_name, list_of_rows):
+    """
+    Return the first element of a list of class instances.
+    """
     return row_results_to_class_list(class_name, list_of_rows)[0]
 
 
-class PostgresInterface:
+class DBInterface(ABC):
+    """
+    Acts as an db agnostic interface for interacting with a database.
+    """
+
+    def __init__(self, config: DatabaseConfig):
+        """
+        Initialize the PostgresInterface with a given configuration.
+
+        Args:
+            config (DatabaseConfig): The configuration for the database connection.
+        """
+        self.config: DatabaseConfig = config
+
+    @abstractmethod
+    def init_schema(self):
+        """
+        Run the initialize_schema.sql script to create the tables and functions
+        """
+
+    @abstractmethod
+    def build_flowcharts_from_graph_view(
+        self, graph_view: List[GraphView]
+    ) -> List[Flowchart]:
+        """
+        Builds flowcharts from the graph views.
+
+        Args:
+            graph_view (List[GraphView]): List of graph views.
+
+        Returns:
+            List[Flowchart]: List of constructed flowcharts.
+        """
+
+    @abstractmethod
+    def new_flowchart(self) -> Flowchart:
+        """
+        Creates a new flowchart in the database.
+        """
+
+    @abstractmethod
+    def get_node_type_id(self, classname):
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def get_or_create_flowchart(
+        flowcharts: List[Flowchart], row: GraphView
+    ) -> Flowchart:
+        """
+        Get the flowchart with the matching graph_id from the list or create a new one if it doesn't exist.
+
+        Args:
+            flowcharts (List[Flowchart]): List of flowcharts.
+            row (GraphView): The graph view to process.
+
+        Returns:
+            Flowchart: The flowchart that corresponds to the graph_id.
+        """
+
+    @staticmethod
+    @abstractmethod
+    def add_node_to_flowchart(flowchart: Flowchart, row: GraphView) -> NodeBase:
+        """
+        Add a node to the flowchart.
+
+        Args:
+            flowchart (Flowchart): The flowchart to which the node will be added.
+            row (GraphView): The graph view containing node information.
+        """
+
+    @abstractmethod
+    def add_connector_to_flowchart(self, flowchart: Flowchart, row: GraphView):
+        """
+        Add a connection between two nodes to the flowchart.
+
+        Args:
+            flowchart (Flowchart): The flowchart to which the connection will be added.
+            row (GraphView): The graph view containing connection information.
+        """
+
+    @abstractmethod
+    def get_flowchart_by_id(self, id) -> Flowchart:
+        """
+        Gets the flowchart from the database with the given ID.
+
+        Args:
+            id (int): The ID of the flowchart to retrieve.
+
+        Returns:
+            Flowchart: The flowchart with the given ID.
+        """
+
+    @abstractmethod
+    def get_all_flowchart_ids_and_names(self) -> List[GraphNamesAndIds]:
+        """
+        Returns a list of all flowchart IDs and names.
+
+        Args:
+            None
+
+        Returns:
+            List[GraphNamesAndIds]: A list of all flowchart IDs and names.
+        """
+
+
+class PostgresInterface(DBInterface):
     """
     Interface for interacting with a PostgreSQL database.
 
@@ -230,7 +340,7 @@ class PostgresInterface:
         self.conn.commit()
         id = self.cursor.fetchone()[0]
         return Flowchart(id=id, name=name["name"], created=datetime.now())
-    
+
     def get_node_type_id(self, classname):
         self.cursor.execute(
             """
