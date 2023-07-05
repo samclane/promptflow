@@ -12,7 +12,51 @@ client = TestClient(app)
 @pytest.fixture
 def create_test_flowchart():
     # Create a flowchart using the create endpoint
-    response = client.post("/flowcharts/create")
+    response = client.post(
+        "/flowcharts",
+        json={"flowchart": {"id": "1", "name": "test", "nodes": [], "connectors": []}},
+    )
+    flowchart_id = response.json()["flowchart"]["id"]
+    return flowchart_id
+
+
+@pytest.fixture
+def create_advanced_flowchart():
+    # Create a flowchart object first
+    flowchart = {
+        "flowchart": {
+            "id": "1",
+            "name": "test",
+            "created": "2021-01-01T00:00:00.000000",
+            "nodes": [
+                {
+                    "id": "1",
+                    "uid": "1",
+                    "node_type_id": "103",
+                    "label": "Start",
+                    "metadata": {},
+                },
+                {
+                    "id": "2",
+                    "uid": "2",
+                    "node_type_id": "104",
+                    "label": "End",
+                    "metadata": {},
+                },
+            ],
+            "connectors": [
+                {
+                    "id": "1",
+                    "conditional": "True",
+                    "label": "True",
+                    "graph_id": "1",
+                    "node": "1",
+                    "next_node": "2",
+                }
+            ],
+        }
+    }
+    response = client.post("/flowcharts", json=flowchart)
     flowchart_id = response.json()["flowchart"]["id"]
     return flowchart_id
 

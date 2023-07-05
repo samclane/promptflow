@@ -74,9 +74,9 @@ class FlowchartJson(BaseModel):
 
 
 @app.post("/flowcharts")
-def upload_flowchart_json(flowchart_json: FlowchartJson) -> dict:
-    """Upload a flowchart json file."""
-    promptflow.logger.info("Uploading flowchart")
+def upsert_flowchart_json(flowchart_json: FlowchartJson) -> dict:
+    """Upsert a flowchart json file."""
+    promptflow.logger.info("Upserting flowchart")
     try:
         flowchart = Flowchart.deserialize(interface, flowchart_json.flowchart)
     except ValueError:
@@ -94,28 +94,6 @@ def get_flowchart(flowchart_id: str) -> dict:
         interface.conn.rollback()
         return {"message": "Flowchart not found", "error": str(e)}
     return {"flowchart": flowchart.serialize()}
-
-
-@app.post("/flowcharts/create")
-def create_flowchart() -> dict:
-    """Create a new flowchart."""
-    promptflow.logger.info("Creating flowchart")
-    flowchart = interface.new_flowchart()
-    return {"flowchart": flowchart.serialize()}
-
-
-@app.delete("/flowcharts/{flowchart_id}")
-def delete_flowchart(flowchart_id: str) -> dict:
-    """
-    Delete the flowchart with the given id.
-    """
-    promptflow.logger.info("Deleting flowchart")
-    try:
-        flowchart = Flowchart.get_flowchart_by_id(flowchart_id, interface)
-    except ValueError:
-        return {"message": "Flowchart not found"}
-    flowchart.delete()
-    return {"message": "Flowchart deleted", "flowchart": flowchart.serialize()}
 
 
 @app.get("/flowcharts/{flowchart_id}/run")
