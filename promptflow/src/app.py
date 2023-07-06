@@ -72,11 +72,19 @@ class FlowchartJson(BaseModel):
     flowchart: dict
 
 
+def add_node_type_ids(flowchart: dict):
+    """Add node type ids to the flowchart"""
+    for node in flowchart["nodes"]:
+        node["node_type_id"] = interface.get_node_type_id(node["classname"])
+    return flowchart
+
+
 @app.post("/flowcharts")
 def upsert_flowchart_json(flowchart_json: FlowchartJson) -> dict:
     """Upsert a flowchart json file."""
     promptflow.logger.info("Upserting flowchart")
     try:
+        flowchart = add_node_type_ids(flowchart_json.flowchart)
         flowchart = Flowchart.deserialize(interface, flowchart_json.flowchart)
     except ValueError:
         return {"message": "Invalid flowchart json file"}

@@ -30,7 +30,6 @@ def create_test_flowchart(request):
                     {
                         "id": "1",
                         "uid": "1",
-                        "node_type_id": "103",
                         "label": "Start",
                         "classname": "StartNode",
                         "metadata": {},
@@ -38,7 +37,6 @@ def create_test_flowchart(request):
                     {
                         "id": "2",
                         "uid": "2",
-                        "node_type_id": "104",
                         "classname": "InitNode",
                         "label": "End",
                         "metadata": {},
@@ -58,6 +56,8 @@ def create_test_flowchart(request):
         }
         response = client.post("/flowcharts", json=flowchart)
         flowchart_id = response.json()["flowchart"]["id"]
+    else:
+        raise ValueError(f"Invalid flowchart type: {flowchart_type}")
     return flowchart_id
 
 
