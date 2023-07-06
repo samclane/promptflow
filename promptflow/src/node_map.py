@@ -6,6 +6,7 @@ from typing import Dict, Type
 from promptflow.src.nodes.audio_node import ElevenLabsNode, WhispersNode
 from promptflow.src.nodes.date_node import DateNode
 from promptflow.src.nodes.db_node import PGGenerateNode, PGQueryNode, SQLiteQueryNode
+from promptflow.src.nodes.debug_nodes import AssertNode, InterpreterNode, LoggingNode
 from promptflow.src.nodes.dummy_llm_node import DummyNode
 from promptflow.src.nodes.embedding_node import (
     EmbeddingInNode,
@@ -39,7 +40,6 @@ from promptflow.src.nodes.random_number import RandomNode
 from promptflow.src.nodes.server_node import ServerInputNode
 from promptflow.src.nodes.start_node import InitNode, StartNode
 from promptflow.src.nodes.structured_data_node import JsonerizerNode, JsonNode
-from promptflow.src.nodes.debug_nodes import AssertNode, InterpreterNode, LoggingNode
 from promptflow.src.nodes.websearch_node import GoogleSearchNode, SerpApiNode
 
 node_map: Dict[str, Type[NodeBase]] = {
@@ -92,3 +92,29 @@ node_map: Dict[str, Type[NodeBase]] = {
     "JSONImageFile": JSONImageFile,
     "SaveImageNode": SaveImageNode,
 }
+
+if __name__ == "__main__":
+    # populate the database with the node_map
+    from promptflow.src.postgres_interface import DatabaseConfig, PostgresInterface
+
+    interface = PostgresInterface(
+        DatabaseConfig(
+            host="172.18.0.3",
+            database="postgres",
+            user="postgres",
+            password="postgres",
+        )
+    )
+
+    conn = interface.conn
+    cur = interface.cursor
+    for node_name in node_map:
+        cur.execute(
+            """
+            INSERT INTO node_types (name) VALUES (%s) ON CONFLICT DO NOTHING
+            """,
+            (node_name,),
+        )
+    conn.commit()
+
+    conn.close()
