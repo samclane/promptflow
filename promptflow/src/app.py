@@ -13,6 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
+from promptflow.src.celery_app import celery_app
 from promptflow.src.connectors.connector import Connector
 from promptflow.src.flowchart import Flowchart
 from promptflow.src.node_map import node_map
@@ -99,6 +100,30 @@ def run_flowchart_endpoint(flowchart_id: str, background_tasks: BackgroundTasks)
     """Queue the flowchart execution as a background task."""
     task = run_flowchart.apply_async((flowchart_id, interface.config.dict()))
     return {"message": "Flowchart execution started", "task_id": str(task.id)}
+
+
+@app.get("/jobs")
+def get_all_jobs():
+    """Get all running celery jobs by querying the celery backend"""
+    jobs = celery_app.control.inspect()
+    jobs = {
+        "active": jobs.active(),
+        "scheduled": jobs.scheduled(),
+        "reserved": jobs.reserved(),
+    }
+    return {"jobs": jobs}
+
+
+@app.get("/jobs/{job_id}")
+def get_job_by_id(job_id) -> dict:
+    """Get a celery job by id"""
+    jobs = celery_app.control.inspect()
+    for job_type in ["active", "scheduled", "reserved"]:
+        for host, tasks in getattr(jobs, job_type)().items():
+            for job in tasks:
+                if job["request"]["id"] == job_id:
+                    return {"job": job}
+    return {"message": "Job not found"}
 
 
 @app.get("/flowcharts/{flowchart_id}/stop")
