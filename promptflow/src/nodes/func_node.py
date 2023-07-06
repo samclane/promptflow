@@ -29,13 +29,11 @@ class FuncNode(NodeBase, ABC):
     def __init__(
         self,
         flowchart: "Flowchart",
-        center_x: float,
-        center_y: float,
         label: str,
         func: Optional[TextData] = None,
         **kwargs,
     ):
-        super().__init__(flowchart, center_x, center_y, label, **kwargs)
+        super().__init__(flowchart, label, **kwargs)
         if not self.func:
             self.func = TextData("func.py", DEFAULT_FUNC_TEMPLATE, flowchart)
         if isinstance(func, dict):

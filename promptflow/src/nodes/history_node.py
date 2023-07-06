@@ -104,16 +104,12 @@ class WindowedHistoryNode(HistoryWindow):
     def __init__(
         self,
         flowchart: "Flowchart",
-        center_x: float,
-        center_y: float,
         label: str,
         window: int = 100,
         **kwargs,
     ):
         super().__init__(
             flowchart,
-            center_x,
-            center_y,
             label,
             **kwargs,
         )
@@ -150,16 +146,12 @@ class DynamicWindowedHistoryNode(HistoryWindow):
     def __init__(
         self,
         flowchart: "Flowchart",
-        center_x: float,
-        center_y: float,
         label: str,
         target: str = "",
         **kwargs,
     ):
         super().__init__(
             flowchart,
-            center_x,
-            center_y,
             label,
             **kwargs,
         )
