@@ -1,9 +1,10 @@
+import logging
+import traceback
+
 from promptflow.src.celery_app import celery_app
 from promptflow.src.flowchart import Flowchart
 from promptflow.src.postgres_interface import DatabaseConfig, PostgresInterface
 from promptflow.src.state import State
-import logging
-import traceback
 
 
 @celery_app.task(bind=True, name="promptflow.src.app.run_flowchart")

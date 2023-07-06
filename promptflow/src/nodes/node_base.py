@@ -1,18 +1,18 @@
 """
 Base class for all nodes
 """
-from typing import TYPE_CHECKING, Any
-from abc import ABC, abstractmethod
 import logging
+from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING, Any
 from uuid import uuid4
 
-from promptflow.src.state import State
 from promptflow.src.serializable import Serializable
+from promptflow.src.state import State
 from promptflow.src.themes import monokai
 
 if TYPE_CHECKING:
-    from promptflow.src.flowchart import Flowchart
     from promptflow.src.connectors.connector import Connector
+    from promptflow.src.flowchart import Flowchart
 
 
 class NodeBase(Serializable, ABC):
@@ -27,8 +27,6 @@ class NodeBase(Serializable, ABC):
     def __init__(
         self,
         flowchart: "Flowchart",
-        center_x: float,
-        center_y: float,
         label: str,
         **kwargs,
     ):
@@ -43,8 +41,8 @@ class NodeBase(Serializable, ABC):
         self.visited = False  # Add a visited attribute to keep track of visited nodes
 
         # create the label
-        self.center_x = center_x
-        self.center_y = center_y
+        self.center_y = kwargs.get("center_y", 0)
+        self.center_x = kwargs.get("center_x", 0)
 
         self.node_type_id = kwargs.get("node_type_id", None)
         if self.node_type_id is None:

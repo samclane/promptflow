@@ -1,20 +1,19 @@
 """
 Handles image data
 """
-from abc import ABC
 import base64
-from enum import Enum
-from PIL import Image, ImageTk
-import json
 import io
+import json
+from abc import ABC
+from enum import Enum
 from typing import Any
-import torch
-from transformers import AutoProcessor, AutoModelForCausalLM
-
-
-from promptflow.src.nodes.node_base import NodeBase
 
 import openai
+import torch
+from PIL import Image, ImageTk
+from transformers import AutoModelForCausalLM, AutoProcessor
+
+from promptflow.src.nodes.node_base import NodeBase
 
 
 class ImageSize(Enum):

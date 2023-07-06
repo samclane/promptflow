@@ -2,13 +2,13 @@
 This module contains the Connector class, which represents a connection
 between two nodes in the flowchart.
 """
-import math
 import logging
+import math
 from typing import Optional, Tuple
 
+from promptflow.src.nodes.node_base import NodeBase
 from promptflow.src.nodes.start_node import StartNode
 from promptflow.src.serializable import Serializable
-from promptflow.src.nodes.node_base import NodeBase
 from promptflow.src.text_data import TextData
 from promptflow.src.themes import monokai
 
@@ -45,6 +45,8 @@ class Connector(Serializable):
             )
         if isinstance(condition, dict):
             condition = TextData.deserialize(condition, self.flowchart)
+        elif isinstance(condition, str):
+            condition = TextData("Untitled", condition, self.flowchart)
         if condition.text == "":
             condition.text = DEFAULT_COND_TEMPLATE
         self.condition: TextData = condition
@@ -63,9 +65,10 @@ class Connector(Serializable):
     def serialize(self):
         return {
             "id": self.id,
-            "node1": self.node1.id,
-            "node2": self.node2.id,
-            "condition": self.condition.serialize(),
+            "prev": self.node1.id,
+            "next": self.node2.id,
+            "conditional": self.condition.serialize(),
+            "label": self.condition.label,
         }
 
     def delete(self, *args):

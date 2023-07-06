@@ -1,6 +1,7 @@
-from abc import ABC
 import logging
-from typing import Any, Callable, Optional, TYPE_CHECKING
+from abc import ABC
+from typing import TYPE_CHECKING, Any, Callable, Optional
+
 from promptflow.src.db_interface.main import (
     PGInterface,
     PgMLInterface,
@@ -69,8 +70,6 @@ class DBNode(NodeBase, ABC):
     def __init__(
         self,
         flowchart: "Flowchart",
-        center_x: float,
-        center_y: float,
         label: str,
         interface,
         **kwargs,
@@ -82,7 +81,7 @@ class DBNode(NodeBase, ABC):
         self.host = self.interface.host
         self.port = self.interface.port
 
-        super().__init__(flowchart, center_x, center_y, label, **kwargs)
+        super().__init__(flowchart, label, **kwargs)
 
     def run_subclass(self, before_result: Any, state) -> str:
         self.interface.interface.connect()
@@ -117,13 +116,11 @@ class PGMLNode(DBNode):
     def __init__(
         self,
         flowchart: "Flowchart",
-        center_x: float,
-        center_y: float,
         label: str,
         **kwargs,
     ):
         self.interface = DBConnectionSingleton(PgMLInterface)
-        super().__init__(flowchart, center_x, center_y, label, **kwargs)
+        super().__init__(flowchart, label, **kwargs)
         self.model = "gpt2-instruct-dolly"
 
     def get_options(self) -> dict[str, Any]:
@@ -146,12 +143,10 @@ class PGQueryNode(DBNode):
     def __init__(
         self,
         flowchart: "Flowchart",
-        center_x: float,
-        center_y: float,
         label: str,
         **kwargs,
     ):
-        super().__init__(flowchart, center_x, center_y, label, PGInterface, **kwargs)
+        super().__init__(flowchart, label, PGInterface, **kwargs)
 
     def run_subclass(self, before_result: Any, state) -> str:
         super().run_subclass(before_result, state)

@@ -1,11 +1,12 @@
 import json
 from abc import ABC, abstractmethod
-from pydantic import BaseModel, validator, constr, conint
 from datetime import datetime
-from typing import Optional, Dict, Any, List, Tuple
-import psycopg2
-from promptflow.src.connectors.connector import Connector
+from typing import Any, Dict, List, Optional, Tuple
 
+import psycopg2
+from pydantic import BaseModel, conint, constr, validator
+
+from promptflow.src.connectors.connector import Connector
 from promptflow.src.flowchart import Flowchart
 from promptflow.src.node_map import node_map
 from promptflow.src.nodes.node_base import NodeBase

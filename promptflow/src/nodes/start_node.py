@@ -20,18 +20,14 @@ class StartNode(NodeBase):
 
     def __init__(
         self,
-        flowchart: "Flowchart",
-        center_x: float,
-        center_y: float,
-        label: str,
+        *args,
         **kwargs,
     ):
+        super().__init__(*args, **kwargs)
         # make sure there is only one start node
-        for node in flowchart.nodes:
+        for node in self.flowchart.nodes:
             if isinstance(node, StartNode):
                 raise ValueError("Only one start node is allowed")
-
-        super().__init__(flowchart, center_x, center_y, label, **kwargs)
 
     @classmethod
     def deserialize(cls, flowchart: "Flowchart", data: dict):
@@ -50,18 +46,15 @@ class InitNode(NodeBase):
 
     def __init__(
         self,
-        flowchart: "Flowchart",
-        center_x: float,
-        center_y: float,
-        label: str,
+        *args,
         **kwargs,
     ):
+        super().__init__(*args, **kwargs)
         # make sure there is only one init node
-        for node in flowchart.nodes:
+        for node in self.flowchart.nodes:
             if isinstance(node, InitNode):
                 raise ValueError("Only one init node is allowed")
 
-        super().__init__(flowchart, center_x, center_y, label, **kwargs)
         self.run_once = False
 
     def run_subclass(self, before_result: Any, state) -> str | None:

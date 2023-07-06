@@ -1,13 +1,15 @@
 """
 Handles all audio-related nodes
 """
-from abc import ABC
 import os
-from typing import Any, Optional
 import wave
-import openai
+from abc import ABC
+from typing import Any, Optional
+
 import elevenlabs
 import numpy as np
+import openai
+
 from promptflow.src.nodes.node_base import NodeBase
 from promptflow.src.state import State
 from promptflow.src.text_data import TextData

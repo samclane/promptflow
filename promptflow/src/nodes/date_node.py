@@ -3,6 +3,7 @@ Convenience node for injecting date into state
 """
 import datetime
 from typing import TYPE_CHECKING, Any
+
 from promptflow.src.nodes.node_base import NodeBase
 from promptflow.src.themes import monokai
 
@@ -20,15 +21,11 @@ class DateNode(NodeBase):
     def __init__(
         self,
         flowchart: "Flowchart",
-        center_x: float,
-        center_y: float,
         label: str,
         **kwargs,
     ):
         super().__init__(
             flowchart,
-            center_x,
-            center_y,
             label,
             **kwargs,
         )

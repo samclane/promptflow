@@ -2,11 +2,10 @@
 Node to run arbitrary Python code.
 """
 
-from typing import Any, TYPE_CHECKING, Optional
 from abc import ABC
+from typing import TYPE_CHECKING, Any, Optional
 
 from promptflow.src.nodes.node_base import NodeBase
-from promptflow.src.state import State
 from promptflow.src.text_data import TextData
 from promptflow.src.themes import monokai
 
@@ -30,13 +29,11 @@ class FuncNode(NodeBase, ABC):
     def __init__(
         self,
         flowchart: "Flowchart",
-        center_x: float,
-        center_y: float,
         label: str,
         func: Optional[TextData] = None,
         **kwargs,
     ):
-        super().__init__(flowchart, center_x, center_y, label, **kwargs)
+        super().__init__(flowchart, label, **kwargs)
         if not self.func:
             self.func = TextData("func.py", DEFAULT_FUNC_TEMPLATE, flowchart)
         if isinstance(func, dict):

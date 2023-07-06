@@ -1,16 +1,16 @@
+import enum
+import os
 from typing import TYPE_CHECKING, Any
 
-import tiktoken
-import openai
 import anthropic
 import google.generativeai as genai
-import os
-import enum
+import openai
+import tiktoken
 
-from promptflow.src.state import State
-from promptflow.src.utils import retry_with_exponential_backoff
 from promptflow.src.nodes.node_base import NodeBase
+from promptflow.src.state import State
 from promptflow.src.themes import monokai
+from promptflow.src.utils import retry_with_exponential_backoff
 
 if TYPE_CHECKING:
     from promptflow.src.flowchart import Flowchart
@@ -86,8 +86,6 @@ class OpenAINode(NodeBase):
     def __init__(
         self,
         flowchart: "Flowchart",
-        center_x: float,
-        center_y: float,
         label: str,
         **kwargs,
     ):
@@ -99,7 +97,7 @@ class OpenAINode(NodeBase):
         self.presence_penalty = kwargs.get("presence_penalty", 0.0)
         self.frequency_penalty = kwargs.get("frequency_penalty", 0.0)
 
-        super().__init__(flowchart, center_x, center_y, label, **kwargs)
+        super().__init__(flowchart, label, **kwargs)
 
     @retry_with_exponential_backoff
     def _chat_completion(self, prompt: str, state: State) -> str:

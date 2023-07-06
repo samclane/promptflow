@@ -2,14 +2,14 @@
 Nodes for querying the web.
 """
 
-from abc import ABC
 import os
+from abc import ABC
 from typing import Any
 
-from promptflow.src.nodes.node_base import NodeBase
-
-from serpapi import GoogleSearch
 from googlesearch import search
+from serpapi import GoogleSearch
+
+from promptflow.src.nodes.node_base import NodeBase
 
 
 class WebSearchNode(NodeBase, ABC):

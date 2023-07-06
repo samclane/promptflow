@@ -2,10 +2,10 @@
 Handles long term memory storage and retrieval.
 """
 
-from abc import ABC
 import os
-from uuid import uuid4
+from abc import ABC
 from typing import Any, Optional
+from uuid import uuid4
 
 import pinecone
 from InstructorEmbedding import INSTRUCTOR

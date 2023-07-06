@@ -2,24 +2,27 @@
 This module contains the Flowchart class, which manages the nodes and connectors of a flowchart.
 """
 from __future__ import annotations
+
 import json
 import logging
 import threading
 import time
 from queue import Queue
-from typing import Any, Callable, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Optional
+
 import networkx as nx
+
+from promptflow.src.connectors.connector import Connector
+from promptflow.src.connectors.partial_connector import PartialConnector
 from promptflow.src.node_map import node_map
 from promptflow.src.nodes.node_base import NodeBase
 from promptflow.src.nodes.start_node import InitNode, StartNode
-from promptflow.src.connectors.connector import Connector
-from promptflow.src.connectors.partial_connector import PartialConnector
 
 if TYPE_CHECKING:
     from promptflow.src.postgres_interface import DBInterface
+
 from promptflow.src.state import State
 from promptflow.src.text_data import TextData
-from pydantic import BaseModel
 
 
 class Flowchart:
@@ -85,10 +88,10 @@ class Flowchart:
             x_offset = pan[0]
             y_offset = pan[1]
             flowchart.add_node(node, (x_offset, y_offset))
-        for connector_data in data["connectors"]:
+        for connector_data in data["branches"]:
             node1 = flowchart.find_node(connector_data["node1"])
             node2 = flowchart.find_node(connector_data["node2"])
-            connector = Connector(node1, node2, connector_data.get("condition", ""))
+            connector = Connector(node1, node2, connector_data.get("conditional", ""))
             flowchart.add_connector(connector)
         flowchart.is_dirty = False
         flowchart.save_to_db()
@@ -286,9 +289,9 @@ class Flowchart:
         data["nodes"] = []
         for node in self.nodes:
             data["nodes"].append(node.serialize())
-        data["connectors"] = []
+        data["branches"] = []
         for connector in self.connectors:
-            data["connectors"].append(connector.serialize())
+            data["branches"].append(connector.serialize())
         return data
 
     def save_to_db(self) -> None:

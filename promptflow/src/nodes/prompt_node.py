@@ -22,16 +22,12 @@ class PromptNode(NodeBase):
     def __init__(
         self,
         flowchart: "Flowchart",
-        center_x: float,
-        center_y: float,
         label: str,
         prompt: Optional[TextData | dict] = None,
         **kwargs,
     ):
         super().__init__(
             flowchart,
-            center_x,
-            center_y,
             label,
             **kwargs,
         )

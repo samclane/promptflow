@@ -5,24 +5,23 @@ flowcharts.
 """
 import json
 import logging
-from fastapi import FastAPI, HTTPException, Response, File, UploadFile, BackgroundTasks
-from fastapi.responses import JSONResponse
-from fastapi.middleware.cors import CORSMiddleware
 import os
 import zipfile
+
+from fastapi import BackgroundTasks, FastAPI, File, HTTPException, Response, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel
+
+from promptflow.src.celery_app import celery_app
+from promptflow.src.connectors.connector import Connector
 from promptflow.src.flowchart import Flowchart
+from promptflow.src.node_map import node_map
 from promptflow.src.nodes.embedding_node import EmbeddingsIngestNode
 from promptflow.src.nodes.node_base import NodeBase
-from promptflow.src.node_map import node_map
 from promptflow.src.postgres_interface import DatabaseConfig, PostgresInterface
-
-from promptflow.src.state import State
-from promptflow.src.connectors.connector import Connector
-from promptflow.src.connectors.partial_connector import PartialConnector
 from promptflow.src.state import State
 from promptflow.src.tasks import run_flowchart
-from promptflow.src.text_data import TextData
-from pydantic import BaseModel
 
 
 class PromptFlowApp:
@@ -73,11 +72,19 @@ class FlowchartJson(BaseModel):
     flowchart: dict
 
 
+def add_node_type_ids(flowchart: dict):
+    """Add node type ids to the flowchart"""
+    for node in flowchart["nodes"]:
+        node["node_type_id"] = interface.get_node_type_id(node["classname"])
+    return flowchart
+
+
 @app.post("/flowcharts")
-def upload_flowchart_json(flowchart_json: FlowchartJson) -> dict:
-    """Upload a flowchart json file."""
-    promptflow.logger.info("Uploading flowchart")
+def upsert_flowchart_json(flowchart_json: FlowchartJson) -> dict:
+    """Upsert a flowchart json file."""
+    promptflow.logger.info("Upserting flowchart")
     try:
+        flowchart = add_node_type_ids(flowchart_json.flowchart)
         flowchart = Flowchart.deserialize(interface, flowchart_json.flowchart)
     except ValueError:
         return {"message": "Invalid flowchart json file"}
@@ -96,33 +103,36 @@ def get_flowchart(flowchart_id: str) -> dict:
     return {"flowchart": flowchart.serialize()}
 
 
-@app.post("/flowcharts/create")
-def create_flowchart() -> dict:
-    """Create a new flowchart."""
-    promptflow.logger.info("Creating flowchart")
-    flowchart = interface.new_flowchart()
-    return {"flowchart": flowchart.serialize()}
-
-
-@app.delete("/flowcharts/{flowchart_id}")
-def delete_flowchart(flowchart_id: str) -> dict:
-    """
-    Delete the flowchart with the given id.
-    """
-    promptflow.logger.info("Deleting flowchart")
-    try:
-        flowchart = Flowchart.get_flowchart_by_id(flowchart_id, interface)
-    except ValueError:
-        return {"message": "Flowchart not found"}
-    flowchart.delete()
-    return {"message": "Flowchart deleted", "flowchart": flowchart.serialize()}
-
-
 @app.get("/flowcharts/{flowchart_id}/run")
 def run_flowchart_endpoint(flowchart_id: str, background_tasks: BackgroundTasks):
     """Queue the flowchart execution as a background task."""
     task = run_flowchart.apply_async((flowchart_id, interface.config.dict()))
     return {"message": "Flowchart execution started", "task_id": str(task.id)}
+
+
+@app.get("/jobs")
+def get_all_jobs():
+    """Get all running celery jobs by querying the celery backend"""
+    jobs = celery_app.control.inspect()
+    jobs = {
+        "active": jobs.active(),
+        "scheduled": jobs.scheduled(),
+        "reserved": jobs.reserved(),
+    }
+    return {"jobs": jobs}
+
+
+@app.get("/jobs/{job_id}")
+def get_job_by_id(job_id) -> dict:
+    """Get a celery job by id"""
+    jobs = celery_app.control.inspect()
+    for job_type in ["active", "scheduled", "reserved"]:
+        job_dict = getattr(jobs, job_type)()
+        for host, tasks in job_dict.items() if job_dict else {}:
+            for job in tasks:
+                if job["request"]["id"] == job_id:
+                    return {"job": job}
+    return {"message": "Job not found"}
 
 
 @app.get("/flowcharts/{flowchart_id}/stop")
@@ -219,14 +229,14 @@ class NodeType(BaseModel):
     classname: str
 
 
-@app.post("/flowcharts/{flowchart_id}/nodes/add")
+@app.post("/flowcharts/{flowchart_id}/nodes")
 def add_node(flowchart_id: str, nodetype: NodeType) -> dict:
     node_cls = node_map.get(nodetype.classname)
     if not node_cls:
         return {"message": "Node not added: invalid classname"}
     flowchart = Flowchart.get_flowchart_by_id(flowchart_id, interface)
     node_type_id = interface.get_node_type_id(nodetype.classname)
-    node = node_cls(flowchart, 0, 0, nodetype.classname, node_type_id=node_type_id)
+    node = node_cls(flowchart, nodetype.classname, node_type_id=node_type_id)
     if node:
         flowchart.add_node(node)
         return {"message": "Node added", "node": node.serialize()}
@@ -234,7 +244,7 @@ def add_node(flowchart_id: str, nodetype: NodeType) -> dict:
         return {"message": "Node not added: invalid classname"}
 
 
-@app.post("/flowcharts/{flowchart_id}/nodes/{node_id}/remove")
+@app.delete("/flowcharts/{flowchart_id}/nodes/{node_id}")
 def remove_node(node_id: str, flowchart_id: str) -> dict:
     flowchart = Flowchart.get_flowchart_by_id(flowchart_id, interface)
     node = flowchart.find_node(node_id)

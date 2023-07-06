@@ -1,14 +1,14 @@
 """
 Interact with word embeddings
 """
-import logging
 import csv
+import logging
 import os
+import time
 from abc import ABC
 from typing import TYPE_CHECKING, Any, List, Optional
-import time
-import hnswlib
 
+import hnswlib
 import numpy as np
 from InstructorEmbedding import INSTRUCTOR
 
@@ -55,15 +55,11 @@ class EmbeddingNode(NodeBase, ABC):
     def __init__(
         self,
         flowchart: "Flowchart",
-        center_x: float,
-        center_y: float,
         label: str,
         **kwargs,
     ):
         super().__init__(
             flowchart,
-            center_x,
-            center_y,
             label,
             **kwargs,
         )
@@ -134,15 +130,11 @@ class EmbeddingQueryNode(EmbeddingNode):
     def __init__(
         self,
         flowchart: "Flowchart",
-        center_x: float,
-        center_y: float,
         label: str,
         **kwargs,
     ):
         super().__init__(
             flowchart,
-            center_x,
-            center_y,
             label,
             **kwargs,
         )
@@ -206,15 +198,11 @@ class EmbeddingsIngestNode(EmbeddingNode):
     def __init__(
         self,
         flowchart: "Flowchart",
-        center_x: float,
-        center_y: float,
         label: str,
         **kwargs,
     ):
         super().__init__(
             flowchart,
-            center_x,
-            center_y,
             label,
             **kwargs,
         )
