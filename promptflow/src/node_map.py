@@ -39,7 +39,7 @@ from promptflow.src.nodes.random_number import RandomNode
 from promptflow.src.nodes.server_node import ServerInputNode
 from promptflow.src.nodes.start_node import InitNode, StartNode
 from promptflow.src.nodes.structured_data_node import JsonerizerNode, JsonNode
-from promptflow.src.nodes.test_nodes import AssertNode, InterpreterNode, LoggingNode
+from promptflow.src.nodes.debug_nodes import AssertNode, InterpreterNode, LoggingNode
 from promptflow.src.nodes.websearch_node import GoogleSearchNode, SerpApiNode
 
 node_map: Dict[str, Type[NodeBase]] = {
