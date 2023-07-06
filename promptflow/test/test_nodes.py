@@ -20,7 +20,7 @@ def node(request):
 def create_test_flowchart():
     response = client.post(
         "/flowcharts",
-        json={"flowchart": {"id": "1", "name": "test", "nodes": [], "connectors": []}},
+        json={"flowchart": {"id": "1", "name": "test", "nodes": [], "branches": []}},
     )
     flowchart_id = response.json()["flowchart"]["id"]
     return flowchart_id

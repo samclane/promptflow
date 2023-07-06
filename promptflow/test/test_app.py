@@ -15,7 +15,7 @@ def create_test_flowchart(request):
         response = client.post(
             "/flowcharts",
             json={
-                "flowchart": {"id": "1", "name": "test", "nodes": [], "connectors": []}
+                "flowchart": {"id": "1", "name": "test", "nodes": [], "branches": []}
             },
         )
         flowchart_id = response.json()["flowchart"]["id"]
@@ -44,7 +44,7 @@ def create_test_flowchart(request):
                         "metadata": {},
                     },
                 ],
-                "connectors": [
+                "branches": [
                     {
                         "id": "1",
                         "conditional": "True",
@@ -254,10 +254,12 @@ def test_get_job_by_id():
 
     # Pick a job_id if there is any active job
     job_id = None
-    for host, tasks in all_jobs["jobs"]["active"].items():
-        if tasks:
-            job_id = tasks[0]["request"]["id"]
-            break
+    job_dict = all_jobs["jobs"]["active"]
+    if job_dict:
+        for host, tasks in job_dict.items():
+            if tasks:
+                job_id = tasks[0]["request"]["id"]
+                break
 
     if job_id:
         # Simulate a GET request to the /jobs/{job_id} endpoint

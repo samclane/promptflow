@@ -119,7 +119,8 @@ def get_job_by_id(job_id) -> dict:
     """Get a celery job by id"""
     jobs = celery_app.control.inspect()
     for job_type in ["active", "scheduled", "reserved"]:
-        for host, tasks in getattr(jobs, job_type)().items():
+        job_dict = getattr(jobs, job_type)()
+        for host, tasks in job_dict.items() if job_dict else {}:
             for job in tasks:
                 if job["request"]["id"] == job_id:
                     return {"job": job}

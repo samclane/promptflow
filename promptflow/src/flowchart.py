@@ -88,10 +88,10 @@ class Flowchart:
             x_offset = pan[0]
             y_offset = pan[1]
             flowchart.add_node(node, (x_offset, y_offset))
-        for connector_data in data["connectors"]:
+        for connector_data in data["branches"]:
             node1 = flowchart.find_node(connector_data["node1"])
             node2 = flowchart.find_node(connector_data["node2"])
-            connector = Connector(node1, node2, connector_data.get("condition", ""))
+            connector = Connector(node1, node2, connector_data.get("conditional", ""))
             flowchart.add_connector(connector)
         flowchart.is_dirty = False
         flowchart.save_to_db()
@@ -289,9 +289,9 @@ class Flowchart:
         data["nodes"] = []
         for node in self.nodes:
             data["nodes"].append(node.serialize())
-        data["connectors"] = []
+        data["branches"] = []
         for connector in self.connectors:
-            data["connectors"].append(connector.serialize())
+            data["branches"].append(connector.serialize())
         return data
 
     def save_to_db(self) -> None:
