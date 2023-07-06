@@ -12,13 +12,9 @@ def create_test_flowchart(request):
 
     if flowchart_type == "simple":
         # Create a simple flowchart
-        response = client.post(
-            "/flowcharts",
-            json={
+        flowchart = {
                 "flowchart": {"id": "1", "name": "test", "nodes": [], "branches": []}
-            },
-        )
-        flowchart_id = response.json()["flowchart"]["id"]
+        }
 
     elif flowchart_type == "advanced":
         flowchart = {
@@ -45,7 +41,7 @@ def create_test_flowchart(request):
                 "branches": [
                     {
                         "id": "1",
-                        "conditional": "True",
+                        "conditional": "",
                         "label": "True",
                         "graph_id": "1",
                         "node1": "1",
@@ -54,10 +50,11 @@ def create_test_flowchart(request):
                 ],
             }
         }
-        response = client.post("/flowcharts", json=flowchart)
-        flowchart_id = response.json()["flowchart"]["id"]
+
     else:
         raise ValueError(f"Invalid flowchart type: {flowchart_type}")
+    response = client.post("/flowcharts", json=flowchart)
+    flowchart_id = response.json()["flowchart"]["id"]
     return flowchart_id
 
 
