@@ -80,6 +80,21 @@ def test_get_flowcharts(create_test_flowchart):
 
 
 @pytest.mark.parametrize("create_test_flowchart", ["simple", "advanced"], indirect=True)
+def test_get_flowchart_by_id(create_test_flowchart):
+    # Simulate a GET request to the /flowcharts/{flowchart_id} endpoint
+    response = client.get(f"/flowcharts/{create_test_flowchart}")
+
+    # Ensure the response is in JSON format
+    assert response.headers["Content-Type"] == "application/json"
+
+    # Ensure the response has a 200 OK status code
+    assert response.status_code == 200
+
+    # Ensure the response JSON contains the flowchart ID
+    assert str(response.json()["flowchart"]["id"]) == create_test_flowchart
+
+
+@pytest.mark.parametrize("create_test_flowchart", ["simple", "advanced"], indirect=True)
 def test_get_flowchart_not_found(create_test_flowchart):
     # Simulate a GET request to the /flowcharts/{flowchart_id} endpoint with an invalid ID
     response = client.get("/flowcharts/nonexistent")
