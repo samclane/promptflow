@@ -197,7 +197,7 @@ class NodeType(BaseModel):
     classname: str
 
 
-@app.post("/flowcharts/{flowchart_id}/nodes/add")
+@app.post("/flowcharts/{flowchart_id}/nodes")
 def add_node(flowchart_id: str, nodetype: NodeType) -> dict:
     node_cls = node_map.get(nodetype.classname)
     if not node_cls:
@@ -212,7 +212,7 @@ def add_node(flowchart_id: str, nodetype: NodeType) -> dict:
         return {"message": "Node not added: invalid classname"}
 
 
-@app.post("/flowcharts/{flowchart_id}/nodes/{node_id}/remove")
+@app.delete("/flowcharts/{flowchart_id}/nodes/{node_id}")
 def remove_node(node_id: str, flowchart_id: str) -> dict:
     flowchart = Flowchart.get_flowchart_by_id(flowchart_id, interface)
     node = flowchart.find_node(node_id)

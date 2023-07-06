@@ -143,7 +143,7 @@ def test_get_node_types():
 @pytest.mark.parametrize("create_test_flowchart", ["simple", "advanced"], indirect=True)
 def test_add_node(create_test_flowchart):
     data = {"classname": "InputNode"}
-    response = client.post(f"/flowcharts/{create_test_flowchart}/nodes/add", json=data)
+    response = client.post(f"/flowcharts/{create_test_flowchart}/nodes", json=data)
     assert response.status_code == 200
     assert "Node added" in response.json()["message"]
 
@@ -153,14 +153,12 @@ def test_remove_node(create_test_flowchart):
     # First add a node
     node_data = {"classname": "InputNode"}
     add_node_response = client.post(
-        f"/flowcharts/{create_test_flowchart}/nodes/add", json=node_data
+        f"/flowcharts/{create_test_flowchart}/nodes", json=node_data
     )
     node_id = add_node_response.json()["node"]["id"]
 
     # Remove the node
-    response = client.post(
-        f"/flowcharts/{create_test_flowchart}/nodes/{node_id}/remove"
-    )
+    response = client.delete(f"/flowcharts/{create_test_flowchart}/nodes/{node_id}")
     assert response.status_code == 200
     assert "Node removed" in response.json()["message"]
 
@@ -170,13 +168,13 @@ def test_connect_nodes(create_test_flowchart):
     # Add two nodes first
     node1_data = {"classname": "InputNode"}
     add_node1_response = client.post(
-        f"/flowcharts/{create_test_flowchart}/nodes/add", json=node1_data
+        f"/flowcharts/{create_test_flowchart}/nodes", json=node1_data
     )
     node1_id = add_node1_response.json()["node"]["id"]
 
     node2_data = {"classname": "InputNode"}
     add_node2_response = client.post(
-        f"/flowcharts/{create_test_flowchart}/nodes/add", json=node2_data
+        f"/flowcharts/{create_test_flowchart}/nodes", json=node2_data
     )
     node2_id = add_node2_response.json()["node"]["id"]
 
@@ -195,7 +193,7 @@ def test_get_node_options(create_test_flowchart):
     # Add a node first
     node_data = {"classname": "InputNode"}
     add_node_response = client.post(
-        f"/flowcharts/{create_test_flowchart}/nodes/add", json=node_data
+        f"/flowcharts/{create_test_flowchart}/nodes", json=node_data
     )
     node_id = add_node_response.json()["node"]["id"]
     response = client.get(
@@ -211,7 +209,7 @@ def test_update_node_options(create_test_flowchart):
     # Add a node first
     node_data = {"classname": "InputNode"}
     add_node_response = client.post(
-        f"/flowcharts/{create_test_flowchart}/nodes/add", json=node_data
+        f"/flowcharts/{create_test_flowchart}/nodes", json=node_data
     )
     node_id = add_node_response.json()["node"]["id"]
     response = client.post(
