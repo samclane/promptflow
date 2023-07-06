@@ -1,8 +1,5 @@
-import json
-from fastapi.testclient import TestClient
 import pytest
-import shutil
-import os
+from fastapi.testclient import TestClient
 
 from promptflow.src.app import app
 

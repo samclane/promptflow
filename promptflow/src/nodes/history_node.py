@@ -2,8 +2,9 @@
 Manages writing history to state
 """
 from abc import ABC
-import tiktoken
 from typing import TYPE_CHECKING, Any, Optional
+
+import tiktoken
 
 from promptflow.src.nodes.node_base import NodeBase
 from promptflow.src.state import State

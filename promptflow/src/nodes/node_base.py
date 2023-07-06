@@ -1,18 +1,18 @@
 """
 Base class for all nodes
 """
-from typing import TYPE_CHECKING, Any
-from abc import ABC, abstractmethod
 import logging
+from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING, Any
 from uuid import uuid4
 
-from promptflow.src.state import State
 from promptflow.src.serializable import Serializable
+from promptflow.src.state import State
 from promptflow.src.themes import monokai
 
 if TYPE_CHECKING:
-    from promptflow.src.flowchart import Flowchart
     from promptflow.src.connectors.connector import Connector
+    from promptflow.src.flowchart import Flowchart
 
 
 class NodeBase(Serializable, ABC):

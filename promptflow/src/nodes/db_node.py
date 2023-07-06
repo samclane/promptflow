@@ -1,6 +1,7 @@
-from abc import ABC
 import logging
-from typing import Any, Callable, Optional, TYPE_CHECKING
+from abc import ABC
+from typing import TYPE_CHECKING, Any, Callable, Optional
+
 from promptflow.src.db_interface.main import (
     PGInterface,
     PgMLInterface,

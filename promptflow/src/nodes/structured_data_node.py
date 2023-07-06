@@ -1,9 +1,9 @@
 """
 Nodes for handling structured data.
 """
-from abc import ABC, abstractmethod
 import ast
 import json
+from abc import ABC, abstractmethod
 from typing import Any
 
 import jsonschema

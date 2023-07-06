@@ -5,24 +5,22 @@ flowcharts.
 """
 import json
 import logging
-from fastapi import FastAPI, HTTPException, Response, File, UploadFile, BackgroundTasks
-from fastapi.responses import JSONResponse
-from fastapi.middleware.cors import CORSMiddleware
 import os
 import zipfile
+
+from fastapi import BackgroundTasks, FastAPI, File, HTTPException, Response, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel
+
+from promptflow.src.connectors.connector import Connector
 from promptflow.src.flowchart import Flowchart
+from promptflow.src.node_map import node_map
 from promptflow.src.nodes.embedding_node import EmbeddingsIngestNode
 from promptflow.src.nodes.node_base import NodeBase
-from promptflow.src.node_map import node_map
 from promptflow.src.postgres_interface import DatabaseConfig, PostgresInterface
-
-from promptflow.src.state import State
-from promptflow.src.connectors.connector import Connector
-from promptflow.src.connectors.partial_connector import PartialConnector
 from promptflow.src.state import State
 from promptflow.src.tasks import run_flowchart
-from promptflow.src.text_data import TextData
-from pydantic import BaseModel
 
 
 class PromptFlowApp:

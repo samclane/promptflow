@@ -2,8 +2,8 @@
 import logging
 from typing import TYPE_CHECKING, Optional
 
-from promptflow.src.nodes.node_base import NodeBase
 from promptflow.src.connectors.connector import Connector
+from promptflow.src.nodes.node_base import NodeBase
 
 if TYPE_CHECKING:
     from promptflow.src.flowchart import Flowchart

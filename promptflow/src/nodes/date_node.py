@@ -3,6 +3,7 @@ Convenience node for injecting date into state
 """
 import datetime
 from typing import TYPE_CHECKING, Any
+
 from promptflow.src.nodes.node_base import NodeBase
 from promptflow.src.themes import monokai
 

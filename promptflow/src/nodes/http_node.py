@@ -1,11 +1,12 @@
 """
 Interface for http requests
 """
+import json
 from enum import Enum
 from typing import Any, Callable
-import json
-import requests
+
 import bs4
+import requests
 
 from promptflow.src.nodes.node_base import NodeBase
 from promptflow.src.state import State

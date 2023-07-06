@@ -2,24 +2,27 @@
 This module contains the Flowchart class, which manages the nodes and connectors of a flowchart.
 """
 from __future__ import annotations
+
 import json
 import logging
 import threading
 import time
 from queue import Queue
-from typing import Any, Callable, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Optional
+
 import networkx as nx
+
+from promptflow.src.connectors.connector import Connector
+from promptflow.src.connectors.partial_connector import PartialConnector
 from promptflow.src.node_map import node_map
 from promptflow.src.nodes.node_base import NodeBase
 from promptflow.src.nodes.start_node import InitNode, StartNode
-from promptflow.src.connectors.connector import Connector
-from promptflow.src.connectors.partial_connector import PartialConnector
 
 if TYPE_CHECKING:
     from promptflow.src.postgres_interface import DBInterface
+
 from promptflow.src.state import State
 from promptflow.src.text_data import TextData
-from pydantic import BaseModel
 
 
 class Flowchart:

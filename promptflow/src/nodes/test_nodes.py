@@ -2,7 +2,7 @@
 Nodes for performing tests on the model.
 """
 import code
-from typing import TYPE_CHECKING, Optional, Any
+from typing import TYPE_CHECKING, Any, Optional
 
 from promptflow.src.nodes.node_base import NodeBase
 from promptflow.src.text_data import TextData

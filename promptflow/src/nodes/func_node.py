@@ -2,11 +2,10 @@
 Node to run arbitrary Python code.
 """
 
-from typing import Any, TYPE_CHECKING, Optional
 from abc import ABC
+from typing import TYPE_CHECKING, Any, Optional
 
 from promptflow.src.nodes.node_base import NodeBase
-from promptflow.src.state import State
 from promptflow.src.text_data import TextData
 from promptflow.src.themes import monokai
 

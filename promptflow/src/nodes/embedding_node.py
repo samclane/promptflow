@@ -1,14 +1,14 @@
 """
 Interact with word embeddings
 """
-import logging
 import csv
+import logging
 import os
+import time
 from abc import ABC
 from typing import TYPE_CHECKING, Any, List, Optional
-import time
-import hnswlib
 
+import hnswlib
 import numpy as np
 from InstructorEmbedding import INSTRUCTOR
 
