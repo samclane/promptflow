@@ -227,13 +227,20 @@ def test_update_node_options(create_test_flowchart):
     assert "options updated" in response.json()["message"]
 
 
-def test_get_all_jobs():
-    pass  # TODO
+def test_get_jobs():
+    # call the /jobs endpoint
+    response = client.get("/jobs")
+    assert response.status_code == 200
+    assert len(response.json()) > 0
 
 
 def test_get_job_by_id():
-    pass  # TODO
+    # call the /jobs/{id} endpoint
+    response = client.get("/jobs/1")
+    assert response.status_code == 200
 
 
 def test_get_job_not_found():
-    pass  # TODO
+    # call the /jobs/{id} endpoint
+    response = client.get("/jobs/999")
+    assert response.status_code == 404

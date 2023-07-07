@@ -121,7 +121,10 @@ def get_all_jobs():
 @app.get("/jobs/{job_id}")
 def get_job_by_id(job_id) -> dict:
     """Get a specific job by id"""
-    return interface.get_job_view(job_id).dict()
+    try:
+        return interface.get_job_view(job_id).dict()
+    except ValueError:
+        raise HTTPException(status_code=404, detail="Job not found")
 
 
 @app.get("/flowcharts/{flowchart_id}/stop")
