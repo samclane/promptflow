@@ -545,11 +545,6 @@ class PostgresInterface(DBInterface):
         self.conn.commit()
 
     def create_job_log(self, job_id: int, data: dict):
-        # self.cursor.callproc(
-        #     "create_job_log",
-        #     [json.dumps({"jobId": job_id, "data": json.dumps(data)}),],
-        # )
-        # self.conn.commit()
         self.cursor.execute(
             "CALL create_job_log(%s)", (json.dumps({"jobId": job_id, "data": data}),)
         )
