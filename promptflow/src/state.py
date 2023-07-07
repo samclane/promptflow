@@ -59,8 +59,9 @@ class State(Serializable):
         return cls(**data)
 
     def serialize(self) -> dict[str, Any]:
+        str_snapshot = {k: str(v) for k, v in self.snapshot.items()}
         return {
-            "snapshot": self.snapshot,
+            "snapshot": str_snapshot,
             "history": self.history,
             "result": self.result,
             "data": self.data,

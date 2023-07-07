@@ -518,21 +518,28 @@ class PostgresInterface(DBInterface):
         )
         self.conn.commit()
 
-    def create_job(self, job: dict):
+    def create_job(self, job: dict) -> int:
         self.cursor.callproc(
             "create_job",
             [
                 json.dumps(job),
             ],
         )
+        job_data = self.cursor.fetchone()
+        job_id = job_data[0]
         self.conn.commit()
+        return job_id
 
     def update_job_status(self, job_id: int, status: str):
         self.cursor.callproc(
             "update_job_status",
             [
-                job_id,
-                status,
+                json.dumps(
+                    {
+                        "jobId": job_id,
+                        "status": status,
+                    }
+                )
             ],
         )
         self.conn.commit()
