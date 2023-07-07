@@ -38,7 +38,7 @@ CREATE OR REPLACE VIEW jobs_view AS
     jm.metadata
 FROM
   jobs j
-  LEFT JOIN job_metadata jm ON jm.job_id=j.id
+  LEFT JOIN job_metadata jm ON jm.job_id = j.id
   JOIN LATERAL (
     SELECT
       js.job_id,
@@ -48,12 +48,14 @@ FROM
       job_status js
     JOIN job_statuses jss ON
       jss.id = js.status_id
+    WHERE 
+      j.id = js.job_id
     ORDER BY
-      created DESC
+      js.created DESC
     LIMIT 1
       ) AS js ON
-    TRUE
-  WHERE j.id = js.job_id;
+    TRUE;
+
 
 CREATE OR REPLACE FUNCTION update_job_status (inp jsonb) RETURNS TABLE (id integer, status TEXT, created timestamp, updated timestamp, metadata jsonb)
 LANGUAGE plpgsql 
