@@ -545,19 +545,28 @@ class PostgresInterface(DBInterface):
         self.conn.commit()
 
     def create_job_log(self, job_id: int, data: dict):
-        self.cursor.callproc(
-            "create_job_log",
-            [
-                job_id,
-                json.dumps(data),
-            ],
+        # self.cursor.callproc(
+        #     "create_job_log",
+        #     [json.dumps({"jobId": job_id, "data": json.dumps(data)}),],
+        # )
+        # self.conn.commit()
+        self.cursor.execute(
+            "CALL create_job_log(%s)", (json.dumps({"jobId": job_id, "data": data}),)
         )
-        self.conn.commit()
+
+    def get_all_jobs(self) -> List[JobView]:
+        self.cursor.execute(
+            """
+            SELECT * FROM jobs_view
+            """,
+        )
+        rows = self.cursor.fetchall()
+        return list(map(lambda x: JobView.hydrate(x), rows))
 
     def get_job_view(self, job_id: int) -> JobView:
         self.cursor.execute(
             """
-            SELECT * FROM job_view where id=%s
+            SELECT * FROM jobs_view where id=%s
             """,
             [job_id],
         )

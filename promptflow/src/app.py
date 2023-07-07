@@ -115,13 +115,13 @@ def get_all_jobs():
     """
     Get all running jobs
     """
-    raise NotImplementedError()
+    return interface.get_all_jobs()
 
 
 @app.get("/jobs/{job_id}")
 def get_job_by_id(job_id) -> dict:
-    """Get a specfic job by id"""
-    raise NotImplementedError()
+    """Get a specific job by id"""
+    return interface.get_job_view(job_id).dict()
 
 
 @app.get("/flowcharts/{flowchart_id}/stop")

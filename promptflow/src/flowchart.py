@@ -8,7 +8,7 @@ import logging
 import threading
 import time
 from queue import Queue
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any, Callable, Optional
 
 import networkx as nx
 
@@ -189,6 +189,7 @@ class Flowchart:
         self,
         state: Optional[State],
         queue: Optional[Queue[NodeBase]] = None,
+        logging_function: Callable[[str], None] = lambda x: None,
     ) -> Optional[State]:
         """
         Given a state, run the flowchart and update the state
@@ -222,6 +223,7 @@ class Flowchart:
                     pass
                 thread.join()
                 output = state.result
+                logging_function(f"Node {cur_node.label} output: {str(output)}")
             except Exception as node_err:
                 self.logger.error(
                     f"Error running node {cur_node.label}: {node_err}", exc_info=True

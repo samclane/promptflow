@@ -11,6 +11,17 @@ from promptflow.src.postgres_interface import (
 from promptflow.src.state import State
 
 
+def log_result_generator(interface: DBInterface, job_id: int):
+    """
+    Callback function to log the result of a flowchart run
+    """
+
+    def wrapper(s: str):
+        interface.create_job_log(job_id, {"message": s})
+
+    return wrapper
+
+
 @celery_app.task(bind=True, name="promptflow.src.app.run_flowchart")
 def run_flowchart(self, flowchart_id: str, db_config: dict) -> dict:
     logging.info("Task started: run_flowchart")
@@ -21,7 +32,7 @@ def run_flowchart(self, flowchart_id: str, db_config: dict) -> dict:
 
     try:
         logging.info("Running flowchart")
-        flowchart = Flowchart.get_flowchart_by_id(flowchart_id, interface)
+        flowchart: Flowchart = Flowchart.get_flowchart_by_id(flowchart_id, interface)
         if flowchart is None:
             raise Exception(f"Flowchart with id {flowchart_id} not found")
         init_state = State()
@@ -30,7 +41,9 @@ def run_flowchart(self, flowchart_id: str, db_config: dict) -> dict:
 
         state = init_state
         interface.update_job_status(job_id, "RUNNING")
-        state = flowchart.run(state)
+        state = flowchart.run(
+            state, logging_function=log_result_generator(interface, job_id)
+        )
         interface.update_job_status(job_id, "DONE")
 
         logging.info("Finished running flowchart")
