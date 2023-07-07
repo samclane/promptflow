@@ -50,7 +50,6 @@ FROM
       jss.id = js.status_id
     ORDER BY
       created DESC
-    LIMIT 1
       ) AS js ON
     TRUE
   WHERE j.id = js.job_id;
