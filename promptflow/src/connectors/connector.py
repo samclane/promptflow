@@ -50,7 +50,7 @@ class Connector(Serializable):
         if condition.text == "":
             condition.text = DEFAULT_COND_TEMPLATE
         self.condition: TextData = condition
-        self.condition_label: Optional[int] = (
+        self.condition_label: Optional[str] = (
             None if is_condition_default(condition) else condition.label
         )
 
@@ -67,7 +67,7 @@ class Connector(Serializable):
             "id": self.id,
             "prev": self.node1.id,
             "next": self.node2.id,
-            "conditional": self.condition.serialize(),
+            "conditional": self.condition.text,
             "label": self.condition.label,
         }
 
