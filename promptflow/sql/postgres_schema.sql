@@ -109,8 +109,7 @@ INSERT
   node_types (name)
 VALUES
   ('StartNode'),
-  ('InputNode'),
-  ('PrintNode') 
+  ('InputNode')
 ON CONFLICT (name) DO UPDATE SET name = EXCLUDED.name;
 
 -- Graphs
