@@ -13,6 +13,44 @@ from promptflow.src.nodes.node_base import NodeBase
 from promptflow.src.text_data import TextData
 
 
+class JobView(BaseModel):
+    """
+    Model representing a job in the database
+
+    Attributes:
+        job_id (int): The unique ID of the job.
+        job_status (str): The status of the job (PENDING'), ('RUNNING'), ('FAILED)
+        created (datetime): The date and time the job was created.
+        updated (datetime): The date and time the job was updated.
+        metadata (Optional[Dict[str, Any]]): The metadata for the job.
+    """
+
+    job_id: conint(gt=0)
+    job_status: constr(min_length=1)
+    created: datetime
+    updated: datetime
+    metadata: Optional[Dict[str, Any]]
+
+    @staticmethod
+    def hydrate(row: Tuple[Any, ...]) -> "JobView":
+        """
+        Hydrates a JobView instance from a dictionary representing a database row.
+
+        Args:
+            row (Dict[str, Any]): Dictionary representing a database row.
+
+        Returns:
+            JobView: A JobView instance populated with the data from the row.
+        """
+        return JobView(
+            job_id=row[0],
+            job_status=row[1],
+            created=row[2],
+            updated=row[3],
+            metadata=row[4],
+        )
+
+
 class GraphView(BaseModel):
     """
     Model representing a view of a graph.
@@ -266,6 +304,59 @@ class DBInterface(ABC):
             flowchart (Flowchart): The flowchart to save.
         """
 
+    @abstractmethod
+    def create_job(self, job: dict):
+        """
+        Creates a new job in the database from a celery job.
+
+        Args:
+            job (Job): The job to create.
+        """
+
+    @abstractmethod
+    def update_job_status(self, job_id: int, status: str):
+        """
+        Updates the status of a job in the database.
+
+        Args:
+            job_id (int): The ID of the job to update.
+            status (str): The new status of the job.
+        """
+
+    @abstractmethod
+    def create_job_log(self, job_id: int, data: dict):
+        """
+        Creates a new job log in the database.
+
+        Args:
+            job_id (int): The ID of the job to update.
+            log (dict): The log to create.
+        """
+
+    @abstractmethod
+    def get_job_view(self, job_id: int) -> JobView:
+        """
+        Gets a job view from the database.
+
+        Args:
+            job_id (int): The ID of the job to retrieve.
+
+        Returns:
+            JobView: The job view with the given ID.
+        """
+
+    @abstractmethod
+    def get_job_log(self, job_id: int) -> List[dict]:
+        """
+        Gets a job log from the database.
+
+        Args:
+            job_id (int): The ID of the job to retrieve.
+
+        Returns:
+            List[dict]: The job log with the given ID.
+        """
+
 
 class PostgresInterface(DBInterface):
     """
@@ -426,3 +517,54 @@ class PostgresInterface(DBInterface):
             ],
         )
         self.conn.commit()
+
+    def create_job(self, job: dict):
+        self.cursor.callproc(
+            "create_job",
+            [
+                json.dumps(job),
+            ],
+        )
+        self.conn.commit()
+
+    def update_job_status(self, job_id: int, status: str):
+        self.cursor.callproc(
+            "update_job_status",
+            [
+                job_id,
+                status,
+            ],
+        )
+        self.conn.commit()
+
+    def create_job_log(self, job_id: int, data: dict):
+        self.cursor.callproc(
+            "create_job_log",
+            [
+                job_id,
+                json.dumps(data),
+            ],
+        )
+        self.conn.commit()
+
+    def get_job_view(self, job_id: int) -> JobView:
+        self.cursor.execute(
+            """
+            SELECT * FROM job_view where id=%s
+            """,
+            [job_id],
+        )
+        row = self.cursor.fetchone()
+        if not row:
+            raise ValueError(f"Job with id {job_id} not found")
+        return JobView.hydrate(row)
+
+    def get_job_log(self, job_id: int) -> List[dict]:
+        self.cursor.execute(
+            """
+            SELECT * FROM job_log where job_id=%s
+            """,
+            [job_id],
+        )
+        rows = self.cursor.fetchall()
+        return list(map(lambda x: json.loads(x[1]), rows))

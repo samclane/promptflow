@@ -112,27 +112,16 @@ def run_flowchart_endpoint(flowchart_id: str, background_tasks: BackgroundTasks)
 
 @app.get("/jobs")
 def get_all_jobs():
-    """Get all running celery jobs by querying the celery backend"""
-    jobs = celery_app.control.inspect()
-    jobs = {
-        "active": jobs.active(),
-        "scheduled": jobs.scheduled(),
-        "reserved": jobs.reserved(),
-    }
-    return {"jobs": jobs}
+    """
+    Get all running jobs
+    """
+    raise NotImplementedError()
 
 
 @app.get("/jobs/{job_id}")
 def get_job_by_id(job_id) -> dict:
-    """Get a celery job by id"""
-    jobs = celery_app.control.inspect()
-    for job_type in ["active", "scheduled", "reserved"]:
-        job_dict = getattr(jobs, job_type)()
-        for host, tasks in job_dict.items() if job_dict else {}:
-            for job in tasks:
-                if job["request"]["id"] == job_id:
-                    return {"job": job}
-    return {"message": "Job not found"}
+    """Get a specfic job by id"""
+    raise NotImplementedError()
 
 
 @app.get("/flowcharts/{flowchart_id}/stop")
