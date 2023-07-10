@@ -202,6 +202,31 @@ branches jsonb := p_input -> 'branches';
 g_id integer;
 
 BEGIN 
+  /*
+
+{
+    "name": "My Graph",
+    "nodes": [
+      {
+        "uid": "1",
+        "node_type": "InitNode",
+        "label": "Initializer Node",
+        "metadata": {
+          "field1": "Okay"
+        }
+      }
+    ],
+    "branches": [
+      {
+        "conditional": "",
+        "label": "Loop it",
+        "prev": "1",
+        "next": "1"
+      }
+    ]
+}
+  
+   */
   
   IF v_name IS NULL THEN RAISE EXCEPTION 'Name is required for upsert'; END IF;
 
@@ -222,7 +247,7 @@ BEGIN
   )
   SELECT
     (j ->> 'uid') :: TEXT,
-    (j ->> 'node_type_id') :: integer,
+    (SELECT id FROM node_types  WHERE "name"=(j ->> 'node_type')) AS node_type_id,
     g_id,
     j ->> 'label',
     j -> 'metadata'
@@ -248,5 +273,4 @@ BEGIN
 
   RETURN query SELECT * FROM graph_view gv WHERE gv.graph_id = g_id;
 END $$;
-
 
