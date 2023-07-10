@@ -573,7 +573,7 @@ class PostgresInterface(DBInterface):
     def get_job_logs(self, job_id: int) -> List[dict]:
         self.cursor.execute(
             """
-            SELECT * FROM job_log where job_id=%s
+            SELECT * FROM job_logs where job_id=%s
             """,
             [job_id],
         )

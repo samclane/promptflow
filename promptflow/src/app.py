@@ -87,7 +87,7 @@ def upsert_flowchart_json(flowchart_json: FlowchartJson) -> dict:
         flowchart = add_node_type_ids(flowchart_json.flowchart)
         flowchart = Flowchart.deserialize(interface, flowchart_json.flowchart)
     except ValueError:
-        return {"message": "Invalid flowchart json file"}
+        return {"message": "Invalid flowchart json"}
     return {"flowchart": flowchart.serialize()}
 
 

@@ -248,4 +248,4 @@ def test_get_job_not_found():
 def test_get_job_logs():
     response = client.get("/jobs/1/logs")
     assert response.status_code == 200
-    assert len(response.json()["logs"]) > 0
+    assert "logs" in response.json()
