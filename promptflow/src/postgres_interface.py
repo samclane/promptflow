@@ -346,7 +346,7 @@ class DBInterface(ABC):
         """
 
     @abstractmethod
-    def get_job_log(self, job_id: int) -> List[dict]:
+    def get_job_logs(self, job_id: int) -> List[dict]:
         """
         Gets a job log from the database.
 
@@ -570,7 +570,7 @@ class PostgresInterface(DBInterface):
             raise ValueError(f"Job with id {job_id} not found")
         return JobView.hydrate(row)
 
-    def get_job_log(self, job_id: int) -> List[dict]:
+    def get_job_logs(self, job_id: int) -> List[dict]:
         self.cursor.execute(
             """
             SELECT * FROM job_log where job_id=%s

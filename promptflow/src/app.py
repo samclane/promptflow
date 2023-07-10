@@ -125,6 +125,16 @@ def get_job_by_id(job_id) -> dict:
         return interface.get_job_view(job_id).dict()
     except ValueError:
         raise HTTPException(status_code=404, detail="Job not found")
+    
+@app.get("/jobs/{job_id}/logs")
+def get_job_logs(job_id) -> dict:
+    """
+    Get all logs for a specific job
+    """
+    try:
+        return {"logs": interface.get_job_logs(job_id)}
+    except ValueError:
+        raise HTTPException(status_code=404, detail="Job not found")
 
 
 @app.get("/flowcharts/{flowchart_id}/stop")
