@@ -67,7 +67,6 @@ def create_test_flowchart(request):
             "flowchart": {
                 "id": "3",
                 "name": "ChatGPT",
-                "created": "2023-07-07T00:00:00.000000",
                 "nodes": [
                     {
                         "id": "1",
