@@ -93,8 +93,10 @@ node_map: Dict[str, Type[NodeBase]] = {
     "SaveImageNode": SaveImageNode,
 }
 
-if __name__ == "__main__":
+
+def populate_node_map():
     # populate the database with the node_map
+    """"""
     from promptflow.src.postgres_interface import DatabaseConfig, PostgresInterface
 
     interface = PostgresInterface(
@@ -118,3 +120,7 @@ if __name__ == "__main__":
     conn.commit()
 
     conn.close()
+
+
+if __name__ == "__main__":
+    populate_node_map()
