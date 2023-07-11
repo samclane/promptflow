@@ -243,6 +243,7 @@ def add_node(flowchart_id: str, nodetype: NodeType) -> dict:
     flowchart = Flowchart.get_flowchart_by_id(flowchart_id, interface)
     node_type_id = interface.get_node_type_id(nodetype.node_type)
     node = node_cls(flowchart, nodetype.node_type, node_type_id=node_type_id)
+    interface.save_flowchart(flowchart)
     if node:
         flowchart.add_node(node)
         return {"message": "Node added", "node": node.serialize()}
@@ -255,6 +256,7 @@ def remove_node(node_id: str, flowchart_id: str) -> dict:
     flowchart = Flowchart.get_flowchart_by_id(flowchart_id, interface)
     node = flowchart.find_node(node_id)
     flowchart.remove_node(node)
+    interface.save_flowchart(flowchart)
     return {"message": "Node removed", "node": node.serialize()}
 
 
@@ -270,6 +272,7 @@ def connect_nodes(flowchart_id: str, node_id: str, target_node_id: NodeData) -> 
     if node and target_node:
         connector = Connector(node, target_node)
         flowchart.add_connector(connector)
+        interface.save_flowchart(flowchart)
         return {"message": "Nodes connected", "connector": connector.serialize()}
     else:
         return {"message": "Nodes not connected"}
@@ -288,6 +291,7 @@ def update_node_options(flowchart_id: str, node_id: str, data: dict) -> dict:
     flowchart = Flowchart.get_flowchart_by_id(flowchart_id, interface)
     node = flowchart.find_node(node_id)
     node.update(data)
+    interface.save_flowchart(flowchart)
     return {"message": "Node options updated", "node": node.serialize()}
 
 
