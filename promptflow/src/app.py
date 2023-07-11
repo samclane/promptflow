@@ -243,9 +243,9 @@ def add_node(flowchart_id: str, nodetype: NodeType) -> dict:
     flowchart = Flowchart.get_flowchart_by_id(flowchart_id, interface)
     node_type_id = interface.get_node_type_id(nodetype.node_type)
     node = node_cls(flowchart, nodetype.node_type, node_type_id=node_type_id)
-    interface.save_flowchart(flowchart)
     if node:
         flowchart.add_node(node)
+        interface.save_flowchart(flowchart)
         return {"message": "Node added", "node": node.serialize()}
     else:
         return {"message": "Node not added: invalid node_type"}
