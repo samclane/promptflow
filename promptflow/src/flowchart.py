@@ -3,7 +3,6 @@ This module contains the Flowchart class, which manages the nodes and connectors
 """
 from __future__ import annotations
 
-import json
 import logging
 import threading
 import time
@@ -38,7 +37,7 @@ class Flowchart:
     def __init__(
         self,
         interface: DBInterface,
-        id: Optional[int] = None,
+        id: int,
         name: Optional[str] = None,
         created: Optional[float] = None,
     ):
@@ -59,9 +58,6 @@ class Flowchart:
 
         self.is_dirty = False
         self.is_running = False
-
-        # insert into database
-        self.save_to_db()
 
     @classmethod
     def get_flowchart_by_id(cls, id, interface: DBInterface):
@@ -84,17 +80,16 @@ class Flowchart:
             created=data.get("created", time.time()),
         )
         for node_data in data["nodes"]:
-            node = node_map[node_data["classname"]].deserialize(flowchart, node_data)
+            node = node_map[node_data["node_type"]].deserialize(flowchart, node_data)
             x_offset = pan[0]
             y_offset = pan[1]
             flowchart.add_node(node, (x_offset, y_offset))
         for connector_data in data["branches"]:
-            node1 = flowchart.find_node(connector_data["node1"])
-            node2 = flowchart.find_node(connector_data["node2"])
-            connector = Connector(node1, node2, connector_data.get("conditional", ""))
+            prev = flowchart.find_node(connector_data["prev"])
+            next = flowchart.find_node(connector_data["next"])
+            connector = Connector(prev, next, connector_data.get("conditional", ""))
             flowchart.add_connector(connector)
         flowchart.is_dirty = False
-        flowchart.save_to_db()
         return flowchart
 
     @property
@@ -156,7 +151,6 @@ class Flowchart:
         self.graph.add_node(node)
         self.selected_element = node
         self.is_dirty = True
-        self.save_to_db()
         return node
 
     def add_connector(self, connector: Connector) -> Connector:
@@ -166,10 +160,9 @@ class Flowchart:
         # check for duplicate connectors
         self.logger.debug(f"Adding connector {connector}")
         self.connectors.append(connector)
-        self.graph.add_edge(connector.node1, connector.node2)
+        self.graph.add_edge(connector.prev, connector.next)
         self.selected_element = connector
         self.is_dirty = True
-        self.save_to_db()
         return connector
 
     def initialize(self, state: State) -> Optional[State]:
@@ -261,10 +254,10 @@ class Flowchart:
                     cond = True
                 if cond:
                     # if connector.node2 not in queue:
-                    if queue.queue.count(connector.node2) == 0:
-                        queue.put(connector.node2)
+                    if queue.queue.count(connector.next) == 0:
+                        queue.put(connector.next)
                         self.run(state, queue)
-                    self.logger.info(f"Added node {connector.node2.label} to queue")
+                    self.logger.info(f"Added node {connector.next.label} to queue")
 
         if queue.empty():
             self.logger.info("Flowchart stopped")
@@ -296,13 +289,6 @@ class Flowchart:
             data["branches"].append(connector.serialize())
         return data
 
-    def save_to_db(self) -> None:
-        """
-        Save the flowchart to the database
-        """
-        self.logger.info(f"Saving flowchart {self.name} to database")
-        self.interface.save_flowchart(self)
-
     def remove_node(self, node: NodeBase) -> None:
         """
         Remove a node and all connectors connected to it.
@@ -313,20 +299,19 @@ class Flowchart:
         # remove all connectors connected to this node
         for other_node in self.nodes:
             for connector in other_node.connectors:
-                if connector.node1 == node or connector.node2 == node:
+                if connector.prev == node or connector.next == node:
                     connector.delete()
-                    self.graph.remove_edge(connector.node1, connector.node2)
+                    self.graph.remove_edge(connector.prev, connector.next)
                     if connector in other_node.input_connectors:
                         other_node.input_connectors.remove(connector)
                     if connector in other_node.output_connectors:
                         other_node.output_connectors.remove(connector)
         for connector in self.connectors:
-            if connector.node1 == node or connector.node2 == node:
+            if connector.prev == node or connector.next == node:
                 connector.delete()
-                self.graph.remove_edge(connector.node1, connector.node2)
+                self.graph.remove_edge(connector.prev, connector.next)
         self.graph.remove_node(node)
         self.is_dirty = True
-        self.save_to_db()
 
     def clear(self) -> None:
         """
@@ -341,7 +326,6 @@ class Flowchart:
         self.connectors = []
         self.graph.clear()
         self.is_dirty = True
-        self.save_to_db()
 
     def register_text_data(self, text_data: TextData) -> None:
         """
@@ -369,9 +353,9 @@ class Flowchart:
             mermaid_str += f"{node.id}({node.label})\n"
         for connector in self.connectors:
             if connector.condition_label:
-                mermaid_str += f"{connector.node1.id} -->|{connector.condition_label}| {connector.node2.id}\n"
+                mermaid_str += f"{connector.prev.id} -->|{connector.condition_label}| {connector.next.id}\n"
             else:
-                mermaid_str += f"{connector.node1.id} --> {connector.node2.id}\n"
+                mermaid_str += f"{connector.prev.id} --> {connector.next.id}\n"
 
         return mermaid_str
 
@@ -389,12 +373,12 @@ class Flowchart:
             """
         for connector in self.connectors:
             if connector.condition_label:
-                graphml_string += f"""<edge source="{connector.node1.id}" target="{connector.node2.id}">
+                graphml_string += f"""<edge source="{connector.prev.id}" target="{connector.next.id}">
                 <data key="d0">{connector.condition_label}</data>
                 </edge>
                 """
             else:
-                graphml_string += f"""<edge source="{connector.node1.id}" target="{connector.node2.id}"/>
+                graphml_string += f"""<edge source="{connector.prev.id}" target="{connector.next.id}"/>
                 """
         graphml_string += "\r</graphml>"
         return graphml_string

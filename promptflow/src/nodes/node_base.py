@@ -91,9 +91,6 @@ class NodeBase(Serializable, ABC):
     def label(self, label: str):
         self._label = label
 
-    def save_to_db(self):
-        pass
-
     def get_center(
         self, offset_x: float = 0, offset_y: float = 0
     ) -> tuple[float, float]:
@@ -161,8 +158,9 @@ class NodeBase(Serializable, ABC):
             "label": self.label,
             "center_x": self.center_x,
             "center_y": self.center_y,
-            "classname": self.__class__.__name__,
+            "node_type": self.__class__.__name__,
             "node_type_id": self.node_type_id,
+            "graph_id": self.flowchart.id,
             "metadata": {},
         }
 
@@ -187,7 +185,7 @@ class NodeBase(Serializable, ABC):
         """
         Return all child nodes of this node.
         """
-        return [connector.node2 for connector in self.output_connectors]
+        return [connector.next for connector in self.output_connectors]
 
     def edit_options(self, event):
         """

@@ -230,7 +230,7 @@ class DBInterface(ABC):
         """
 
     @abstractmethod
-    def get_node_type_id(self, classname):
+    def get_node_type_id(self, node_type):
         """
         Returns the node type ID for the given node type.
         """
@@ -426,12 +426,12 @@ class PostgresInterface(DBInterface):
             interface=self, id=id, name=name["name"], created=datetime.now()
         )
 
-    def get_node_type_id(self, classname):
+    def get_node_type_id(self, node_type):
         self.cursor.execute(
             """
             SELECT id FROM node_types WHERE name = %s
             """,
-            [classname],
+            [node_type],
         )
         return self.cursor.fetchone()[0]
 
