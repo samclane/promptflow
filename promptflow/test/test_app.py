@@ -199,35 +199,35 @@ def test_get_flowchart_not_found():
     assert response.json()["message"] == "Flowchart not found"
 
 
-@pytest.mark.parametrize("create_test_flowchart", ["simple", "advanced"], indirect=True)
+@pytest.mark.parametrize("create_test_flowchart", ["simple", "advanced", "chat_gpt"], indirect=True)
 def test_run_flowchart(create_test_flowchart):
     response = client.get(f"/flowcharts/{create_test_flowchart}/run")
     assert response.status_code == 200
     assert "started" in response.json()["message"]
 
 
-@pytest.mark.parametrize("create_test_flowchart", ["simple", "advanced"], indirect=True)
+@pytest.mark.parametrize("create_test_flowchart", ["simple", "advanced", "chat_gpt"], indirect=True)
 def test_stop_flowchart(create_test_flowchart):
     response = client.get(f"/flowcharts/{create_test_flowchart}/stop")
     assert response.status_code == 200
     assert "Flowchart stopped" in response.json()["message"]
 
 
-@pytest.mark.parametrize("create_test_flowchart", ["simple", "advanced"], indirect=True)
+@pytest.mark.parametrize("create_test_flowchart", ["simple", "advanced", "chat_gpt"], indirect=True)
 def test_clear_flowchart(create_test_flowchart):
     response = client.get(f"/flowcharts/{create_test_flowchart}/clear")
     assert response.status_code == 200
     assert "Flowchart cleared" in response.json()["message"]
 
 
-@pytest.mark.parametrize("create_test_flowchart", ["simple", "advanced"], indirect=True)
+@pytest.mark.parametrize("create_test_flowchart", ["simple", "advanced", "chat_gpt"], indirect=True)
 def test_cost_flowchart(create_test_flowchart):
     response = client.get(f"/flowcharts/{create_test_flowchart}/cost")
     assert response.status_code == 200
     assert "cost" in response.json()
 
 
-@pytest.mark.parametrize("create_test_flowchart", ["simple", "advanced"], indirect=True)
+@pytest.mark.parametrize("create_test_flowchart", ["simple", "advanced", "chat_gpt"], indirect=True)
 def test_save_as(create_test_flowchart):
     response = client.post(f"/flowcharts/{create_test_flowchart}/save_as")
     assert response.status_code in [200, 404]
@@ -245,7 +245,7 @@ def test_get_node_types():
     assert "node_types" in response.json()
 
 
-@pytest.mark.parametrize("create_test_flowchart", ["simple", "advanced"], indirect=True)
+@pytest.mark.parametrize("create_test_flowchart", ["simple", "advanced", "chat_gpt"], indirect=True)
 def test_add_node(create_test_flowchart):
     data = {"node_type": "InputNode"}
     response = client.post(f"/flowcharts/{create_test_flowchart}/nodes", json=data)
@@ -253,7 +253,7 @@ def test_add_node(create_test_flowchart):
     assert "Node added" in response.json()["message"]
 
 
-@pytest.mark.parametrize("create_test_flowchart", ["simple", "advanced"], indirect=True)
+@pytest.mark.parametrize("create_test_flowchart", ["simple", "advanced", "chat_gpt"], indirect=True)
 def test_remove_node(create_test_flowchart):
     # First add a node
     node_data = {"node_type": "InputNode"}
@@ -268,7 +268,7 @@ def test_remove_node(create_test_flowchart):
     assert "Node removed" in response.json()["message"]
 
 
-@pytest.mark.parametrize("create_test_flowchart", ["simple", "advanced"], indirect=True)
+@pytest.mark.parametrize("create_test_flowchart", ["simple", "advanced", "chat_gpt"], indirect=True)
 def test_connect_nodes(create_test_flowchart):
     # Add two nodes first
     node1_data = {"node_type": "InputNode"}
@@ -293,7 +293,7 @@ def test_connect_nodes(create_test_flowchart):
     assert "Nodes connected" in response.json()["message"]
 
 
-@pytest.mark.parametrize("create_test_flowchart", ["simple", "advanced"], indirect=True)
+@pytest.mark.parametrize("create_test_flowchart", ["simple", "advanced", "chat_gpt"], indirect=True)
 def test_get_node_options(create_test_flowchart):
     # Add a node first
     node_data = {"node_type": "InputNode"}
@@ -308,7 +308,7 @@ def test_get_node_options(create_test_flowchart):
     assert "options" in response.json()
 
 
-@pytest.mark.parametrize("create_test_flowchart", ["simple", "advanced"], indirect=True)
+@pytest.mark.parametrize("create_test_flowchart", ["simple", "advanced", "chat_gpt"], indirect=True)
 def test_update_node_options(create_test_flowchart):
     options_data = {"label": "Test label"}
     # Add a node first
