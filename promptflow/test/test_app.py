@@ -13,7 +13,20 @@ def create_test_flowchart(request):
     if flowchart_type == "simple":
         # Create a simple flowchart
         flowchart = {
-            "flowchart": {"id": "1", "name": "simple", "nodes": [], "branches": []}
+            "flowchart": {
+                "id": "1",
+                "name": "simple",
+                "nodes": [
+                    {
+                        "id": "1",
+                        "uid": "1",
+                        "label": "Start",
+                        "node_type": "StartNode",
+                        "metadata": {},
+                    },
+                ],
+                "branches": [],
+            }
         }
 
     elif flowchart_type == "advanced":
@@ -40,7 +53,7 @@ def create_test_flowchart(request):
                 "branches": [
                     {
                         "id": "1",
-                        "condition": "",
+                        "conditional": "",
                         "label": "True",
                         "prev": "1",
                         "next": "2",
