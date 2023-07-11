@@ -13,40 +13,110 @@ def create_test_flowchart(request):
     if flowchart_type == "simple":
         # Create a simple flowchart
         flowchart = {
-            "flowchart": {"id": "1", "name": "test", "nodes": [], "branches": []}
+            "flowchart": {"id": "1", "name": "simple", "nodes": [], "branches": []}
         }
 
     elif flowchart_type == "advanced":
         flowchart = {
             "flowchart": {
-                "id": "1",
-                "name": "test",
-                "created": "2021-01-01T00:00:00.000000",
+                "id": "2",
+                "name": "advanced",
                 "nodes": [
                     {
                         "id": "1",
                         "uid": "1",
                         "label": "Start",
-                        "classname": "StartNode",
+                        "node_type": "StartNode",
                         "metadata": {},
                     },
                     {
                         "id": "2",
                         "uid": "2",
-                        "classname": "InitNode",
                         "label": "End",
+                        "node_type": "InitNode",
                         "metadata": {},
                     },
                 ],
                 "branches": [
                     {
                         "id": "1",
-                        "conditional": "",
+                        "condition": "",
                         "label": "True",
-                        "graph_id": "1",
-                        "node1": "1",
-                        "node2": "2",
+                        "prev": "1",
+                        "next": "2",
                     }
+                ],
+            }
+        }
+
+    elif flowchart_type == "chat_gpt":
+        flowchart = {
+            "flowchart": {
+                "id": "3",
+                "name": "ChatGPT",
+                "created": "2023-07-07T00:00:00.000000",
+                "nodes": [
+                    {
+                        "id": "1",
+                        "uid": "1",
+                        "label": "Start",
+                        "node_type": "StartNode",
+                        "metadata": {},
+                    },
+                    {
+                        "id": "2",
+                        "uid": "2",
+                        "label": "Initialize ChatGPT",
+                        "node_type": "InitNode",
+                        "metadata": {},
+                    },
+                    {
+                        "id": "3",
+                        "uid": "3",
+                        "label": "Input from User",
+                        "node_type": "InputNode",
+                        "metadata": {},
+                    },
+                    {
+                        "id": "4",
+                        "uid": "4",
+                        "label": "Process Query with ChatGPT",
+                        "node_type": "OpenAINode",
+                        "metadata": {},
+                    },
+                    {
+                        "id": "5",
+                        "uid": "5",
+                        "label": "Output to User",
+                        "node_type": "LoggingNode",
+                        "metadata": {},
+                    },
+                ],
+                "branches": [
+                    {
+                        "conditional": "",
+                        "label": "Initialization",
+                        "prev": "1",
+                        "next": "2",
+                    },
+                    {
+                        "conditional": "",
+                        "label": "Receive Input",
+                        "prev": "2",
+                        "next": "3",
+                    },
+                    {
+                        "conditional": "",
+                        "label": "Process Input",
+                        "prev": "3",
+                        "next": "4",
+                    },
+                    {
+                        "conditional": "def main(): return False",
+                        "label": "Display Output",
+                        "prev": "4",
+                        "next": "5",
+                    },
                 ],
             }
         }
@@ -54,6 +124,14 @@ def create_test_flowchart(request):
     else:
         raise ValueError(f"Invalid flowchart type: {flowchart_type}")
     response = client.post("/flowcharts", json=flowchart)
+    if not response.status_code == 200:
+        raise ValueError(
+            f"Failed to create flowchart: {flowchart_type}", response.json()
+        )
+    if not "flowchart" in response.json():
+        raise ValueError(
+            f"Failed to create flowchart: {flowchart_type}, {response.json()}"
+        )
     flowchart_id = response.json()["flowchart"]["id"]
     return flowchart_id
 
@@ -72,7 +150,9 @@ def test_get_flowcharts():
     assert isinstance(response.json(), list)
 
 
-@pytest.mark.parametrize("create_test_flowchart", ["simple", "advanced"], indirect=True)
+@pytest.mark.parametrize(
+    "create_test_flowchart", ["simple", "advanced", "chat_gpt"], indirect=True
+)
 def test_get_flowchart_by_id(create_test_flowchart):
     # Simulate a GET request to the /flowcharts/{flowchart_id} endpoint
     response = client.get(f"/flowcharts/{create_test_flowchart}")
@@ -82,6 +162,11 @@ def test_get_flowchart_by_id(create_test_flowchart):
 
     # Ensure the response has a 200 OK status code
     assert response.status_code == 200
+
+    # ensure json response is a dict
+    assert isinstance(response.json(), dict)
+
+    assert "flowchart" in response.json(), "flowchart key not found in response"
 
     # Ensure the response JSON contains the flowchart ID
     assert str(response.json()["flowchart"]["id"]) == create_test_flowchart
@@ -149,7 +234,7 @@ def test_get_node_types():
 
 @pytest.mark.parametrize("create_test_flowchart", ["simple", "advanced"], indirect=True)
 def test_add_node(create_test_flowchart):
-    data = {"classname": "InputNode"}
+    data = {"node_type": "InputNode"}
     response = client.post(f"/flowcharts/{create_test_flowchart}/nodes", json=data)
     assert response.status_code == 200
     assert "Node added" in response.json()["message"]
@@ -158,7 +243,7 @@ def test_add_node(create_test_flowchart):
 @pytest.mark.parametrize("create_test_flowchart", ["simple", "advanced"], indirect=True)
 def test_remove_node(create_test_flowchart):
     # First add a node
-    node_data = {"classname": "InputNode"}
+    node_data = {"node_type": "InputNode"}
     add_node_response = client.post(
         f"/flowcharts/{create_test_flowchart}/nodes", json=node_data
     )
@@ -173,13 +258,13 @@ def test_remove_node(create_test_flowchart):
 @pytest.mark.parametrize("create_test_flowchart", ["simple", "advanced"], indirect=True)
 def test_connect_nodes(create_test_flowchart):
     # Add two nodes first
-    node1_data = {"classname": "InputNode"}
+    node1_data = {"node_type": "InputNode"}
     add_node1_response = client.post(
         f"/flowcharts/{create_test_flowchart}/nodes", json=node1_data
     )
     node1_id = add_node1_response.json()["node"]["id"]
 
-    node2_data = {"classname": "InputNode"}
+    node2_data = {"node_type": "InputNode"}
     add_node2_response = client.post(
         f"/flowcharts/{create_test_flowchart}/nodes", json=node2_data
     )
@@ -198,7 +283,7 @@ def test_connect_nodes(create_test_flowchart):
 @pytest.mark.parametrize("create_test_flowchart", ["simple", "advanced"], indirect=True)
 def test_get_node_options(create_test_flowchart):
     # Add a node first
-    node_data = {"classname": "InputNode"}
+    node_data = {"node_type": "InputNode"}
     add_node_response = client.post(
         f"/flowcharts/{create_test_flowchart}/nodes", json=node_data
     )
@@ -214,7 +299,7 @@ def test_get_node_options(create_test_flowchart):
 def test_update_node_options(create_test_flowchart):
     options_data = {"label": "Test label"}
     # Add a node first
-    node_data = {"classname": "InputNode"}
+    node_data = {"node_type": "InputNode"}
     add_node_response = client.post(
         f"/flowcharts/{create_test_flowchart}/nodes", json=node_data
     )
@@ -244,6 +329,7 @@ def test_get_job_not_found():
     # call the /jobs/{id} endpoint
     response = client.get("/jobs/999")
     assert response.status_code == 404
+
 
 def test_get_job_logs():
     response = client.get("/jobs/1/logs")

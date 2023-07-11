@@ -7,7 +7,6 @@ import math
 from typing import Optional, Tuple
 
 from promptflow.src.nodes.node_base import NodeBase
-from promptflow.src.nodes.start_node import StartNode
 from promptflow.src.serializable import Serializable
 from promptflow.src.text_data import TextData
 from promptflow.src.themes import monokai
@@ -26,17 +25,17 @@ class Connector(Serializable):
 
     def __init__(
         self,
-        node1: NodeBase,
-        node2: NodeBase,
+        prev: NodeBase,
+        next: NodeBase,
         condition: Optional[TextData | dict] = None,
         id: Optional[str] = None,
     ):
-        self.node1 = node1
-        self.node2 = node2
+        self.prev = prev
+        self.next = next
         self.id = id
-        self.flowchart = node1.flowchart
-        node1.output_connectors.append(self)
-        node2.input_connectors.append(self)
+        self.flowchart = prev.flowchart
+        prev.output_connectors.append(self)
+        next.input_connectors.append(self)
         self.logger = logging.getLogger(__name__)
         # each connector has a branching condition
         if not condition:
@@ -59,14 +58,14 @@ class Connector(Serializable):
         return self.condition.label
 
     @classmethod
-    def deserialize(cls, node1: NodeBase, node2: NodeBase, condition: TextData):
-        return cls(node1, node2, condition)
+    def deserialize(cls, prev: NodeBase, next: NodeBase, condition: TextData):
+        return cls(prev, next, condition)
 
     def serialize(self):
         return {
             "id": self.id,
-            "prev": self.node1.id,
-            "next": self.node2.id,
+            "prev": self.prev.id,
+            "next": self.next.id,
             "conditional": self.condition.text,
             "label": self.condition.label,
         }
@@ -75,10 +74,10 @@ class Connector(Serializable):
         """
         Remove the connector from the flowchart, both from the canvas and from the flowchart's list of connectors.
         """
-        if self in self.node1.flowchart.connectors:
-            self.node1.flowchart.connectors.remove(self)
-        self.node1.output_connectors.remove(self)
-        self.node2.input_connectors.remove(self)
+        if self in self.prev.flowchart.connectors:
+            self.prev.flowchart.connectors.remove(self)
+        self.prev.output_connectors.remove(self)
+        self.next.input_connectors.remove(self)
 
     def select(self, *args):
         """
@@ -90,14 +89,11 @@ class Connector(Serializable):
         """
         Check if the node connects to itself or to a child of itself
         """
-        if self.node1 == self.node2:
+        if self.prev == self.next:
             return True
-        if self.node1 in self.node2.get_children():
+        if self.prev in self.next.get_children():
             return True
         return False
-
-    def save_to_db(self):
-        pass
 
 
 def is_condition_default(condition: TextData) -> bool:

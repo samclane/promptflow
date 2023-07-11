@@ -41,7 +41,7 @@ class PartialConnector:
         nodes
         """
         for connector in self.flowchart.connectors:
-            if connector.node1 == self.node and connector.node2 == node:
+            if connector.prev == self.node and connector.next == node:
                 self.logger.debug("Connector already exists")
                 return True
         return False

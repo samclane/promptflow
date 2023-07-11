@@ -30,7 +30,7 @@ def create_test_flowchart():
 def test_add_node(node, create_test_flowchart):
     response = client.post(
         f"/flowcharts/{create_test_flowchart}/nodes",
-        json={"classname": node.__name__, "label": "test"},
+        json={"node_type": node.__name__, "label": "test"},
     )
     assert response.status_code == 200
     assert response.json()["node"]["label"] == node.__name__

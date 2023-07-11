@@ -7,6 +7,7 @@ import json
 import logging
 import os
 import zipfile
+import traceback
 
 from fastapi import BackgroundTasks, FastAPI, File, HTTPException, Response, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -75,7 +76,7 @@ class FlowchartJson(BaseModel):
 def add_node_type_ids(flowchart: dict):
     """Add node type ids to the flowchart"""
     for node in flowchart["nodes"]:
-        node["node_type_id"] = interface.get_node_type_id(node["classname"])
+        node["node_type_id"] = interface.get_node_type_id(node["node_type"])
     return flowchart
 
 
@@ -86,8 +87,9 @@ def upsert_flowchart_json(flowchart_json: FlowchartJson) -> dict:
     try:
         flowchart = add_node_type_ids(flowchart_json.flowchart)
         flowchart = Flowchart.deserialize(interface, flowchart_json.flowchart)
+        interface.save_flowchart(flowchart)
     except ValueError:
-        return {"message": "Invalid flowchart json"}
+        return {"message": "Invalid flowchart json", "error": traceback.format_exc()}
     return {"flowchart": flowchart.serialize()}
 
 
@@ -99,7 +101,7 @@ def get_flowchart(flowchart_id: str) -> dict:
         flowchart = Flowchart.get_flowchart_by_id(flowchart_id, interface)
     except Exception as e:
         interface.conn.rollback()
-        return {"message": "Flowchart not found", "error": str(e)}
+        return {"message": "Flowchart not found", "error": traceback.format_exc()}
     return {"flowchart": flowchart.serialize()}
 
 
@@ -125,7 +127,8 @@ def get_job_by_id(job_id) -> dict:
         return interface.get_job_view(job_id).dict()
     except ValueError:
         raise HTTPException(status_code=404, detail="Job not found")
-    
+
+
 @app.get("/jobs/{job_id}/logs")
 def get_job_logs(job_id) -> dict:
     """
@@ -203,7 +206,7 @@ def load_from(file: UploadFile = File(...)) -> dict:
                 data = json.load(loadfile)
                 # load the embedding if there is one
                 for node in data["nodes"]:
-                    if node["classname"] == "EmbeddingsIngestNode":
+                    if node["node_type"] == "EmbeddingsIngestNode":
                         # load the embedding
                         embed_file = archive.extract(node["filename"], path=os.getcwd())
                         node["filename"] = embed_file
@@ -213,6 +216,7 @@ def load_from(file: UploadFile = File(...)) -> dict:
                         )
                         node["label_file"] = label_file
                 flowchart = Flowchart.deserialize(interface, data)
+                interface.save_flowchart(flowchart)
                 return {"flowchart": flowchart.serialize()}
     else:
         promptflow.logger.info("No file selected to load from")
@@ -228,22 +232,22 @@ def get_node_types() -> dict:
 
 # Force FastAPI to accept a JSON body for the node type
 class NodeType(BaseModel):
-    classname: str
+    node_type: str
 
 
 @app.post("/flowcharts/{flowchart_id}/nodes")
 def add_node(flowchart_id: str, nodetype: NodeType) -> dict:
-    node_cls = node_map.get(nodetype.classname)
+    node_cls = node_map.get(nodetype.node_type)
     if not node_cls:
-        return {"message": "Node not added: invalid classname"}
+        return {"message": "Node not added: invalid node_type"}
     flowchart = Flowchart.get_flowchart_by_id(flowchart_id, interface)
-    node_type_id = interface.get_node_type_id(nodetype.classname)
-    node = node_cls(flowchart, nodetype.classname, node_type_id=node_type_id)
+    node_type_id = interface.get_node_type_id(nodetype.node_type)
+    node = node_cls(flowchart, nodetype.node_type, node_type_id=node_type_id)
     if node:
         flowchart.add_node(node)
         return {"message": "Node added", "node": node.serialize()}
     else:
-        return {"message": "Node not added: invalid classname"}
+        return {"message": "Node not added: invalid node_type"}
 
 
 @app.delete("/flowcharts/{flowchart_id}/nodes/{node_id}")
