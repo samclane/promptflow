@@ -147,7 +147,7 @@ CREATE TABLE IF NOT EXISTS branches (
 );
 -- Views
 CREATE OR REPLACE VIEW graph_view AS
-  SELECT
+  SELECT 
     g.id AS graph_id,
     g.created AS created,
     g."name" AS graph_name,
@@ -156,7 +156,7 @@ CREATE OR REPLACE VIEW graph_view AS
     nt."name" AS node_type_name,
     b.next_node AS next_node,
     n.uid AS current_node,
-    b.conditional AS conditional,
+    COALESCE(b.conditional, '') AS conditional,
     (
     SELECT
       COALESCE(b.conditional != '', FALSE)
@@ -164,14 +164,10 @@ CREATE OR REPLACE VIEW graph_view AS
     b."label" AS branch_label,
     b.id AS branch_id,
     n.node_type_id AS node_type_id
-  FROM
-    graphs g
-  LEFT JOIN nodes n ON
-    n.graph_id = g.id
-  LEFT JOIN node_types nt ON
-    nt.id = n.node_type_id
-  LEFT OUTER JOIN branches b ON
-    b.node = n.uid;
+  FROM nodes n
+  JOIN node_types nt ON nt.id=n.node_type_id 
+  JOIN graphs g ON g.id=n.graph_id
+  LEFT JOIN branches b ON b.graph_id=g.id AND b.node=n.uid;
 
 -- Functions
 CREATE OR REPLACE FUNCTION upsert_graph(p_input JSONB) 
