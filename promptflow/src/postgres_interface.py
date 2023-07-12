@@ -580,7 +580,7 @@ class PostgresInterface(DBInterface):
             [job_id],
         )
         rows = self.cursor.fetchall()
-        return list(map(lambda x: json.loads(x[1]), rows))
+        return list(map(lambda x: x[0], rows))
 
     def listener(self, manager, loop: asyncio.AbstractEventLoop):
         self.conn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
