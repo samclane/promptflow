@@ -345,8 +345,8 @@ def handle_exception(request, exc):
     )
 
 
-@app.on_event("startup")
-def startup_event():
-    loop = asyncio.new_event_loop()
-    thread = Thread(target=interface.listener, args=(manager, loop,))
-    thread.start()
+# @app.on_event("startup")
+# def startup_event():
+#     loop = asyncio.new_event_loop()
+#     thread = Thread(target=interface.listener, args=(manager, loop,))
+#     thread.start()
