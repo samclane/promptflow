@@ -505,7 +505,7 @@ class PostgresInterface(DBInterface):
         return self.build_flowcharts_from_graph_view(graph_nodes)[0]
 
     def get_all_flowchart_ids_and_names(self) -> List[GraphNamesAndIds]:
-        self.cursor.execute("SELECT graph_id, graph_name FROM graph_view")
+        self.cursor.execute("SELECT id, name FROM graphs")
         rows = self.cursor.fetchall()
         return row_results_to_class_list(GraphNamesAndIds, rows)
 
