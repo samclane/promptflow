@@ -24,11 +24,11 @@ The EnvVars node allows you to set environment variables.
 
 ### EnvNode
 
-Loads a `.env` file. Double-click to set the path to the `.env` file.
+Loads a `.env` file.
 
 ### ManualEnvNode
 
-Sets a single environment variable. Double-click to set the key and value.
+Sets a single environment variable.
 
 (Input)=
 
@@ -44,11 +44,11 @@ Allows the user to preselect a file. The file output is saved to `state.result` 
 
 ### JSONFileInput
 
-Parses `key` from `state.result` and opens the file. Double-click to edit the key.
+Parses `key` from `state.result` and opens the file. Dou
 
 ### ServerInput
 
-Wait for a POST request to be made to a server. Defaults to `localhost:8000`. Double-click to edit the server address.
+Wait for a POST request to be made to a server. Defaults to `localhost:8000`.
 
 (Output)=
 
@@ -56,23 +56,23 @@ Wait for a POST request to be made to a server. Defaults to `localhost:8000`. Do
 
 ### FileOutput
 
-Writes the `state.result` to a file. Double-click to edit the file path.
+Writes the `state.result` to a file.
 
 ### JSONFileOutput
 
-Parses a filename and a data key from `state.result` and writes the data to the file. Double-click to edit the filename and data key.
+Parses a filename and a data key from `state.result` and writes the data to the file.
 
 (History)=
 
 ## History
 
-Saves the output of the previous node to a running history. Useful for chatbots or interactive programs. Follows OpenAI's history scheme, with 3 roles: `assistant`, `user`, and `system`. Double-click the node to edit which role the node will save to.
+Saves the output of the previous node to a running history. Useful for chatbots or interactive programs. Follows OpenAI's history scheme, with 3 roles: `assistant`, `user`, and `system`. 
 
 For a simple example of History Node usage, see [Usage](working-with-llms).
 
 ### ManualHistory
 
-Allows the user to manually create an extended conversation history before runtime. Double-click to edit the history.
+Allows the user to manually create an extended conversation history before runtime.
 
 ## HistoryWindow
 
@@ -82,13 +82,13 @@ The [`History`](History) node saves to an "infinite" memory, which isn't feasibl
 
 ### WindowedHistoryNode
 
-The WindowedHistoryNode node saves the last `n` results of the [`History`](History) node. This is useful for LLMs, which have token limits. Double-click the node to edit the window size.
+The WindowedHistoryNode node saves the last `n` results of the [`History`](History) node. This is useful for LLMs, which have token limits. 
 
 (DynamicWindowedMemory)=
 
 ### DynamicWindowedHistoryNode
 
-The DynamicWindowedHistoryNode node saves the last `n` results of the [`History`](History) node since a target string has appeared in the history. This is useful for LLMs, which have token limits. Double-click the node to edit the window size and target string.
+The DynamicWindowedHistoryNode node saves the last `n` results of the [`History`](History) node since a target string has appeared in the history. This is useful for LLMs, which have token limits. 
 
 (Memory)=
 ## Memory Nodes
@@ -97,17 +97,17 @@ Nodes for managing long term memory, usually with vector stores or caches.
 
 ### PineconeInsertNode
 
-Inserts the `state.result` into a Pinecone vector store. Double-click the node to edit the vector store index.
+Inserts the `state.result` into a Pinecone vector store. 
 
 ### PineconeQueryNode
 
-Queries a Pinecone vector store. Double-click the node to edit the vector store index and the number of results returned.
+Queries a Pinecone vector store. 
 
 (Prompt)=
 
 ## Prompt
 
-Outputs an f-string style formatted string. You can edit the prompt text by double-clicking the lower `Prompt` label on the node.
+Outputs an f-string style formatted string.
 
 For a simple example of Prompt Node usage, see [Usage](working-with-llms).
 
@@ -121,15 +121,12 @@ You are a {state.result}. Please stay in character, and answer as a {state.resul
 
 Connecting the following flowchart would allow the user to program any "personality" they want:
 
-![image](../screenshots/docs/roleplay.png)
-
 (LLM)=
 
 ## LLMs
 
-Call to a Large Language Model. Double-click to edit the LLM parameters.
+Call to a Large Language Model. 
 
-![image](../screenshots/docs/llm_options.png)
 
 ### OpenAI
 
@@ -186,15 +183,13 @@ def main(state: State):
 
 ## Date
 
-Outputs the current date and time. Useful for injecting into a [`Prompt`](Prompt) node. Double-click the node to edit the date format.
-
+Outputs the current date and time. Useful for injecting into a [`Prompt`](Prompt) node.
 (Database)=
 
 ## Database
 
-Connects to a database and runs a query. Double-click the node to edit the database connection parameters:
+Connects to a database and runs a query.
 
-![image](../screenshots/docs/db_options.png)
 
 (Query)=
 
@@ -213,7 +208,7 @@ The query node allows you to run a query against a database. The query is `state
 
 #### Generate
 
-The Generate node uses a pgml model to complete a prompt. The prompt is `state.result`, so you can use the result of a previous node to select a row. `model` can be selected by double-clicking the node.
+The Generate node uses a pgml model to complete a prompt. The prompt is `state.result`, so you can use the result of a previous node to select a row.
 
 (DummyLLM)=
 
@@ -231,7 +226,7 @@ Text embeddings are useful for many tasks, such as clustering, classification, a
 
 ### EmbeddingIngest
 
-When pointed at a json file, will read all values into database. Usually linked to the [`Init`](Init) node. Double-click the node to point the node to the `.bin` file, and a json file with mappings between the indices and the corresponding values (usually strings).
+When pointed at a json file, will read all values into database. Usually linked to the [`Init`](Init) node.
 
 (EmbeddingIn)=
 
@@ -243,38 +238,36 @@ Takes data from a node and puts it into an hnswlib index.
 
 ### EmbeddingQuery
 
-Queries an hnswlib index and returns the result. Double click to edit the number of results returned, as well as as the separator between results.
+Queries an hnswlib index and returns the result.
 
 (Http)=
 
 ## HTTP
 
-Allows the flowchart to make HTTP requests. Double-click the node to edit the request type (GET, POST, etc), the URL, and the request body. **The `state.result` will be put into the `json` parameter.**
+Allows the flowchart to make HTTP requests. **The `state.result` will be put into the `json` parameter.**
 
-![image](../screenshots/docs/http_options.png)
 
 ### JSONHttpRequest
 
-Parses a url from `state.result` and makes a request. Double-click the node to edit the url key.
+Parses a url from `state.result` and makes a request.
 
 
 (RandomNumber)=
 
 ## RandomNumber
 
-Returns a random number between `min` and `max`. Double-click the node to edit the `min` and `max` values.
+Returns a random number between `min` and `max`.
 
 (Regex)=
 
 ## Regex
 
-Runs a regex on the `state.result`. Double-click the node to edit the regex. Returns the first extracted group.
-
+Runs a regex on the `state.result`. 
 (TagRegex)=
 
 ### Tag
 
-Like the [`Regex`](Regex) node, but extracts text in-between tags. For example, if the `state.result` is `Hello <name>World</name>`, adding `start=<name>` and `end=</name>` would return `World`. Double-click the node to edit the start and end tags.
+Like the [`Regex`](Regex) node, but extracts text in-between tags. For example, if the `state.result` is `Hello <name>World</name>`, adding `start=<name>` and `end=</name>` would return `World`.
 
 (StructuredData)=
 
@@ -282,8 +275,7 @@ Like the [`Regex`](Regex) node, but extracts text in-between tags. For example, 
 
 ### JSON
 
-Validate JSON against a user-provided schema. Double-click to edit the schema.
-
+Validate JSON against a user-provided schema.
 ### Jsonerizer
 
 Converts a string to JSON.
@@ -311,13 +303,13 @@ Nodes for performing tests on the flowchart
 
 ### Assert
 
-Assert a Python expression. Double-click the node to edit the expression.
+Assert a Python expression.
 
 (Logging)=
 
 ### Logging
 
-Logs the output at a certain step. Useful for debugging. Double-click the node to edit the message. The string is a Python f-string, similar to [`Prompt`](Prompt).
+Logs the output at a certain step. Useful for debugging. The string is a Python f-string, similar to [`Prompt`](Prompt).
 
 ### Interpreter
 
@@ -347,11 +339,11 @@ Call the openai DallE model to generate an image. The prompt is the `state.resul
 
 ### OpenImageFile
 
-Open an image file. Double-click the node to edit the file path.
+Open an image file. 
 
 ### JSONImageFile
 
-Parse a filename and a data key from `state.result` and open the image. Double-click the node to edit the filename key.
+Parse a filename and a data key from `state.result` and open the image.
 
 ### CaptionNode
 
@@ -359,4 +351,4 @@ Caption the image in `state.data`. Assumes the image is a `tk.PhotoImage`, as of
 
 ### SaveImageNode
 
-Write thte image in `state.data` to a file. Double-click the node to edit the file path.
+Write the image in `state.data` to a file.

@@ -48,12 +48,3 @@ Creating a new [`Node`](Node) is a good starting point for understanding the cod
 3. `run_subclass` is the most important function in the `Node` class. It is called when the node is run. In this case, we simply return a random number between `min` and `max`.
 
 4. `edit_options` is called when the node is double-clicked. It opens the `OptionsPopup` and sets the `min` and `max` values. The main window waits until the popup is closed before continuing execution. Finally, we set the `min` and `max` values to the values in the popup.
-
-## Runtime Popups
-
-In order to add a runtime popup, such as a text input, to a node, you must must create a new tkinter `root` window, and `withdraw()` it.
-
-As an example, let's look at the [`InputNode`](Input):
-
-```{literalinclude} ../promptflow/src/nodes/input_node.py
-```
