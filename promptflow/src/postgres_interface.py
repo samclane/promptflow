@@ -586,7 +586,7 @@ class PostgresInterface(DBInterface):
         self.conn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
 
         with self.conn.cursor() as cur:
-            cur.execute("LISTEN job_log_updated;")
+            cur.execute("LISTEN job_log_created;")
 
             while True:
                 self.conn.poll()

@@ -345,8 +345,8 @@ def handle_exception(request, exc):
     )
 
 
-# @app.on_event("startup")
-# async def startup_event():
-#     loop = asyncio.get_event_loop()
-#     with ThreadPoolExecutor() as pool:
-#         await loop.run_in_executor(pool, lambda: interface.listener(manager, loop))
+@app.on_event("startup")
+def startup_event():
+    loop = asyncio.new_event_loop()
+    thread = Thread(target=interface.listener, args=(manager, loop,))
+    thread.start()
