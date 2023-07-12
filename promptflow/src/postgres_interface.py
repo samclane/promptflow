@@ -1,9 +1,11 @@
+import asyncio
 import json
 from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
 
 import psycopg2
+import psycopg2.extensions
 from pydantic import BaseModel, conint, constr, validator
 
 from promptflow.src.connectors.connector import Connector
@@ -579,3 +581,17 @@ class PostgresInterface(DBInterface):
         )
         rows = self.cursor.fetchall()
         return list(map(lambda x: json.loads(x[1]), rows))
+
+    def listener(self, manager, loop: asyncio.AbstractEventLoop):
+        self.conn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
+
+        with self.conn.cursor() as cur:
+            cur.execute("LISTEN job_log_updated;")
+
+            while True:
+                self.conn.poll()
+                while self.conn.notifies:
+                    notify = self.conn.notifies.pop(0)
+                    loop.run_in_executor(
+                        None, asyncio.run, manager.send_message(notify.payload)
+                    )

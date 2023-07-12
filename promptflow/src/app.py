@@ -3,13 +3,25 @@ Primary application class. This class is responsible for creating the
 window, menu, and canvas. It also handles the saving and loading of
 flowcharts.
 """
+import asyncio
 import json
 import logging
 import os
-import zipfile
 import traceback
+import zipfile
+from concurrent.futures import ThreadPoolExecutor
+from threading import Thread
 
-from fastapi import BackgroundTasks, FastAPI, File, HTTPException, Response, UploadFile
+from fastapi import (
+    BackgroundTasks,
+    FastAPI,
+    File,
+    HTTPException,
+    Response,
+    UploadFile,
+    WebSocket,
+    WebSocketDisconnect,
+)
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -57,6 +69,25 @@ interface = PostgresInterface(
         password="postgres",
     )
 )
+
+
+class ConnectionManager:
+    def __init__(self) -> None:
+        self.active_connections: list[WebSocket] = []
+
+    async def connect(self, websocket: WebSocket):
+        await websocket.accept()
+        self.active_connections.append(websocket)
+
+    async def disconnect(self, websocket: WebSocket):
+        self.active_connections.remove(websocket)
+
+    async def send_message(self, message: str):
+        for connection in self.active_connections:
+            await connection.send_text(message)
+
+
+manager = ConnectionManager()
 
 
 @app.get("/flowcharts")
@@ -138,6 +169,17 @@ def get_job_logs(job_id) -> dict:
         return {"logs": interface.get_job_logs(job_id)}
     except ValueError:
         raise HTTPException(status_code=404, detail="Job not found")
+
+
+@app.websocket("/jobs/{job_id}/ws")
+async def job_logs_ws(websocket: WebSocket, job_id: int):
+    await manager.connect(websocket)
+    try:
+        await websocket.send_text(json.dumps({"logs": interface.get_job_logs(job_id)}))
+        while True:
+            await asyncio.sleep(1)
+    except WebSocketDisconnect:
+        await manager.disconnect(websocket)
 
 
 @app.get("/flowcharts/{flowchart_id}/stop")
@@ -301,3 +343,10 @@ def handle_exception(request, exc):
         status_code=exc.status_code,
         content={"message": str(exc.detail)},
     )
+
+
+# @app.on_event("startup")
+# async def startup_event():
+#     loop = asyncio.get_event_loop()
+#     with ThreadPoolExecutor() as pool:
+#         await loop.run_in_executor(pool, lambda: interface.listener(manager, loop))
