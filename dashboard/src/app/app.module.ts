@@ -4,11 +4,13 @@ import { HttpClientModule } from '@angular/common/http';  // Import HttpClientMo
 
 import { AppComponent } from './app.component';
 import { FlowchartListComponent } from './flowchart-list.component';
+import { JobListComponent } from './job-list.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    FlowchartListComponent
+    FlowchartListComponent,
+    JobListComponent
   ],
   imports: [
     BrowserModule,
