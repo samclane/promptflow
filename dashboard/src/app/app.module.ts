@@ -5,12 +5,14 @@ import { HttpClientModule } from '@angular/common/http';  // Import HttpClientMo
 import { AppComponent } from './app.component';
 import { FlowchartListComponent } from './flowchart-list.component';
 import { JobListComponent } from './job-list.component';
+import { NodeTypeListComponent } from './node-type-list.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     FlowchartListComponent,
-    JobListComponent
+    JobListComponent,
+    NodeTypeListComponent
   ],
   imports: [
     BrowserModule,
