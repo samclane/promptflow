@@ -177,6 +177,7 @@ async def job_logs_ws(websocket: WebSocket, job_id: int):
     try:
         await websocket.send_text(json.dumps({"logs": interface.get_job_logs(job_id)}))
         while True:
+            await websocket.send_text(json.dumps({"logs": interface.get_job_logs(job_id)}))
             await asyncio.sleep(1)
     except WebSocketDisconnect:
         await manager.disconnect(websocket)
