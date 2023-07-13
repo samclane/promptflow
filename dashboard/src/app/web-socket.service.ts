@@ -8,8 +8,7 @@ import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 export class WebSocketService {
   private socket$!: WebSocketSubject<any>;
 
-  public connect(jobId: string): void {
-    const url = `ws://localhost:8000/jobs/${jobId}/ws`;  // replace with your WebSocket server URL
+  public connect(url: string, jobId: string): void {
     if (!this.socket$ || this.socket$.closed) {
       this.socket$ = webSocket(url);
     }

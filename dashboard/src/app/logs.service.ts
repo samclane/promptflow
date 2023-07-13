@@ -12,7 +12,8 @@ export class LogsService {
   constructor(private webSocketService: WebSocketService) { }
 
   startLogging(jobId: string): void {
-    this.webSocketService.connect(jobId);
+    const url = `ws://localhost:8000/jobs/${jobId}/ws`;  // replace with your WebSocket server URL
+    this.webSocketService.connect(url, jobId);
     this.logs$ = this.webSocketService.getObservable();
   }
 
