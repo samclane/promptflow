@@ -14,20 +14,14 @@ export class JobDetailComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private jobsService: JobsService,
-    private logsService: LogsService
+    private jobsService: JobsService
   ) { }
 
   ngOnInit(): void {
     this.jobId = this.route.snapshot.paramMap.get('id') as string;
     if (this.jobId){ 
         this.getJob();
-        this.logsService.startLogging(this.jobId);
 
-        this.logsService.getLogs().subscribe(log => {
-          console.log(log);
-        });
-    
     }
   }
 
