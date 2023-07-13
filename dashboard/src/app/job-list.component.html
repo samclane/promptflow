@@ -1,23 +1,27 @@
 <!-- job-list.component.html -->
-<table>
-    <thead>
-      <tr>
-        <th>Job ID</th>
-        <th>Status</th>
-        <th>Created</th>
-        <th>Updated</th>
-        <th>Metadata Job Id</th>
+<div class="overflow-x-auto">
+  <table class="mx-auto max-w-4xl w-full whitespace-nowrap rounded-lg bg-white divide-y divide-gray-300 overflow-hidden">
+    <thead class="bg-gray-50">
+      <tr class="text-left font-bold">
+        <th class="px-6 py-4 text-xs leading-4 tracking-wider text-gray-500">Job ID</th>
+        <th class="px-6 py-4 text-xs leading-4 tracking-wider text-gray-500">Status</th>
+        <th class="px-6 py-4 text-xs leading-4 tracking-wider text-gray-500">Created</th>
+        <th class="px-6 py-4 text-xs leading-4 tracking-wider text-gray-500">Updated</th>
+        <th class="px-6 py-4 text-xs leading-4 tracking-wider text-gray-500">Metadata Job Id</th>
+        <th class="px-6 py-4 text-xs leading-4 tracking-wider text-gray-500">Actions</th>
       </tr>
     </thead>
-    <tbody>
-      <tr *ngFor="let job of jobs">
-        <td>{{ job.job_id }}</td>
-        <td>{{ job.job_status }}</td>
-        <td>{{ job.created }}</td>
-        <td>{{ job.updated }}</td>
-        <td>{{ job.metadata.jobId }}</td>
-        <td><a [routerLink]="['/jobs', job.job_id]">View Details</a></td>
+    <tbody class="bg-white divide-y divide-gray-300">
+      <tr *ngFor="let job of jobs" class="text-gray-700">
+        <td class="px-6 py-4">{{ job.job_id }}</td>
+        <td class="px-6 py-4">{{ job.job_status }}</td>
+        <td class="px-6 py-4">{{ job.created }}</td>
+        <td class="px-6 py-4">{{ job.updated }}</td>
+        <td class="px-6 py-4">{{ job.metadata.jobId }}</td>
+        <td class="px-6 py-4">
+          <a [routerLink]="['/jobs', job.job_id]" class="text-blue-600 hover:text-blue-900">View Details</a>
+        </td>
       </tr>
     </tbody>
   </table>
-  
+</div>

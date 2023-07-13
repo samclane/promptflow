@@ -11,6 +11,7 @@ import { JobDetailComponent } from './job-detail.component';
 
 import { RouterModule, Routes } from '@angular/router';
 import { JobLogsComponent } from './job-logs.component';
+import { HeaderComponent } from './header.component';
 
 const routes: Routes = [
   { path: 'flowcharts', component: FlowchartListComponent },
@@ -29,7 +30,8 @@ const routes: Routes = [
     NodeTypeListComponent,
     FlowchartDetailComponent,
     JobDetailComponent,
-    JobLogsComponent
+    JobLogsComponent,
+    HeaderComponent
   ],
   imports: [
     BrowserModule,
