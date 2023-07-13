@@ -14,4 +14,11 @@ export class NodeService {
     return this.http.get(`${this.apiUrl}/nodes/types`);
   }
 
+  addNode(flowchartId: string, nodeType: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/flowcharts/${flowchartId}/nodes`, { node_type: nodeType });
+  }
+
+  removeNode(flowchartId: string, nodeId: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/flowcharts/${flowchartId}/nodes/${nodeId}`);
+  }
 }
