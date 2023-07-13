@@ -1,0 +1,10 @@
+<!-- job-detail.component.html -->
+<h2>Job Detail</h2>
+
+<div *ngIf="job">
+  <p><strong>ID:</strong> {{ job.job_id }}</p>
+  <p><strong>Status:</strong> {{ job.job_status }}</p>
+  <p><strong>Created:</strong> {{ job.created }}</p>
+  <p><strong>Updated:</strong> {{ job.updated }}</p>
+  <p><strong>Metadata:</strong> {{ job.metadata | json }}</p>
+</div>

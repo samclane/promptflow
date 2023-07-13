@@ -22,4 +22,7 @@ export class JobsService {
     return this.http.get(`${this.apiUrl}/jobs/${jobId}/logs`);
   }
 
+  createJob(jobData: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/jobs`, jobData);
+  }
 }

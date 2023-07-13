@@ -16,6 +16,7 @@
         <td>{{ job.created }}</td>
         <td>{{ job.updated }}</td>
         <td>{{ job.metadata.jobId }}</td>
+        <td><a [routerLink]="['/jobs', job.job_id]">View Details</a></td>
       </tr>
     </tbody>
   </table>
