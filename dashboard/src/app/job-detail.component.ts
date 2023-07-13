@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { JobsService } from './jobs.service';
+import { LogsService } from './logs.service';
 
 @Component({
   selector: 'app-job-detail',
@@ -8,18 +9,25 @@ import { JobsService } from './jobs.service';
   styleUrls: ['./job-detail.component.css']
 })
 export class JobDetailComponent implements OnInit {
-  jobId?: string;
+  jobId!: string;
   job: any;
 
   constructor(
     private route: ActivatedRoute,
-    private jobsService: JobsService
+    private jobsService: JobsService,
+    private logsService: LogsService
   ) { }
 
   ngOnInit(): void {
     this.jobId = this.route.snapshot.paramMap.get('id') as string;
     if (this.jobId){ 
-        this.getJob();    
+        this.getJob();
+        this.logsService.startLogging(this.jobId);
+
+        this.logsService.getLogs().subscribe(log => {
+          console.log(log);
+        });
+    
     }
   }
 
