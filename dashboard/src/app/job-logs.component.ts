@@ -18,8 +18,8 @@ export class JobLogsComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.logsService.startLogging(this.jobId);
-    this.logSubscription = this.logsService.getLogs().subscribe(log => {
-      this.logs += log + '\n';
+    this.logSubscription = this.logsService.getLogs().subscribe(logs => {
+      this.logs = logs;
     });
   }
 
