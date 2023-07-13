@@ -44,4 +44,12 @@ export class FlowchartDetailComponent implements OnInit {
         // Handle successful execution...
         });
     }
-  }}
+  }
+    stopFlowchart(): void {
+        if (this.flowchartId) {
+            this.flowchartService.stopFlowchart(this.flowchartId).subscribe(() => {
+            // Handle successful stop...
+            });
+        }
+    }
+  }

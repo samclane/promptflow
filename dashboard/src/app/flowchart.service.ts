@@ -21,8 +21,12 @@ export class FlowchartService {
   upsertFlowchart(flowchartJson: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/flowcharts`, flowchartJson);
   }
-  
+
   runFlowchart(flowchartId: string): Observable<any> {
     return this.http.get(`${this.apiUrl}/flowcharts/${flowchartId}/run`);
+  }
+
+  stopFlowchart(flowchartId: string): Observable<any> {
+    return this.http.get(`${this.apiUrl}/flowcharts/${flowchartId}/stop`);
   }
 }
