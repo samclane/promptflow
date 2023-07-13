@@ -1,6 +1,7 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { NodeService } from './node.service';
+import { FlowchartService } from './flowchart.service';
 
 @Component({
   selector: 'app-flowchart-detail',
@@ -12,7 +13,8 @@ export class FlowchartDetailComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private nodeService: NodeService
+    private nodeService: NodeService,
+    private flowchartService: FlowchartService
   ) { }
 
   ngOnInit(): void {
@@ -36,5 +38,10 @@ export class FlowchartDetailComponent implements OnInit {
     }
   }
 
-  // Other methods for interacting with the flowchart...
-}
+  runFlowchart(): void {
+    if (this.flowchartId) {
+        this.flowchartService.runFlowchart(this.flowchartId).subscribe(() => {
+        // Handle successful execution...
+        });
+    }
+  }}
