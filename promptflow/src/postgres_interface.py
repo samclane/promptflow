@@ -378,14 +378,14 @@ class PostgresInterface(DBInterface):
             user=config.user,
             password=config.password,
         )
-        self.cursor = self.conn.cursor()
         self.init_schema()
 
     def init_schema(self):
         try:
             with open("promptflow/sql/postgres_schema.sql", "r") as file:
-                self.cursor.execute(file.read())
-                self.conn.commit()
+                with self.conn.cursor() as cursor:
+                    cursor.execute(file.read())
+                    self.conn.commit()
         except Exception as e:
             print(f"Error initializing schema: {e}")
 
@@ -409,33 +409,35 @@ class PostgresInterface(DBInterface):
         return flowcharts
 
     def new_flowchart(self) -> Flowchart:
-        name = {
-            "name": "New Flowchart" + str(datetime.now()),
-            "nodes": [],
-            "branches": [],
-        }
-        self.cursor.callproc(
-            """
-            upsert_graph
-            """,
-            [
-                json.dumps(name),
-            ],
-        )
-        self.conn.commit()
-        id = self.cursor.fetchone()[0]
-        return Flowchart(
-            interface=self, id=id, name=name["name"], created=datetime.now()
-        )
+        with self.conn.cursor() as cursor:
+            name = {
+                "name": "New Flowchart" + str(datetime.now()),
+                "nodes": [],
+                "branches": [],
+            }
+            cursor.callproc(
+                """
+                upsert_graph
+                """,
+                [
+                    json.dumps(name),
+                ],
+            )
+            self.conn.commit()
+            id = cursor.fetchone()[0]
+            return Flowchart(
+                interface=self, id=id, name=name["name"], created=datetime.now()
+            )
 
     def get_node_type_id(self, node_type):
-        self.cursor.execute(
-            """
-            SELECT id FROM node_types WHERE name = %s
-            """,
-            [node_type],
-        )
-        return self.cursor.fetchone()[0]
+        with self.conn.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT id FROM node_types WHERE name = %s
+                """,
+                [node_type],
+            )
+            return cursor.fetchone()[0]
 
     def get_or_create_flowchart(
         self, flowcharts: List[Flowchart], row: GraphView
@@ -496,91 +498,107 @@ class PostgresInterface(DBInterface):
             flowchart.add_connector(connector)
 
     def get_flowchart_by_id(self, id) -> Flowchart:
-        self.cursor.execute(
-            "SELECT * FROM graph_view where graph_id=%s", (id,)
-        )  # todo select id,name from graph_view  for function get_graph_view
-        # todo for function get_graph_view_to_flowchart_list select id,name from graph_view where id = input_id
-        rows = self.cursor.fetchall()
-        graph_nodes = row_results_to_class_list(GraphView, rows)
-        return self.build_flowcharts_from_graph_view(graph_nodes)[0]
+        with self.conn.cursor() as cursor:
+            cursor.execute(
+                "SELECT * FROM graph_view where graph_id=%s", (id,)
+            )  # todo select id,name from graph_view  for function get_graph_view
+            # todo for function get_graph_view_to_flowchart_list select id,name from graph_view where id = input_id
+            rows = cursor.fetchall()
+            self.conn.commit()
+            graph_nodes = row_results_to_class_list(GraphView, rows)
+            return self.build_flowcharts_from_graph_view(graph_nodes)[0]
 
     def get_all_flowchart_ids_and_names(self) -> List[GraphNamesAndIds]:
-        self.cursor.execute("SELECT id, name FROM graphs")
-        rows = self.cursor.fetchall()
-        return row_results_to_class_list(GraphNamesAndIds, rows)
+        with self.conn.cursor() as cursor:
+            cursor.execute("SELECT id, name FROM graphs")
+            rows = cursor.fetchall()
+            self.conn.commit()
+            return row_results_to_class_list(GraphNamesAndIds, rows)
 
     def save_flowchart(self, flowchart: Flowchart):
-        self.cursor.callproc(
-            """
-            upsert_graph
-            """,
-            [
-                json.dumps(flowchart.serialize()),
-            ],
-        )
-        self.conn.commit()
+        with self.conn.cursor() as cursor:
+            cursor.callproc(
+                """
+                upsert_graph
+                """,
+                [
+                    json.dumps(flowchart.serialize()),
+                ],
+            )
+            self.conn.commit()
 
     def create_job(self, job: dict) -> int:
-        self.cursor.callproc(
-            "create_job",
-            [
-                json.dumps(job),
-            ],
-        )
-        job_data = self.cursor.fetchone()
-        job_id = job_data[0]
-        self.conn.commit()
-        return job_id
+        with self.conn.cursor() as cursor:
+            cursor.callproc(
+                "create_job",
+                [
+                    json.dumps(job),
+                ],
+            )
+            job_data = cursor.fetchone()
+            job_id = job_data[0]
+            self.conn.commit()
+            return job_id
 
     def update_job_status(self, job_id: int, status: str):
-        self.cursor.callproc(
-            "update_job_status",
-            [
-                json.dumps(
-                    {
-                        "jobId": job_id,
-                        "status": status,
-                    }
-                )
-            ],
-        )
-        self.conn.commit()
+        with self.conn.cursor() as cursor:
+            cursor.callproc(
+                "update_job_status",
+                [
+                    json.dumps(
+                        {
+                            "jobId": job_id,
+                            "status": status,
+                        }
+                    )
+                ],
+            )
+            self.conn.commit()
 
     def create_job_log(self, job_id: int, data: dict):
-        self.cursor.execute(
-            "CALL create_job_log(%s)", (json.dumps({"jobId": job_id, "data": data}),)
-        )
+        with self.conn.cursor() as cursor:
+            cursor.execute(
+                "CALL create_job_log(%s)",
+                (json.dumps({"jobId": job_id, "data": data}),),
+            )
+            self.conn.commit()
 
     def get_all_jobs(self) -> List[JobView]:
-        self.cursor.execute(
-            """
-            SELECT * FROM jobs_view
-            """,
-        )
-        rows = self.cursor.fetchall()
-        return list(map(JobView.hydrate, rows))
+        with self.conn.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT * FROM jobs_view
+                """,
+            )
+            rows = cursor.fetchall()
+            self.conn.commit()
+            return list(map(JobView.hydrate, rows))
 
     def get_job_view(self, job_id: int) -> JobView:
-        self.cursor.execute(
-            """
-            SELECT * FROM jobs_view where id=%s
-            """,
-            [job_id],
-        )
-        row = self.cursor.fetchone()
-        if not row:
-            raise ValueError(f"Job with id {job_id} not found")
-        return JobView.hydrate(row)
+        with self.conn.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT * FROM jobs_view where id=%s
+                """,
+                [job_id],
+            )
+            row = cursor.fetchone()
+            self.conn.commit()
+            if not row:
+                raise ValueError(f"Job with id {job_id} not found")
+            return JobView.hydrate(row)
 
     def get_job_logs(self, job_id: int) -> List[dict]:
-        self.cursor.execute(
-            """
-            SELECT * FROM job_logs where job_id=%s
-            """,
-            [job_id],
-        )
-        rows = self.cursor.fetchall()
-        return list(map(lambda x: x[0], rows))
+        with self.conn.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT * FROM job_logs where job_id=%s
+                """,
+                [job_id],
+            )
+            rows = cursor.fetchall()
+            self.conn.commit()
+            return list(map(lambda x: x[0], rows))
 
     def listener(self, manager, loop: asyncio.AbstractEventLoop):
         self.conn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
