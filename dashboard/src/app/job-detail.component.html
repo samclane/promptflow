@@ -1,11 +1,16 @@
-<h2>Job Detail</h2>
+<div class="p-4 md:p-8 bg-white rounded-lg shadow-lg max-w-3xl mx-auto mt-10" *ngIf="job">
+  <h2 class="text-4xl font-semibold mb-4">Job Detail</h2>
 
-<div *ngIf="job">
-  <p><strong>ID:</strong> {{ job.job_id }}</p>
-  <p><strong>Status:</strong> {{ job.job_status }}</p>
-  <p><strong>Created:</strong> {{ job.created }}</p>
-  <p><strong>Updated:</strong> {{ job.updated }}</p>
-  <p><strong>Metadata:</strong> {{ job.metadata | json }}</p>
-  <p><strong>Logs:</strong> <app-job-logs [jobId]="jobId"></app-job-logs></p>
+  <div class="p-4 bg-blue-100 rounded-lg">
+    <p class="font-semibold text-lg mb-2"><strong>ID:</strong> {{ job.job_id }}</p>
+    <p class="font-semibold text-lg mb-2"><strong>Status:</strong> {{ job.job_status }}</p>
+    <p class="font-semibold text-lg mb-2"><strong>Created:</strong> {{ job.created }}</p>
+    <p class="font-semibold text-lg mb-2"><strong>Updated:</strong> {{ job.updated }}</p>
+    <p class="font-semibold text-lg mb-2"><strong>Metadata:</strong> <pre class="font-semibold text-sm">{{ job.metadata | json }}</pre>
+  </div>
+
+  <div class="mt-6">
+    <h3 class="text-2xl font-semibold mb-2">Logs:</h3>
+    <app-job-logs [jobId]="jobId" class="shadow rounded p-4"></app-job-logs>
+  </div>
 </div>
- 

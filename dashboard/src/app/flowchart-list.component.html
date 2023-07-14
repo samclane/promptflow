@@ -1,11 +1,13 @@
-<div *ngFor="let flowchart of flowcharts" class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl m-3">
-  <div class="md:flex">
-    <div class="md:flex-shrink-0">
+<div *ngFor="let flowchart of flowcharts" class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl m-3 transition duration-500 ease-in-out transform hover:-translate-y-1 hover:scale-110 hover:bg-gray-200">
+<a [routerLink]="['/flowcharts', flowchart.id]">
+    <div class="md:flex">
+      <div class="md:flex-shrink-0">
+      </div>
+      <div class="p-8">
+        <div class="block mt-1 text-lg leading-tight font-medium text-black">{{ flowchart.name }}</div>
+        <p class="mt-2 text-gray-500">
+        </p>
+      </div>
     </div>
-    <div class="p-8">
-      <a [routerLink]="['/flowcharts', flowchart.id]" class="block mt-1 text-lg leading-tight font-medium text-black hover:underline">{{ flowchart.name }}</a>
-      <p class="mt-2 text-gray-500">
-      </p>
-    </div>
-  </div>
+  </a>
 </div>
