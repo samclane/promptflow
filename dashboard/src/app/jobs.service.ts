@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -24,5 +24,11 @@ export class JobsService {
 
   createJob(jobData: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/jobs`, jobData);
+  }
+
+  getJobCount(): Observable<number> {
+    return this.getJobs().pipe(
+      map(jobs => jobs.length)
+    );
   }
 }

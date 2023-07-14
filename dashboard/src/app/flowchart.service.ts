@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -28,5 +28,12 @@ export class FlowchartService {
 
   stopFlowchart(flowchartId: string): Observable<any> {
     return this.http.get(`${this.apiUrl}/flowcharts/${flowchartId}/stop`);
+  }
+
+  getFlowchartCount(): Observable<number> {
+    // call getFlowcharts() and return the length of the array
+    return this.getFlowcharts().pipe(
+      map(flowcharts => flowcharts.length)
+    );
   }
 }
