@@ -558,7 +558,7 @@ class PostgresInterface(DBInterface):
             """,
         )
         rows = self.cursor.fetchall()
-        return list(map(lambda x: JobView.hydrate(x), rows))
+        return list(map(JobView.hydrate, rows))
 
     def get_job_view(self, job_id: int) -> JobView:
         self.cursor.execute(
