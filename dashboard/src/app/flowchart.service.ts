@@ -31,7 +31,6 @@ export class FlowchartService {
   }
 
   getFlowchartCount(): Observable<number> {
-    // call getFlowcharts() and return the length of the array
     return this.getFlowcharts().pipe(
       map(flowcharts => flowcharts.length)
     );

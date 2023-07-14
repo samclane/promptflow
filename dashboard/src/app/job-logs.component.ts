@@ -1,4 +1,3 @@
-// job-logs.component.ts
 import { Component, OnInit, OnDestroy, Input } from '@angular/core';
 import { LogsService } from './logs.service';
 import { WebSocketService } from './web-socket.service';

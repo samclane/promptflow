@@ -1,4 +1,3 @@
-// logs.service.ts
 import { Injectable } from '@angular/core';
 import { WebSocketService } from './web-socket.service';
 import { Observable } from 'rxjs';
@@ -12,7 +11,7 @@ export class LogsService {
   constructor(private webSocketService: WebSocketService) { }
 
   startLogging(jobId: string): void {
-    const url = `ws://localhost:8000/jobs/${jobId}/ws`;  // replace with your WebSocket server URL
+    const url = `ws://localhost:8000/jobs/${jobId}/ws`;
     this.webSocketService.connect(url, jobId);
     this.logs$ = this.webSocketService.getObservable();
   }

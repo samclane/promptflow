@@ -1,4 +1,3 @@
-// node-type-list.component.ts
 import { Component, OnInit } from '@angular/core';
 import { NodeService } from './node.service';
 
@@ -20,5 +19,4 @@ export class NodeTypeListComponent implements OnInit {
     this.nodeService.getNodeTypes().subscribe(nodeTypes => this.nodeTypes = nodeTypes["node_types"]);
   }
 
-  // Other methods for interacting with node types...
 }

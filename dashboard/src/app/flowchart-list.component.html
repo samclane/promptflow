@@ -1,14 +1,10 @@
 <div *ngFor="let flowchart of flowcharts" class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl m-3">
   <div class="md:flex">
     <div class="md:flex-shrink-0">
-      <!-- You can put an image here using the img tag if you have any associated with the flowchart -->
-      <!-- <img class="h-48 w-full object-cover md:w-48" src="/path-to-your-image.jpg" alt="Flowchart image"> -->
     </div>
     <div class="p-8">
       <a [routerLink]="['/flowcharts', flowchart.id]" class="block mt-1 text-lg leading-tight font-medium text-black hover:underline">{{ flowchart.name }}</a>
       <p class="mt-2 text-gray-500">
-        <!-- You can put some description here if you have any associated with the flowchart -->
-        <!-- {{ flowchart.description }} -->
       </p>
     </div>
   </div>
