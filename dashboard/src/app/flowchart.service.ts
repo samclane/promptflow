@@ -35,4 +35,8 @@ export class FlowchartService {
       map(flowcharts => flowcharts.length)
     );
   }
+
+  deleteFlowchart(flowchartId: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/flowcharts/${flowchartId}`);
+  }
 }

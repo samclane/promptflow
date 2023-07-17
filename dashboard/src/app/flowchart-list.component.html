@@ -1,13 +1,15 @@
 <div *ngFor="let flowchart of flowcharts" class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl m-3 transition duration-500 ease-in-out transform hover:bg-gray-200">
-<a [routerLink]="['/flowcharts', flowchart.id]">
-    <div class="md:flex">
-      <div class="md:flex-shrink-0">
+  <div class="flex justify-between">
+    <a [routerLink]="['/flowcharts', flowchart.id]">
+      <div class="md:flex">
+        <div class="md:flex-shrink-0">
+        </div>
+        <div class="p-8">
+          <div class="block mt-1 text-lg leading-tight font-medium text-black">{{ flowchart.name }}</div>
+          <p class="mt-2 text-gray-500"></p>
+        </div>
       </div>
-      <div class="p-8">
-        <div class="block mt-1 text-lg leading-tight font-medium text-black">{{ flowchart.name }}</div>
-        <p class="mt-2 text-gray-500">
-        </p>
-      </div>
-    </div>
-  </a>
+    </a>
+    <button (click)="deleteFlowchart(flowchart.id)" class="p-2 bg-red-500 text-white rounded self-center mr-4">Delete</button>
+  </div>
 </div>

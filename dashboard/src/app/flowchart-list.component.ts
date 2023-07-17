@@ -19,4 +19,10 @@ export class FlowchartListComponent implements OnInit {
     this.flowchartService.getFlowcharts().subscribe(flowcharts => this.flowcharts = flowcharts);
   }
 
+  deleteFlowchart(id: string): void {
+    this.flowchartService.deleteFlowchart(id).subscribe(() => {
+      this.flowcharts = this.flowcharts.filter(flowchart => flowchart.id !== id);
+    });
+  }
+
 }
