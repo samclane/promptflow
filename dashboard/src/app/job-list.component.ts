@@ -22,11 +22,12 @@ export class JobListComponent implements OnInit {
   }
 
   sortJobs<T extends keyof Job>(property: T): Job[] {
+    this.sortDirection = this.sortDirection * -1; // flip the direction
     return this.jobs.sort((a: Job, b: Job) => {
         if (a[property] < b[property]) {
-            return -1;
+            return -1 * this.sortDirection;
         } else if (a[property] > b[property]) {
-            return 1;
+            return 1 * this.sortDirection;
         } else {
             return 0;
         }
