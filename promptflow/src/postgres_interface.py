@@ -308,6 +308,15 @@ class DBInterface(ABC):
         Args:
             flowchart (Flowchart): The flowchart to save.
         """
+        
+    @abstractmethod
+    def delete_flowchart(self, flowchart_id: int):
+        """
+        Deletes the flowchart from the database.
+        
+        Args: 
+            flowchart_id (int): The ID of the flowchart to delete.
+        """
 
     @abstractmethod
     def create_job(self, job: dict, flowchart_id: str):
@@ -546,7 +555,8 @@ class PostgresInterface(DBInterface):
             cursor.execute(
                 """
                 DELETE FROM graphs WHERE id = %s
-                """
+                """,
+                [flowchart_id],
             )
             self.conn.commit()
 
