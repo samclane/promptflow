@@ -8,7 +8,8 @@ INSERT INTO job_statuses (status) VALUES ('PENDING'), ('RUNNING'), ('FAILED'), (
 
 CREATE TABLE IF NOT EXISTS jobs (
   id serial PRIMARY KEY NOT NULL,
-  created timestamp NOT NULL DEFAULT current_timestamp
+  created timestamp NOT NULL DEFAULT current_timestamp,
+  graph_id integer REFERENCES graphs(id) ON DELETE CASCADE ON UPDATE CASCADE NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS job_metadata (
@@ -35,10 +36,10 @@ CREATE OR REPLACE VIEW jobs_view AS
     js.status,
     j.created,
     js.created updated,
-    jm.metadata
+    jm.metadata,
+    j.graph_id
 FROM
   jobs j
-  LEFT JOIN job_metadata jm ON jm.job_id = j.id
   JOIN LATERAL (
     SELECT
       js.job_id,
@@ -54,10 +55,11 @@ FROM
       js.created DESC
     LIMIT 1
       ) AS js ON
-    TRUE;
+    TRUE
+    LEFT JOIN job_metadata jm ON jm.job_id = j.id;
 
 
-CREATE OR REPLACE FUNCTION update_job_status (inp jsonb) RETURNS TABLE (id integer, status TEXT, created timestamp, updated timestamp, metadata jsonb)
+CREATE OR REPLACE FUNCTION update_job_status (inp jsonb) RETURNS TABLE (id integer, status TEXT, created timestamp, updated timestamp, metadata jsonb, graph_id integer)
 LANGUAGE plpgsql 
 AS $$ 
 DECLARE
@@ -72,7 +74,7 @@ BEGIN
 
   INSERT INTO job_status (status_id, job_id) VALUES (s_id, job_id);
 
-  RETURN query SELECT jv.id, jv.status, jv.created, jv.updated, jv.metadata FROM jobs_view jv WHERE jv.id=job_id;
+  RETURN query SELECT jv.id, jv.status, jv.created, jv.updated, jv.metadata, jv.graph_id FROM jobs_view jv WHERE jv.id=job_id;
 END $$;
 
 CREATE OR REPLACE PROCEDURE create_job_log(inp jsonb) LANGUAGE plpgsql AS $$ 
@@ -85,15 +87,17 @@ BEGIN
   INSERT INTO job_logs (job_id, "log") VALUES (job_id, "log");
 END $$;
 
-CREATE OR REPLACE FUNCTION create_job(inp jsonb) RETURNS TABLE (id integer, status TEXT, created timestamp, updated timestamp, metadata jsonb) LANGUAGE plpgsql
+CREATE OR REPLACE FUNCTION create_job(inp jsonb) RETURNS TABLE (id integer, status TEXT, created timestamp, updated timestamp, metadata jsonb, graph_id integer) LANGUAGE plpgsql
 AS $$
 DECLARE
   job_id integer;
+  graph_id integer := inp->>'graphId';
 BEGIN
-  INSERT INTO jobs DEFAULT VALUES RETURNING jobs.id INTO job_id;
+  IF graph_id IS NULL THEN RAISE EXCEPTION 'Graph ID is required'; END IF;
+  INSERT INTO jobs (graph_id) VALUES (graph_id) RETURNING jobs.id INTO job_id;
   INSERT INTO job_metadata (metadata, job_id) VALUES (inp, job_id);
   INSERT INTO job_status (status_id, job_id) SELECT s.id, job_id FROM job_statuses s WHERE s.status='PENDING';
-  RETURN query SELECT jv.id, jv.status, jv.created, jv.updated, jv.metadata FROM jobs_view jv WHERE jv.id=job_id;
+  RETURN query SELECT jv.id, jv.status, jv.created, jv.updated, jv.metadata, jv.graph_id FROM jobs_view jv WHERE jv.id=job_id;
 END $$;
 
 -- Node Types

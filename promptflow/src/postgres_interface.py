@@ -307,12 +307,13 @@ class DBInterface(ABC):
         """
 
     @abstractmethod
-    def create_job(self, job: dict):
+    def create_job(self, job: dict, flowchart_id: str):
         """
         Creates a new job in the database from a celery job.
 
         Args:
             job (Job): The job to create.
+            flowchart_id (str): The ID of the flowchart to run.
         """
 
     @abstractmethod
@@ -424,7 +425,10 @@ class PostgresInterface(DBInterface):
                 ],
             )
             self.conn.commit()
-            id = cursor.fetchone()[0]
+            row = cursor.fetchone()
+            if not row:
+                raise ValueError("No flowchart data returned from the database")
+            id = row[0]
             return Flowchart(
                 interface=self, id=id, name=name["name"], created=datetime.now()
             )
@@ -437,7 +441,10 @@ class PostgresInterface(DBInterface):
                 """,
                 [node_type],
             )
-            return cursor.fetchone()[0]
+            row = cursor.fetchone()
+            if row is None:
+                raise ValueError(f"Node type {node_type} not found")
+            return row[0]
 
     def get_or_create_flowchart(
         self, flowcharts: List[Flowchart], row: GraphView
@@ -456,6 +463,8 @@ class PostgresInterface(DBInterface):
 
     @staticmethod
     def add_node_to_flowchart(flowchart: Flowchart, row: GraphView) -> NodeBase:
+        if not row.node_type_name:
+            raise ValueError("Node type name cannot be null")
         node_cls = node_map.get(row.node_type_name)
         if node_cls is None:
             raise ValueError(f"Node type {row.node_type_name} not found in node_map")
@@ -484,6 +493,8 @@ class PostgresInterface(DBInterface):
             return
         if not row.current_node or not row.next_node:
             return
+        if not row.branch_label:
+            row.branch_label = "Untitled"
         src_node = flowchart.find_node(row.current_node)
         dst_node = flowchart.find_node(row.next_node)
         if src_node and dst_node:
@@ -527,15 +538,17 @@ class PostgresInterface(DBInterface):
             )
             self.conn.commit()
 
-    def create_job(self, job: dict) -> int:
+    def create_job(self, job: dict, flowchart_id: str) -> int:
         with self.conn.cursor() as cursor:
             cursor.callproc(
                 "create_job",
                 [
-                    json.dumps(job),
+                    json.dumps(job | {"graphId": flowchart_id}),
                 ],
             )
             job_data = cursor.fetchone()
+            if job_data is None:
+                raise ValueError("Job creation failed")
             job_id = job_data[0]
             self.conn.commit()
             return job_id
