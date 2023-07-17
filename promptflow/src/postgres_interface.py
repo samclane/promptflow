@@ -25,6 +25,7 @@ class JobView(BaseModel):
         created (datetime): The date and time the job was created.
         updated (datetime): The date and time the job was updated.
         metadata (Optional[Dict[str, Any]]): The metadata for the job.
+        graph_id (Optional[int]): The ID of the graph associated with the job.
     """
 
     job_id: conint(gt=0)
@@ -32,6 +33,7 @@ class JobView(BaseModel):
     created: datetime
     updated: datetime
     metadata: Optional[Dict[str, Any]]
+    graph_id: Optional[conint(gt=0)]
 
     @staticmethod
     def hydrate(row: Tuple[Any, ...]) -> "JobView":
@@ -50,6 +52,7 @@ class JobView(BaseModel):
             created=row[2],
             updated=row[3],
             metadata=row[4],
+            graph_id=row[5],
         )
 
 
