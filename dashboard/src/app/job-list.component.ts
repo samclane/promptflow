@@ -10,6 +10,7 @@ import { Job } from './job';
 export class JobListComponent implements OnInit {
   jobs: Job[] = [];
   sortDirection = 1; // 1 for ascending, -1 for descending
+  currentSortColumn: string | null = null;
 
   constructor(private jobsService: JobsService) { }
 
@@ -23,6 +24,7 @@ export class JobListComponent implements OnInit {
 
   sortJobs<T extends keyof Job>(property: T): Job[] {
     this.sortDirection = this.sortDirection * -1; // flip the direction
+    this.currentSortColumn = property;
     return this.jobs.sort((a: Job, b: Job) => {
         if (a[property] < b[property]) {
             return -1 * this.sortDirection;
