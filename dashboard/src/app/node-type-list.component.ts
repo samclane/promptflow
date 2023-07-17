@@ -7,7 +7,7 @@ import { NodeService } from './node.service';
   styleUrls: ['./node-type-list.component.css']
 })
 export class NodeTypeListComponent implements OnInit {
-  nodeTypes: any[] = [];
+  nodeTypes: string[] = [];
 
   constructor(private nodeService: NodeService) { }
 

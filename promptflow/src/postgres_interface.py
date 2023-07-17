@@ -540,6 +540,15 @@ class PostgresInterface(DBInterface):
                 ],
             )
             self.conn.commit()
+            
+    def delete_flowchart(self, flowchart_id: int):
+        with self.conn.cursor() as cursor:
+            cursor.execute(
+                """
+                DELETE FROM graphs WHERE id = %s
+                """
+            )
+            self.conn.commit()
 
     def create_job(self, job: dict, flowchart_id: str) -> int:
         with self.conn.cursor() as cursor:

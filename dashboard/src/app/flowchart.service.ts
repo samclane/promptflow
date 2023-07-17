@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
+import { Flowchart, FlowchartConfirmation } from './flowchart';
 
 @Injectable({
   providedIn: 'root'
@@ -10,24 +11,24 @@ export class FlowchartService {
 
   constructor(private http: HttpClient) { }
 
-  getFlowcharts(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/flowcharts`);
+  getFlowcharts(): Observable<Flowchart[]> {
+    return this.http.get(`${this.apiUrl}/flowcharts`) as Observable<Flowchart[]>;
   }
 
-  getFlowchart(flowchartId: string): Observable<any> {
-    return this.http.get(`${this.apiUrl}/flowcharts/${flowchartId}`);
+  getFlowchart(flowchartId: string): Observable<Flowchart> {
+    return this.http.get(`${this.apiUrl}/flowcharts/${flowchartId}`) as Observable<Flowchart>;
   }
 
-  upsertFlowchart(flowchartJson: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/flowcharts`, flowchartJson);
+  upsertFlowchart(flowchartJson: Flowchart): Observable<Flowchart> {
+    return this.http.post(`${this.apiUrl}/flowcharts`, flowchartJson) as Observable<Flowchart>;
   }
 
-  runFlowchart(flowchartId: string): Observable<any> {
-    return this.http.get(`${this.apiUrl}/flowcharts/${flowchartId}/run`);
+  runFlowchart(flowchartId: string): Observable<FlowchartConfirmation> {
+    return this.http.get(`${this.apiUrl}/flowcharts/${flowchartId}/run`) as Observable<FlowchartConfirmation>;
   }
 
-  stopFlowchart(flowchartId: string): Observable<any> {
-    return this.http.get(`${this.apiUrl}/flowcharts/${flowchartId}/stop`);
+  stopFlowchart(flowchartId: string): Observable<FlowchartConfirmation> {
+    return this.http.get(`${this.apiUrl}/flowcharts/${flowchartId}/stop`) as Observable<FlowchartConfirmation>;
   }
 
   getFlowchartCount(): Observable<number> {
@@ -36,7 +37,7 @@ export class FlowchartService {
     );
   }
 
-  deleteFlowchart(flowchartId: string): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/flowcharts/${flowchartId}`);
+  deleteFlowchart(flowchartId: string): Observable<FlowchartConfirmation> {
+    return this.http.delete(`${this.apiUrl}/flowcharts/${flowchartId}`) as Observable<FlowchartConfirmation>;
   }
 }

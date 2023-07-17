@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FlowchartService } from './flowchart.service';
+import { Flowchart } from './flowchart';
 
 @Component({
   selector: 'app-flowchart-list',
@@ -7,7 +8,7 @@ import { FlowchartService } from './flowchart.service';
   styleUrls: ['./flowchart-list.component.css']
 })
 export class FlowchartListComponent implements OnInit {
-  flowcharts: any[] = [];
+  flowcharts: Flowchart[] = [];
 
   constructor(private flowchartService: FlowchartService) { }
 

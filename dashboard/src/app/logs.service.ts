@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
 import { WebSocketService } from './web-socket.service';
 import { Observable } from 'rxjs';
+import { LogWrapper } from './log';
 
 @Injectable({
   providedIn: 'root'
 })
 export class LogsService {
-  private logs$!: Observable<any>;
+  private logs$!: Observable<LogWrapper>;
 
   constructor(private webSocketService: WebSocketService) { }
 
@@ -16,7 +17,7 @@ export class LogsService {
     this.logs$ = this.webSocketService.getObservable();
   }
 
-  getLogs(): Observable<any> {
+  getLogs(): Observable<LogWrapper> {
     return this.logs$;
   }
 }

@@ -136,6 +136,18 @@ def get_flowchart(flowchart_id: str) -> dict:
     return {"flowchart": flowchart.serialize()}
 
 
+@app.delete("/flowcharts/{flowchart_id}")
+def delete_flowchart(flowchart_id: str) -> dict:
+    """Delete a flowchart by id."""
+    promptflow.logger.info("Deleting flowchart")
+    try:
+        interface.delete_flowchart(flowchart_id)
+    except Exception as e:
+        interface.conn.rollback()
+        return {"message": "Flowchart not found", "error": traceback.format_exc()}
+    return {"message": "Flowchart deleted", "flowchart_id": flowchart_id}
+
+
 @app.get("/flowcharts/{flowchart_id}/run")
 def run_flowchart_endpoint(flowchart_id: str, background_tasks: BackgroundTasks):
     """Queue the flowchart execution as a background task."""
