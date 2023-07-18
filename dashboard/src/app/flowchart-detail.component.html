@@ -1,6 +1,8 @@
 <div class="flex flex-col items-start space-y-4 p-4 bg-white rounded shadow">
-    <p class="text-lg text-gray-700">ID: {{ flowchartId }}</p>
-    <button class="px-4 py-2 font-semibold text-white bg-blue-500 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50" (click)="runFlowchart()">Run Flowchart</button>
-    <button class="px-4 py-2 font-semibold text-gray-700 bg-gray-200 rounded hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50" (click)="stopFlowchart()">Stop Flowchart</button>
-  </div>
-  
+  <p class="text-lg text-gray-700">ID: {{ flowchartId }}</p>
+  <button class="px-4 py-2 font-semibold text-white bg-blue-500 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50" (click)="runFlowchart()">Run Flowchart</button>
+  <button class="px-4 py-2 font-semibold text-gray-700 bg-gray-200 rounded hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50" (click)="stopFlowchart()">Stop Flowchart</button>
+
+  <!-- Add JobListComponent here -->
+  <app-job-list [graphId]="flowchartId"></app-job-list>
+</div>
