@@ -20,12 +20,8 @@ export class JobListComponent implements OnInit {
   }
 
   getJobs(): void {
-    this.jobsService.getJobs().subscribe(jobs => {
-      if (this.graphId) {
-        this.jobs = jobs.filter(job => job.graph_id === Number(this.graphId));
-      } else {
-        this.jobs = jobs;
-      }
+    this.jobsService.getJobs(this.graphId).subscribe(jobs => {
+      this.jobs = jobs;
     });
   }
 

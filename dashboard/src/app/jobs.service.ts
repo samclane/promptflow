@@ -11,8 +11,12 @@ export class JobsService {
 
   constructor(private http: HttpClient) { }
 
-  getJobs(): Observable<Job[]> {
-    return this.http.get(`${this.apiUrl}/jobs`) as Observable<Job[]>;
+  getJobs(graphId: string | undefined): Observable<Job[]> {
+    if (graphId) {
+      return this.http.get(`${this.apiUrl}/jobs?graph_id=${graphId}`) as Observable<Job[]>;
+    } else {
+      return this.http.get(`${this.apiUrl}/jobs`) as Observable<Job[]>;
+    }
   }
 
   getJob(jobId: string): Observable<Job> {
@@ -28,7 +32,7 @@ export class JobsService {
   }
 
   getJobCount(): Observable<number> {
-    return this.getJobs().pipe(
+    return this.getJobs(undefined).pipe(
       map(jobs => jobs.length)
     );
   }

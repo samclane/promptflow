@@ -156,11 +156,11 @@ def run_flowchart_endpoint(flowchart_id: str, background_tasks: BackgroundTasks)
 
 
 @app.get("/jobs")
-def get_all_jobs():
+def get_all_jobs(graph_id: str = None, status: str = None, limit: int = None):
     """
     Get all running jobs
     """
-    return interface.get_all_jobs()
+    return interface.get_all_jobs(graph_id, status, limit)
 
 
 @app.get("/jobs/{job_id}")
