@@ -2,6 +2,8 @@ import { Component, OnInit, Input } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { NodeService } from './node.service';
 import { FlowchartService } from './flowchart.service';
+import { Flowchart } from './flowchart';
+import { take } from 'rxjs/operators';
 
 @Component({
   selector: 'app-flowchart-detail',
@@ -9,45 +11,49 @@ import { FlowchartService } from './flowchart.service';
   styleUrls: ['./flowchart-detail.component.css']
 })
 export class FlowchartDetailComponent implements OnInit {
-  flowchartId?: string;
+  id!: string;
+  flowchart?: Flowchart
 
   constructor(
     private route: ActivatedRoute,
     private nodeService: NodeService,
     private flowchartService: FlowchartService
-  ) { }
+  ) {
+    this.id = this.route.snapshot.paramMap.get('id')!;
+   }
 
   ngOnInit(): void {
-    this.flowchartId = this.route.snapshot.paramMap.get('id') as string;
-    // Load the flowchart...
+    this.flowchartService.getFlowchart(this.id).pipe(take(1)).subscribe(flowchart => {
+      this.flowchart = flowchart;
+    });
   }
 
   addNode(nodeType: string): void {
-    if (this.flowchartId) {
-        this.nodeService.addNode(this.flowchartId, nodeType).subscribe(node => {
+    if (this.id) {
+        this.nodeService.addNode(this.id, nodeType).pipe(take(1)).subscribe(node => {
         // Add the node to the flowchart...
         });
     }
   }
 
   removeNode(nodeId: string): void {
-    if (this.flowchartId) {
-        this.nodeService.removeNode(this.flowchartId, nodeId).subscribe(() => {
+    if (this.id) {
+        this.nodeService.removeNode(this.id, nodeId).pipe(take(1)).subscribe(() => {
           // Remove the node from the flowchart...
         });
     }
   }
 
   runFlowchart(): void {
-    if (this.flowchartId) {
-        this.flowchartService.runFlowchart(this.flowchartId).subscribe(() => {
+    if (this.id) {
+        this.flowchartService.runFlowchart(this.id).pipe(take(1)).subscribe(() => {
         // Handle successful execution...
         });
     }
   }
     stopFlowchart(): void {
-        if (this.flowchartId) {
-            this.flowchartService.stopFlowchart(this.flowchartId).subscribe(() => {
+        if (this.id) {
+            this.flowchartService.stopFlowchart(this.id).pipe(take(1)).subscribe(() => {
             // Handle successful stop...
             });
         }

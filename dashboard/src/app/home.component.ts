@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FlowchartService } from './flowchart.service';
 import { JobsService } from './jobs.service';
+import { take } from 'rxjs/operators';
 
 @Component({
   selector: 'app-home',
@@ -17,11 +18,11 @@ export class HomeComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.flowchartService.getFlowchartCount().subscribe(count => {
+    this.flowchartService.getFlowchartCount().pipe(take(1)).subscribe(count => {
       this.flowchartCount = count;
     });
 
-    this.jobService.getJobCount().subscribe(count => {
+    this.jobService.getJobCount().pipe(take(1)).subscribe(count => {
       this.jobCount = count;
     });
   }

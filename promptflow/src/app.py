@@ -121,7 +121,7 @@ def upsert_flowchart_json(flowchart_json: FlowchartJson) -> dict:
         interface.save_flowchart(flowchart)
     except ValueError:
         return {"message": "Invalid flowchart json", "error": traceback.format_exc()}
-    return {"flowchart": flowchart.serialize()}
+    return flowchart.serialize()
 
 
 @app.get("/flowcharts/{flowchart_id}")
@@ -133,7 +133,7 @@ def get_flowchart(flowchart_id: str) -> dict:
     except Exception as e:
         interface.conn.rollback()
         return {"message": "Flowchart not found", "error": traceback.format_exc()}
-    return {"flowchart": flowchart.serialize()}
+    return flowchart.serialize()
 
 
 @app.delete("/flowcharts/{flowchart_id}")

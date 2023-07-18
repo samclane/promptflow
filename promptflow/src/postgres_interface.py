@@ -598,12 +598,21 @@ class PostgresInterface(DBInterface):
             )
             self.conn.commit()
 
-    def get_all_jobs(self) -> List[JobView]:
+    def get_all_jobs(self, graph_id: str = None, status: str = None, limit: int = None) -> List[JobView]:
         with self.conn.cursor() as cursor:
+            query = """SELECT * FROM jobs_view"""
+            if graph_id or status:
+                query += """ WHERE"""
+                if graph_id:
+                    query += """ graph_id=%s""" % graph_id
+                if (graph_id and status):
+                    query += """ AND"""
+                if status:
+                    query += """ status=%s""" % status
+            if limit:
+                query += """ LIMIT %s""" % str(limit)
             cursor.execute(
-                """
-                SELECT * FROM jobs_view
-                """,
+                query,
             )
             rows = cursor.fetchall()
             self.conn.commit()

@@ -1,10 +1,13 @@
-<div class="flex flex-col items-start space-y-4 p-4 bg-white rounded shadow">
-  <p class="text-lg text-gray-700">ID: {{ flowchartId }}</p>
+<div class="flex flex-col items-start space-y-4 p-4 bg-white rounded shadow" *ngIf="flowchart !== undefined">
+  <p class="text-2xl font-semibold text-gray-800">Name: {{ flowchart.name }}</p>
+  <p class="text-lg text-gray-700">ID: {{ flowchart.id }}</p>
   <div>
     <button class="px-4 py-2 mr-2 font-semibold text-white bg-blue-500 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50" (click)="runFlowchart()">Run Flowchart</button>
     <button class="px-4 py-2 font-semibold text-gray-700 bg-gray-200 rounded hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50" (click)="stopFlowchart()">Stop Flowchart</button>
   </div>
-
+  <div>
+    <app-flowchart-display [flowchart]="flowchart"></app-flowchart-display>
+  </div>
   <!-- Add JobListComponent here -->
-  <app-job-list [graphId]="flowchartId"></app-job-list>
+  <app-job-list [graphId]="flowchart.id"></app-job-list>
 </div>

@@ -1,6 +1,7 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { JobsService } from './jobs.service';
 import { Job } from './job';
+import { take } from 'rxjs/operators';
 
 @Component({
   selector: 'app-job-list',
@@ -20,7 +21,7 @@ export class JobListComponent implements OnInit {
   }
 
   getJobs(): void {
-    this.jobsService.getJobs(this.graphId).subscribe(jobs => {
+    this.jobsService.getJobs(this.graphId).pipe(take(1)).subscribe(jobs => {
       this.jobs = jobs;
     });
   }

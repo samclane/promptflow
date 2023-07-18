@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { JobsService } from './jobs.service';
 import { Job } from './job';
+import { take } from 'rxjs/operators';
 
 @Component({
   selector: 'app-job-detail',
@@ -27,7 +28,7 @@ export class JobDetailComponent implements OnInit {
 
   getJob(): void {
     if (this.jobId) {
-        this.jobsService.getJob(this.jobId).subscribe(job => this.job = job);
+        this.jobsService.getJob(this.jobId).pipe(take(1)).subscribe(job => this.job = job);
     }
   }
 

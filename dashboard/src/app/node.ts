@@ -1,6 +1,6 @@
 export interface PFNode {
     id: string;
-    name: string;
+    label: string;
     type: string;
     status: string;
     created_at: string;

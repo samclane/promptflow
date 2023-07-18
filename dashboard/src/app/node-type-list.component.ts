@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { NodeService } from './node.service';
+import { take } from 'rxjs/operators';
 
 @Component({
   selector: 'app-node-type-list',
@@ -16,7 +17,7 @@ export class NodeTypeListComponent implements OnInit {
   }
 
   getNodeTypes(): void {
-    this.nodeService.getNodeTypes().subscribe(nodeTypes => this.nodeTypes = nodeTypes["node_types"]);
+    this.nodeService.getNodeTypes().pipe(take(1)).subscribe(nodeTypes => this.nodeTypes = nodeTypes["node_types"]);
   }
 
 }
