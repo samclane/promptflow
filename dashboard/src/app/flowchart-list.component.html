@@ -1,6 +1,6 @@
 <div *ngFor="let flowchart of flowcharts" class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl m-3 transition duration-500 ease-in-out transform hover:bg-gray-200">
-  <div class="flex justify-between">
-    <a [routerLink]="['/flowcharts', flowchart.id]">
+  <a [routerLink]="['/flowcharts', flowchart.id]" class="block">
+    <div class="flex justify-between">
       <div class="md:flex">
         <div class="md:flex-shrink-0">
         </div>
@@ -9,7 +9,7 @@
           <p class="mt-2 text-gray-500"></p>
         </div>
       </div>
-    </a>
-    <button (click)="deleteFlowchart(flowchart.id)" class="p-2 bg-red-500 transition duration-200 ease-in-out text-white rounded self-center mr-4 hover:bg-red-700">Delete</button>
-  </div>
+      <button (click)="deleteFlowchart(flowchart.id); $event.stopPropagation();" class="p-2 bg-red-500 transition duration-200 ease-in-out text-white rounded self-center mr-4 hover:bg-red-700">Delete</button>
+    </div>
+  </a>
 </div>
