@@ -28,22 +28,6 @@ export class FlowchartDetailComponent implements OnInit {
     });
   }
 
-  addNode(nodeType: string): void {
-    if (this.id) {
-        this.nodeService.addNode(this.id, nodeType).pipe(take(1)).subscribe(node => {
-        // Add the node to the flowchart...
-        });
-    }
-  }
-
-  removeNode(nodeId: string): void {
-    if (this.id) {
-        this.nodeService.removeNode(this.id, nodeId).pipe(take(1)).subscribe(() => {
-          // Remove the node from the flowchart...
-        });
-    }
-  }
-
   runFlowchart(): void {
     if (this.id) {
         this.flowchartService.runFlowchart(this.id).pipe(take(1)).subscribe(() => {

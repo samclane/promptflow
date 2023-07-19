@@ -16,6 +16,7 @@ export class NodeService {
   }
 
   addNode(flowchartId: string, nodeType: string): Observable<Node> {
+    console.log('addNode', flowchartId, nodeType);
     return this.http.post(`${this.apiUrl}/flowcharts/${flowchartId}/nodes`, { node_type: nodeType }) as Observable<Node>;
   }
 

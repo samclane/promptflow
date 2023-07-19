@@ -1,5 +1,5 @@
 <div class="py-4">
-  <select class="block w-full px-4 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-base">
+  <select class="block w-full px-4 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-base" (change)="setCurrentNodeType($event)">
     <option *ngFor="let nodeType of nodeTypes">{{ nodeType }}</option>
   </select>    
 </div>

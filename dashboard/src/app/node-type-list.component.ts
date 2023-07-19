@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { NodeService } from './node.service';
 import { take } from 'rxjs/operators';
 
@@ -9,6 +9,8 @@ import { take } from 'rxjs/operators';
 })
 export class NodeTypeListComponent implements OnInit {
   nodeTypes: string[] = [];
+  currentNodeType: string = "";
+  @Output() nodeTypeSelected = new EventEmitter<string>();
 
   constructor(private nodeService: NodeService) { }
 
@@ -18,6 +20,11 @@ export class NodeTypeListComponent implements OnInit {
 
   getNodeTypes(): void {
     this.nodeService.getNodeTypes().pipe(take(1)).subscribe(nodeTypes => this.nodeTypes = nodeTypes["node_types"]);
+  }
+
+  setCurrentNodeType(event: Event): void {
+    this.currentNodeType = (event.target as HTMLInputElement).value;
+    this.nodeTypeSelected.emit(this.currentNodeType);
   }
 
 }

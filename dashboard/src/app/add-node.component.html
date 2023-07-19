@@ -6,7 +6,7 @@
         <input class="block w-full px-4 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-base" id="label" [formControl]="nodeLabel" required>
     </div>
     <div>
-        <app-node-type-list></app-node-type-list>
+        <app-node-type-list (nodeTypeSelected)="onNodeTypeSelected($event)"></app-node-type-list>
     </div>
     <div class="mt-2">
         <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
