@@ -402,13 +402,13 @@ class Flowchart:
                     self.arrange_tree(child, next_x, next_y, x_gap, y_gap)
                     next_x += child.size_px + x_gap
 
-    def arrange_networkx(self, algorithm):
+    def arrange_networkx(self, algorithm, scale=1.0):
         """
         Arrange all nodes using a networkx algorithm.
         """
         kwargs = {}
         if algorithm == nx.layout.bipartite_layout:
             kwargs["nodes"] = self.graph.nodes
-        pos = algorithm(self.graph, scale=self.nodes[0].size_px * 10, **kwargs)
+        pos = algorithm(self.graph, scale=self.nodes[0].size_px * scale, **kwargs)
         for node in self.nodes:
             node.move_to(pos[node][0], pos[node][1])
