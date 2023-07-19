@@ -130,6 +130,7 @@ class DatabaseConfig(BaseModel):
     database: str
     user: str
     password: str
+    port: int
 
     @validator("host")
     def validate_host(cls, value):
@@ -153,6 +154,12 @@ class DatabaseConfig(BaseModel):
     def validate_password(cls, value):
         if not value:
             raise ValueError("password must be a non-empty string")
+        return value
+
+    @validator("port")
+    def validate_port(cls, value):
+        if not value:
+            raise ValueError("port must be a number that is not 0")
         return value
 
 
@@ -390,6 +397,7 @@ class PostgresInterface(DBInterface):
             database=config.database,
             user=config.user,
             password=config.password,
+            port=config.port
         )
         self.init_schema()
 

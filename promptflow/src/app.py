@@ -65,10 +65,11 @@ promptflow = PromptFlowApp()
 
 interface = PostgresInterface(
     DatabaseConfig(
-        host="172.18.0.3",
-        database="postgres",
-        user="postgres",
-        password="postgres",
+        host=os.getenv("POSTGRES_HOST", "172.18.0.3"),
+        database=os.getenv("POSTGRES_DB", "postgres"),
+        user=os.getenv("POSTGRES_USER", "postgres"),
+        password=os.getenv("POSTGRES_PASSWORD", "postgres"),
+        port=os.getenv("POSTGRES_PORT", 5432)
     )
 )
 
