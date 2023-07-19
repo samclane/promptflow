@@ -6,14 +6,6 @@ CREATE TABLE IF NOT EXISTS node_types (
 
 CREATE INDEX IF NOT EXISTS idx_node_types_name ON node_types(name);
 
-INSERT
-  INTO
-  node_types (name)
-VALUES
-  ('StartNode'),
-  ('InputNode')
-ON CONFLICT (name) DO UPDATE SET name = EXCLUDED.name;
-
 -- Graphs
 CREATE TABLE IF NOT EXISTS graphs (
   id SERIAL PRIMARY KEY NOT NULL,
@@ -274,3 +266,53 @@ BEGIN
   RETURN query SELECT * FROM graph_view gv WHERE gv.graph_id = g_id;
 END $$;
 
+INSERT INTO node_types (name) VALUES
+     ('InitNode'),
+     ('FileInput'),
+     ('JSONFileInput'),
+     ('FuncNode'),
+     ('OpenAINode'),
+     ('ClaudeNode'),
+     ('GoogleVertexNode'),
+     ('DateNode'),
+     ('RandomNode'),
+     ('HistoryNode'),
+     ('ManualHistoryNode'),
+     ('HistoryWindow'),
+     ('WindowedHistoryNode'),
+     ('DynamicWindowedHistoryNode'),
+     ('DummyNode'),
+     ('PromptNode'),
+     ('EmbeddingInNode'),
+     ('EmbeddingQueryNode'),
+     ('EmbeddingsIngestNode'),
+     ('AssertNode'),
+     ('LoggingNode'),
+     ('InterpreterNode'),
+     ('EnvNode'),
+     ('ManualEnvNode'),
+     ('WhispersNode'),
+     ('ElevenLabsNode'),
+     ('PGQueryNode'),
+     ('SQLiteQueryNode'),
+     ('PGGenerateNode'),
+     ('JsonNode'),
+     ('JsonerizerNode'),
+     ('SerpApiNode'),
+     ('GoogleSearchNode'),
+     ('FileOutput'),
+     ('JSONFileOutput'),
+     ('HttpNode'),
+     ('JSONRequestNode'),
+     ('ScrapeNode'),
+     ('ServerInputNode'),
+     ('PineconeInsertNode'),
+     ('PineconeQueryNode'),
+     ('DallENode'),
+     ('CaptionNode'),
+     ('OpenImageFile'),
+     ('JSONImageFile'),
+     ('SaveImageNode'),
+     ('StartNode'),
+     ('InputNode')
+ON CONFLICT (name) DO UPDATE SET name = EXCLUDED.name;
