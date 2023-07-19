@@ -17,7 +17,8 @@ export class FlowchartDisplayComponent implements OnInit {
     flowchart: {
       useMaxWidth: true,
       htmlLabels: true
-    }
+    },
+    securityLevel: 'loose'
   };
   id!: string;
 
@@ -30,7 +31,10 @@ export class FlowchartDisplayComponent implements OnInit {
       this.flowchart = flowchart;
       mermaid.initialize(this.config);
       const graphDefinition = this.generateMermaidDiagram(this.flowchart);
-      mermaid.render("graphDiv", graphDefinition);
+      mermaid.render("mermaid", graphDefinition).then(() => {
+        console.log("Rendered!");
+      });
+      mermaid.run();
     });
   }
 
