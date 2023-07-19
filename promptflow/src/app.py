@@ -160,7 +160,7 @@ def run_flowchart_endpoint(flowchart_id: str, background_tasks: BackgroundTasks)
 @app.get("/flowcharts/{flowchart_id}/svg")
 def render_flowchart_svg(flowchart_id: str):
     """Render a flowchart as an svg."""
-    dwg = svgwrite.Drawing(profile="tiny")
+    dwg = svgwrite.Drawing(profile="full")
     flowchart = Flowchart.get_flowchart_by_id(flowchart_id, interface)
     flowchart.arrange_networkx(nx.layout.bipartite_layout)
     # Draw nodes
@@ -188,6 +188,11 @@ def render_flowchart_svg(flowchart_id: str):
         end_y = connector.next.center_y + connector.next.height / 2
         line = dwg.line((start_x, start_y), (end_x, end_y), stroke="black")
         dwg.add(line)
+        
+        arrow = dwg.marker(insert=(0, 5), size=(10, 10), orient='auto')
+        arrow.elements.append(dwg.path(d="M0,0 L10,5 L0,10 z", fill="black"))
+        dwg.defs.add(arrow)
+        line['marker-end'] = arrow.get_funciri()
 
     return Response(content=dwg.tostring(), media_type="image/svg+xml")
 
