@@ -10,7 +10,6 @@ import { take } from 'rxjs/operators';
   styleUrls: ['./flowchart-display.component.css']
 })
 export class FlowchartDisplayComponent implements OnInit {
-  flowchart!: Flowchart
 
   id!: string;
 
@@ -19,9 +18,10 @@ export class FlowchartDisplayComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.flowchartService.getFlowchart(this.id).pipe(take(1)).subscribe(flowchart => {
-      this.flowchart = flowchart;
-      console.log(this.flowchart)
-    });
+    this.flowchartService.getFlowchartSvg(this.id).pipe(take(1)).subscribe(svg => {
+      const div = document.getElementById('flowchart-display')!;
+      div.innerHTML = svg;
+    }
+    );
   }
 }

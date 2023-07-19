@@ -12,6 +12,8 @@ import zipfile
 from concurrent.futures import ThreadPoolExecutor
 from threading import Thread
 
+import networkx as nx
+import svgwrite
 from fastapi import (
     BackgroundTasks,
     FastAPI,
@@ -153,6 +155,36 @@ def run_flowchart_endpoint(flowchart_id: str, background_tasks: BackgroundTasks)
     """Queue the flowchart execution as a background task."""
     task = run_flowchart.apply_async((flowchart_id, interface.config.dict()))
     return {"message": "Flowchart execution started", "task_id": str(task.id)}
+
+
+@app.get("/flowcharts/{flowchart_id}/svg")
+def render_flowchart_svg(flowchart_id: str):
+    """Render a flowchart as an svg."""
+    dwg = svgwrite.Drawing(profile="tiny")
+    flowchart = Flowchart.get_flowchart_by_id(flowchart_id, interface)
+    flowchart.arrange_networkx(nx.layout.bipartite_layout)
+    # Draw nodes
+    for node in flowchart.nodes:
+        rect = dwg.rect(
+            (node.center_x, node.center_y), (node.width, node.height), fill="white"
+        )
+        dwg.add(rect)
+        text = dwg.text(
+            node.label,
+            insert=(node.center_x + node.width / 2, node.center_y + node.height / 2),
+        )
+        dwg.add(text)
+
+    # Draw connectors
+    for connector in flowchart.connectors:
+        start_x = connector.prev.center_x + connector.prev.width / 2
+        start_y = connector.prev.center_y + connector.prev.height / 2
+        end_x = connector.next.center_x + connector.next.width / 2
+        end_y = connector.next.center_y + connector.next.height / 2
+        line = dwg.line((start_x, start_y), (end_x, end_y), stroke="black")
+        dwg.add(line)
+
+    return Response(content=dwg.tostring(), media_type="image/svg+xml")
 
 
 @app.get("/jobs")
