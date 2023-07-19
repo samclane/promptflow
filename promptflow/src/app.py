@@ -166,12 +166,17 @@ def render_flowchart_svg(flowchart_id: str):
     # Draw nodes
     for node in flowchart.nodes:
         rect = dwg.rect(
-            (node.center_x, node.center_y), (node.width, node.height), fill="white"
+            (node.center_x, node.center_y),
+            (node.width, node.height),
+            fill="white",
+            stroke="black",
         )
         dwg.add(rect)
         text = dwg.text(
             node.label,
             insert=(node.center_x + node.width / 2, node.center_y + node.height / 2),
+            font_size="12",
+            text_anchor="middle",
         )
         dwg.add(text)
 
