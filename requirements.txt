@@ -30,6 +30,7 @@ click-plugins==1.1.1
 click-repl==0.3.0
 cmake==3.26.3
 colorama==0.4.6
+coverage==7.2.7
 cryptography==41.0.1
 customtkinter==5.1.2
 darkdetect==0.8.0
@@ -136,6 +137,7 @@ pyparsing==3.0.9
 pyproject_hooks==1.0.0
 pyrsistent==0.19.3
 pytest==7.4.0
+pytest-cov==4.1.0
 python-dateutil==2.8.2
 python-dotenv==1.0.0
 python-multipart==0.0.6
@@ -170,6 +172,7 @@ sphinxcontrib-qthelp==1.0.3
 sphinxcontrib-serializinghtml==1.1.5
 stack-data==0.6.2
 starlette==0.27.0
+svgwrite==1.4.3
 sympy==1.11.1
 threadpoolctl==3.1.0
 tiktoken==0.3.3
@@ -189,6 +192,7 @@ uvicorn==0.22.0
 vine==5.0.0
 wcwidth==0.2.6
 webencodings==0.5.1
+websockets==11.0.3
 whichcraft==0.6.1
 win32-setctime==1.1.0
 wrapt==1.15.0
