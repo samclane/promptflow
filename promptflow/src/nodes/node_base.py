@@ -20,9 +20,13 @@ class NodeBase(Serializable, ABC):
     Represents a node in the flowchart, which could be a prompt, an llm, traditional code, etc.
     """
 
+    center_x: float = 0
+    center_y: float = 0
     node_color = monokai.WHITE
     prev_color = node_color
     size_px: int = 50  # arbitrary default size
+    width: int = size_px
+    height: int = size_px
 
     def __init__(
         self,
