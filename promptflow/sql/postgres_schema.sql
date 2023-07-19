@@ -1,3 +1,53 @@
+-- Node Types
+CREATE TABLE IF NOT EXISTS node_types (
+  id SERIAL PRIMARY KEY NOT NULL,
+  name TEXT UNIQUE NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_node_types_name ON node_types(name);
+
+INSERT
+  INTO
+  node_types (name)
+VALUES
+  ('StartNode'),
+  ('InputNode')
+ON CONFLICT (name) DO UPDATE SET name = EXCLUDED.name;
+
+-- Graphs
+CREATE TABLE IF NOT EXISTS graphs (
+  id SERIAL PRIMARY KEY NOT NULL,
+  name TEXT UNIQUE NOT NULL,
+  created TIMESTAMP NOT NULL DEFAULT current_timestamp
+);
+-- Nodes
+CREATE TABLE IF NOT EXISTS nodes (
+  id SERIAL PRIMARY KEY NOT NULL,
+  uid TEXT NOT NULL,
+  node_type_id INTEGER REFERENCES node_types (id) ON UPDATE CASCADE ON DELETE CASCADE NOT NULL,
+  graph_id INTEGER REFERENCES graphs (id) ON UPDATE CASCADE ON DELETE CASCADE NOT NULL,
+  "label" TEXT NOT NULL,
+  metadata JSONB NOT NULL,
+  UNIQUE (graph_id, uid)
+);
+
+CREATE INDEX IF NOT EXISTS idx_nodes_graph_id_and_uid ON nodes(graph_id, uid);
+-- Branches
+CREATE TABLE IF NOT EXISTS branches (
+  id SERIAL PRIMARY KEY NOT NULL,
+  conditional TEXT NOT NULL,
+  "label" TEXT NOT NULL,
+  graph_id integer NOT NULL,
+  node TEXT NOT NULL,
+  next_node TEXT NOT NULL,
+  FOREIGN KEY (graph_id, node) REFERENCES nodes(graph_id, uid) 
+  ON DELETE CASCADE 
+  ON UPDATE CASCADE,
+  FOREIGN KEY (graph_id, next_node) REFERENCES nodes(graph_id, uid) 
+  ON DELETE CASCADE 
+  ON UPDATE CASCADE
+);
+
 -- Jobs
 CREATE TABLE IF NOT EXISTS job_statuses (
   id serial PRIMARY KEY NOT NULL,
@@ -100,56 +150,6 @@ BEGIN
   RETURN query SELECT jv.id, jv.status, jv.created, jv.updated, jv.metadata, jv.graph_id FROM jobs_view jv WHERE jv.id=job_id;
 END $$;
 
--- Node Types
-CREATE TABLE IF NOT EXISTS node_types (
-  id SERIAL PRIMARY KEY NOT NULL,
-  name TEXT UNIQUE NOT NULL
-);
-
-CREATE INDEX IF NOT EXISTS idx_node_types_name ON node_types(name);
-
-INSERT
-  INTO
-  node_types (name)
-VALUES
-  ('StartNode'),
-  ('InputNode')
-ON CONFLICT (name) DO UPDATE SET name = EXCLUDED.name;
-
--- Graphs
-CREATE TABLE IF NOT EXISTS graphs (
-  id SERIAL PRIMARY KEY NOT NULL,
-  name TEXT UNIQUE NOT NULL,
-  created TIMESTAMP NOT NULL DEFAULT current_timestamp
-);
--- Nodes
-CREATE TABLE IF NOT EXISTS nodes (
-  id SERIAL PRIMARY KEY NOT NULL,
-  uid TEXT NOT NULL,
-  node_type_id INTEGER REFERENCES node_types (id) ON UPDATE CASCADE ON DELETE CASCADE NOT NULL,
-  graph_id INTEGER REFERENCES graphs (id) ON UPDATE CASCADE ON DELETE CASCADE NOT NULL,
-  "label" TEXT NOT NULL,
-  metadata JSONB NOT NULL,
-  UNIQUE (graph_id, uid)
-);
-
-CREATE INDEX IF NOT EXISTS idx_nodes_graph_id_and_uid ON nodes(graph_id, uid);
--- Branches
-CREATE TABLE IF NOT EXISTS branches (
-  id SERIAL PRIMARY KEY NOT NULL,
-  conditional TEXT NOT NULL,
-  "label" TEXT NOT NULL,
-  graph_id integer NOT NULL,
-  node TEXT NOT NULL,
-  next_node TEXT NOT NULL,
-  FOREIGN KEY (graph_id, node) REFERENCES nodes(graph_id, uid) 
-  ON DELETE CASCADE 
-  ON UPDATE CASCADE,
-  FOREIGN KEY (graph_id, next_node) REFERENCES nodes(graph_id, uid) 
-  ON DELETE CASCADE 
-  ON UPDATE CASCADE
-);
--- Views
 CREATE OR REPLACE VIEW graph_view AS
   SELECT 
     g.id AS graph_id,
