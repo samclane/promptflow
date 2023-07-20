@@ -13,5 +13,26 @@ services:
         volumes:
             - my_dbdata:/var/lib/postgresql/data
 
+    backend:
+        build: ./promptflow
+        volumes:
+        - ./promptflow:/app
+        ports:
+        - 8000:8000
+
+    frontend:
+        build: ./dashboard
+        volumes:
+        - ./dashboard:/usr/share/nginx/html
+        ports:
+        - 4200:80
+
+    worker:
+        build: ./promptflow/src
+        volumes:
+        - ./promptflow/src:/worker
+
+    redis: 
+        image: "redis:alpine"
 volumes:
     my_dbdata:
