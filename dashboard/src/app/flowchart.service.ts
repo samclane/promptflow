@@ -41,7 +41,8 @@ export class FlowchartService {
     return this.http.delete(`${this.apiUrl}/flowcharts/${flowchartId}`) as Observable<FlowchartConfirmation>;
   }
 
-  getFlowchartSvg(flowchartId: string): Observable<string> {
-    return this.http.get(`${this.apiUrl}/flowcharts/${flowchartId}/svg`, { responseType: 'text' }) as Observable<string>;
+  getFlowchartPng(flowchartId: string): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/flowcharts/${flowchartId}/png`, { responseType: 'blob' }) as Observable<Blob>;
   }
+  
 }

@@ -412,3 +412,4 @@ class Flowchart:
         pos = algorithm(self.graph, scale=self.nodes[0].size_px * scale, **kwargs)
         for node in self.nodes:
             node.move_to(pos[node][0], pos[node][1])
+        return pos

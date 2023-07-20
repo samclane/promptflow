@@ -18,10 +18,18 @@ export class FlowchartDisplayComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.flowchartService.getFlowchartSvg(this.id).pipe(take(1)).subscribe(svg => {
-      const div = document.getElementById('flowchart-display')!;
-      div.innerHTML = svg;
-    }
-    );
+    this.flowchartService.getFlowchartPng(this.id).pipe(take(1)).subscribe(png => {
+      const url = URL.createObjectURL(png);
+      const img = document.createElement('img');
+      img.src = url;
+      let elm = document.getElementById('flowchart-display');
+      if (elm) {
+        elm.appendChild(img);
+      } else {
+        console.error('Could not find element with id flowchart-display');
+      }
+    });
   }
+  
+  
 }

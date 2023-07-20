@@ -4,16 +4,18 @@ window, menu, and canvas. It also handles the saving and loading of
 flowcharts.
 """
 import asyncio
+import io
 import json
 import logging
 import os
+import tempfile
 import traceback
 import zipfile
 from concurrent.futures import ThreadPoolExecutor
 from threading import Thread
 
+import matplotlib.pyplot as plt
 import networkx as nx
-import svgwrite
 from fastapi import (
     BackgroundTasks,
     FastAPI,
@@ -25,7 +27,8 @@ from fastapi import (
     WebSocketDisconnect,
 )
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
+from PIL import Image
 from pydantic import BaseModel
 
 from promptflow.src.celery_app import celery_app
@@ -69,7 +72,7 @@ interface = PostgresInterface(
         database=os.getenv("POSTGRES_DB", "postgres"),
         user=os.getenv("POSTGRES_USER", "postgres"),
         password=os.getenv("POSTGRES_PASSWORD", "postgres"),
-        port=os.getenv("POSTGRES_PORT", 5432)
+        port=os.getenv("POSTGRES_PORT", 5432),
     )
 )
 
@@ -158,44 +161,22 @@ def run_flowchart_endpoint(flowchart_id: str, background_tasks: BackgroundTasks)
     return {"message": "Flowchart execution started", "task_id": str(task.id)}
 
 
-@app.get("/flowcharts/{flowchart_id}/svg")
-def render_flowchart_svg(flowchart_id: str):
-    """Render a flowchart as an svg."""
-    dwg = svgwrite.Drawing(profile="full")
+@app.get("/flowcharts/{flowchart_id}/png")
+def render_flowchart_png(flowchart_id: str):
+    """Render a flowchart as a png."""
     flowchart = Flowchart.get_flowchart_by_id(flowchart_id, interface)
-    flowchart.arrange_networkx(nx.layout.bipartite_layout)
-    # Draw nodes
-    for node in flowchart.nodes:
-        rect = dwg.rect(
-            (node.center_x, node.center_y),
-            (node.width, node.height),
-            fill="white",
-            stroke="black",
-        )
-        dwg.add(rect)
-        text = dwg.text(
-            node.label,
-            insert=(node.center_x + node.width / 2, node.center_y + node.height / 2),
-            font_size="12",
-            text_anchor="middle",
-        )
-        dwg.add(text)
+    pos = flowchart.arrange_networkx(
+        lambda *args, **kwargs: nx.layout.spring_layout(*args, **kwargs, seed=1337)
+    )
 
-    # Draw connectors
-    for connector in flowchart.connectors:
-        start_x = connector.prev.center_x + connector.prev.width / 2
-        start_y = connector.prev.center_y + connector.prev.height / 2
-        end_x = connector.next.center_x + connector.next.width / 2
-        end_y = connector.next.center_y + connector.next.height / 2
-        line = dwg.line((start_x, start_y), (end_x, end_y), stroke="black")
-        dwg.add(line)
-        
-        arrow = dwg.marker(insert=(0, 5), size=(10, 10), orient='auto')
-        arrow.elements.append(dwg.path(d="M0,0 L10,5 L0,10 z", fill="black"))
-        dwg.defs.add(arrow)
-        line['marker-end'] = arrow.get_funciri()
+    fig = plt.figure()
+    nx.draw(flowchart.graph, pos=pos, with_labels=True)
 
-    return Response(content=dwg.tostring(), media_type="image/svg+xml")
+    png_image = io.BytesIO()
+    plt.savefig(png_image, format="png")
+    png_image.seek(0)
+
+    return StreamingResponse(png_image, media_type="image/png")
 
 
 @app.get("/jobs")

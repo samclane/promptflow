@@ -397,7 +397,7 @@ class PostgresInterface(DBInterface):
             database=config.database,
             user=config.user,
             password=config.password,
-            port=config.port
+            port=config.port,
         )
         self.init_schema()
 
