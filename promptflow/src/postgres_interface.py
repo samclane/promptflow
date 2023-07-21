@@ -535,6 +535,8 @@ class PostgresInterface(DBInterface):
             )  # todo select id,name from graph_view  for function get_graph_view
             # todo for function get_graph_view_to_flowchart_list select id,name from graph_view where id = input_id
             rows = cursor.fetchall()
+            if not rows:
+                raise ValueError(f"Flowchart with id {id} not found")
             self.conn.commit()
             graph_nodes = row_results_to_class_list(GraphView, rows)
             return self.build_flowcharts_from_graph_view(graph_nodes)[0]
@@ -607,7 +609,10 @@ class PostgresInterface(DBInterface):
             self.conn.commit()
 
     def get_all_jobs(
-        self, graph_id: str = None, status: str = None, limit: int = None
+        self,
+        graph_id: Optional[str] = None,
+        status: Optional[str] = None,
+        limit: Optional[int] = None,
     ) -> List[JobView]:
         with self.conn.cursor() as cursor:
             query = """SELECT * FROM jobs_view"""

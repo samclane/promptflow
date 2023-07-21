@@ -8,11 +8,11 @@ import io
 import json
 import logging
 import os
-import tempfile
 import traceback
 import zipfile
 from concurrent.futures import ThreadPoolExecutor
 from threading import Thread
+from typing import Optional
 
 import matplotlib.pyplot as plt
 import networkx as nx
@@ -27,7 +27,7 @@ from fastapi import (
     WebSocketDisconnect,
 )
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from PIL import Image
 from pydantic import BaseModel
 
@@ -72,28 +72,33 @@ interface = PostgresInterface(
         database=os.getenv("POSTGRES_DB", "postgres"),
         user=os.getenv("POSTGRES_USER", "postgres"),
         password=os.getenv("POSTGRES_PASSWORD", "postgres"),
-        port=os.getenv("POSTGRES_PORT", 5432),
+        port=int(os.getenv("POSTGRES_PORT", 5432)),
     )
 )
 
 
-class ConnectionManager:
+class WSConnectionManager:
+    """Handles websocket connections"""
+
     def __init__(self) -> None:
         self.active_connections: list[WebSocket] = []
 
     async def connect(self, websocket: WebSocket):
+        """Add a websocket connection to the list of active connections"""
         await websocket.accept()
         self.active_connections.append(websocket)
 
     async def disconnect(self, websocket: WebSocket):
+        """Remove a websocket connection from the list of active connections"""
         self.active_connections.remove(websocket)
 
-    async def send_message(self, message: str):
+    async def broadcast(self, message: str):
+        """Send a message to all active connections"""
         for connection in self.active_connections:
             await connection.send_text(message)
 
 
-manager = ConnectionManager()
+ws_manager = WSConnectionManager()
 
 
 @app.get("/flowcharts")
@@ -136,7 +141,7 @@ def get_flowchart(flowchart_id: str) -> dict:
     promptflow.logger.info("Getting flowchart")
     try:
         flowchart = Flowchart.get_flowchart_by_id(flowchart_id, interface)
-    except Exception as e:
+    except ValueError:
         interface.conn.rollback()
         return {"message": "Flowchart not found", "error": traceback.format_exc()}
     return flowchart.serialize()
@@ -148,7 +153,7 @@ def delete_flowchart(flowchart_id: str) -> dict:
     promptflow.logger.info("Deleting flowchart")
     try:
         interface.delete_flowchart(flowchart_id)
-    except Exception as e:
+    except ValueError:
         interface.conn.rollback()
         return {"message": "Flowchart not found", "error": traceback.format_exc()}
     return {"message": "Flowchart deleted", "flowchart_id": flowchart_id}
@@ -180,7 +185,11 @@ def render_flowchart_png(flowchart_id: str):
 
 
 @app.get("/jobs")
-def get_all_jobs(graph_id: str = None, status: str = None, limit: int = None):
+def get_all_jobs(
+    graph_id: Optional[str] = None,
+    status: Optional[str] = None,
+    limit: Optional[int] = None,
+):
     """
     Get all running jobs
     """
@@ -192,8 +201,8 @@ def get_job_by_id(job_id) -> dict:
     """Get a specific job by id"""
     try:
         return interface.get_job_view(job_id).dict()
-    except ValueError:
-        raise HTTPException(status_code=404, detail="Job not found")
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail="Job not found") from exc
 
 
 @app.get("/jobs/{job_id}/logs")
@@ -203,13 +212,13 @@ def get_job_logs(job_id) -> dict:
     """
     try:
         return {"logs": interface.get_job_logs(job_id)}
-    except ValueError:
-        raise HTTPException(status_code=404, detail="Job not found")
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail="Job not found") from exc
 
 
 @app.websocket("/jobs/{job_id}/ws")
 async def job_logs_ws(websocket: WebSocket, job_id: int):
-    await manager.connect(websocket)
+    await ws_manager.connect(websocket)
     try:
         await websocket.send_text(json.dumps({"logs": interface.get_job_logs(job_id)}))
         while True:
@@ -218,7 +227,7 @@ async def job_logs_ws(websocket: WebSocket, job_id: int):
                 json.dumps({"logs": interface.get_job_logs(job_id)})
             )
     except WebSocketDisconnect:
-        await manager.disconnect(websocket)
+        await ws_manager.disconnect(websocket)
     except ValueError as exc:
         raise HTTPException(status_code=404, detail="Job not found") from exc
 
@@ -316,16 +325,21 @@ def get_node_types() -> dict:
 # Force FastAPI to accept a JSON body for the node type
 class NodeType(BaseModel):
     node_type: str
+    id: int
+    uid: str
+    name: Optional[str] = None
 
 
 @app.post("/flowcharts/{flowchart_id}/nodes")
 def add_node(flowchart_id: str, nodetype: NodeType) -> dict:
+    """Add a node to the flowchart."""
     node_cls = node_map.get(nodetype.node_type)
     if not node_cls:
         return {"message": "Node not added: invalid node_type"}
     flowchart = Flowchart.get_flowchart_by_id(flowchart_id, interface)
     node_type_id = interface.get_node_type_id(nodetype.node_type)
-    node = node_cls(flowchart, nodetype.node_type, node_type_id=node_type_id)
+    node = node_cls(flowchart, nodetype.node_type, node_type_id=node_type_id,
+                    id=nodetype.id, uid=nodetype.uid, name=nodetype.name)
     if node:
         flowchart.add_node(node)
         interface.save_flowchart(flowchart)
@@ -336,6 +350,7 @@ def add_node(flowchart_id: str, nodetype: NodeType) -> dict:
 
 @app.delete("/flowcharts/{flowchart_id}/nodes/{node_id}")
 def remove_node(node_id: str, flowchart_id: str) -> dict:
+    """Remove a node from the flowchart."""
     flowchart = Flowchart.get_flowchart_by_id(flowchart_id, interface)
     node = flowchart.find_node(node_id)
     flowchart.remove_node(node)
@@ -347,22 +362,9 @@ class NodeData(BaseModel):
     target_node_id: str
 
 
-@app.post("/flowcharts/{flowchart_id}/nodes/{node_id}/connect")
-def connect_nodes(flowchart_id: str, node_id: str, target_node_id: NodeData) -> dict:
-    flowchart = Flowchart.get_flowchart_by_id(flowchart_id, interface)
-    node = flowchart.find_node(node_id)
-    target_node = flowchart.find_node(target_node_id.target_node_id)
-    if node and target_node:
-        connector = Connector(node, target_node)
-        flowchart.add_connector(connector)
-        interface.save_flowchart(flowchart)
-        return {"message": "Nodes connected", "connector": connector.serialize()}
-    else:
-        return {"message": "Nodes not connected"}
-
-
 @app.get("/flowcharts/{flowchart_id}/nodes/{node_id}/options")
 def get_node_options(flowchart_id: str, node_id: str) -> dict:
+    """Get the editable options for a node."""
     flowchart = Flowchart.get_flowchart_by_id(flowchart_id, interface)
     node = flowchart.find_node(node_id)
     options = node.get_options()
@@ -371,6 +373,7 @@ def get_node_options(flowchart_id: str, node_id: str) -> dict:
 
 @app.post("/flowcharts/{flowchart_id}/nodes/{node_id}/options")
 def update_node_options(flowchart_id: str, node_id: str, data: dict) -> dict:
+    """Update the editable options for a node."""
     flowchart = Flowchart.get_flowchart_by_id(flowchart_id, interface)
     node = flowchart.find_node(node_id)
     node.update(data)

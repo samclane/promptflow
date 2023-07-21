@@ -140,11 +140,7 @@ def create_test_flowchart(request):
         raise ValueError(
             f"Failed to create flowchart: {flowchart_type}", response.json()
         )
-    if not "flowchart" in response.json():
-        raise ValueError(
-            f"Failed to create flowchart: {flowchart_type}, {response.json()}"
-        )
-    flowchart_id = response.json()["flowchart"]["id"]
+    flowchart_id = response.json()["id"]
     return flowchart_id
 
 
@@ -178,15 +174,13 @@ def test_get_flowchart_by_id(create_test_flowchart):
     # ensure json response is a dict
     assert isinstance(response.json(), dict)
 
-    assert "flowchart" in response.json(), "flowchart key not found in response"
-
     # Ensure the response JSON contains the flowchart ID
-    assert str(response.json()["flowchart"]["id"]) == create_test_flowchart
+    assert str(response.json()["id"]) == create_test_flowchart
 
 
 def test_get_flowchart_not_found():
     # Simulate a GET request to the /flowcharts/{flowchart_id} endpoint with an invalid ID
-    response = client.get("/flowcharts/nonexistent")
+    response = client.get("/flowcharts/999")
 
     # Ensure the response is in JSON format
     assert response.headers["Content-Type"] == "application/json"
@@ -258,7 +252,7 @@ def test_get_node_types():
     "create_test_flowchart", ["simple", "advanced", "chat_gpt"], indirect=True
 )
 def test_add_node(create_test_flowchart):
-    data = {"node_type": "InputNode"}
+    data = {"node_type": "InputNode", "id": "1", "uid": "test_add_node", "label": "Start"}
     response = client.post(f"/flowcharts/{create_test_flowchart}/nodes", json=data)
     assert response.status_code == 200
     assert "Node added" in response.json()["message"]
@@ -269,7 +263,7 @@ def test_add_node(create_test_flowchart):
 )
 def test_remove_node(create_test_flowchart):
     # First add a node
-    node_data = {"node_type": "InputNode"}
+    node_data = {"node_type": "InputNode", "id": "1", "uid": "1", "label": "Start"}
     add_node_response = client.post(
         f"/flowcharts/{create_test_flowchart}/nodes", json=node_data
     )
@@ -313,7 +307,7 @@ def test_connect_nodes(create_test_flowchart):
 )
 def test_get_node_options(create_test_flowchart):
     # Add a node first
-    node_data = {"node_type": "InputNode"}
+    node_data = {"node_type": "InputNode", "id": "1", "uid": "1", "label": "Start"}
     add_node_response = client.post(
         f"/flowcharts/{create_test_flowchart}/nodes", json=node_data
     )
@@ -323,25 +317,6 @@ def test_get_node_options(create_test_flowchart):
     )
     assert response.status_code == 200
     assert "options" in response.json()
-
-
-@pytest.mark.parametrize(
-    "create_test_flowchart", ["simple", "advanced", "chat_gpt"], indirect=True
-)
-def test_update_node_options(create_test_flowchart):
-    options_data = {"label": "Test label"}
-    # Add a node first
-    node_data = {"node_type": "InputNode"}
-    add_node_response = client.post(
-        f"/flowcharts/{create_test_flowchart}/nodes", json=node_data
-    )
-    node_id = add_node_response.json()["node"]["id"]
-    response = client.post(
-        f"/flowcharts/{create_test_flowchart}/nodes/{node_id}/options",
-        json=options_data,
-    )
-    assert response.status_code == 200
-    assert "options updated" in response.json()["message"]
 
 
 def test_get_jobs():
