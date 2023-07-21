@@ -1,29 +1,32 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { FlowchartService } from './flowchart.service';
 import { JobsService } from './jobs.service';
-import { take } from 'rxjs/operators';
+import { map, catchError, tap } from 'rxjs/operators';
+import {combineLatest, of} from 'rxjs';
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
-  styleUrls: ['./home.component.css']
+  styleUrls: ['./home.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class HomeComponent implements OnInit {
-  flowchartCount: number = 0;
-  jobCount: number = 0;
-
+export class HomeComponent {
   constructor(
-    private flowchartService: FlowchartService,
-    private jobService: JobsService
+    private readonly flowchartService: FlowchartService,
+    private readonly jobService: JobsService
   ) { }
 
-  ngOnInit(): void {
-    this.flowchartService.getFlowchartCount().pipe(take(1)).subscribe(count => {
-      this.flowchartCount = count;
-    });
+  private readonly flowchartCount$ = this.flowchartService.flowchartsCount$;
 
-    this.jobService.getJobCount().pipe(take(1)).subscribe(count => {
-      this.jobCount = count;
-    });
-  }
+  private readonly jobs$ = this.jobService.getJobs()
+  private readonly jobsCount$ = this.jobs$.pipe(
+    map((x) => x.length),
+    catchError(() => of(0))
+  )
+
+  public readonly vm$ = combineLatest({
+    flowchartsCount: this.flowchartCount$,
+    jobsCount: this.jobsCount$
+  });
+
 }

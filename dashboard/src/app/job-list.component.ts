@@ -21,7 +21,8 @@ export class JobListComponent implements OnInit {
   }
 
   getJobs(): void {
-    this.jobsService.getJobs(this.graphId).pipe(take(1)).subscribe(jobs => {
+    if (!this.graphId) return;
+    this.jobsService.getJobsByGraphId(this.graphId).pipe(take(1)).subscribe(jobs => {
       this.jobs = jobs;
     });
   }

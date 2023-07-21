@@ -1,30 +1,24 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { FlowchartService } from './flowchart.service';
-import { Flowchart } from './flowchart';
-import { take } from 'rxjs/operators';
+import {combineLatest} from 'rxjs';
 
 @Component({
   selector: 'app-flowchart-list',
   templateUrl: './flowchart-list.component.html',
-  styleUrls: ['./flowchart-list.component.css']
+  styleUrls: ['./flowchart-list.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class FlowchartListComponent implements OnInit {
-  flowcharts: Flowchart[] = [];
+export class FlowchartListComponent {
+  constructor(private readonly flowchartService: FlowchartService) { }
 
-  constructor(private flowchartService: FlowchartService) { }
+  private readonly flowcharts$ = this.flowchartService.flowcharts$;
 
-  ngOnInit(): void {
-    this.getFlowcharts();
-  }
-
-  getFlowcharts(): void {
-    this.flowchartService.getFlowcharts().pipe(take(1)).subscribe(flowcharts => this.flowcharts = flowcharts);
-  }
+  public readonly vm$ = combineLatest({
+    flowcharts: this.flowcharts$
+  });
 
   deleteFlowchart(id: string): void {
-    this.flowchartService.deleteFlowchart(id).pipe(take(1)).subscribe(() => {
-      this.flowcharts = this.flowcharts.filter(flowchart => flowchart.id !== id);
-    });
+    this.flowchartService.deleteFlowchart(id)
   }
 
 }
