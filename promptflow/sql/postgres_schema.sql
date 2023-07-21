@@ -149,7 +149,7 @@ CREATE OR REPLACE VIEW graph_view AS
   SELECT 
     g.id AS graph_id,
     g.created AS created,
-    g."name" AS graph_name,
+    g."label" AS graph_name,
     g."uid" AS graph_uid,
     n."label" AS node_label,
     n.metadata AS node_type_metadata,
@@ -190,7 +190,8 @@ RETURNS TABLE (
 LANGUAGE plpgsql 
 AS $$
 DECLARE
-v_name TEXT := p_input ->> 'name';
+v_label TEXT := p_input ->> 'label';
+v_uid TEXT := p_input ->> 'uid';
 
 nodes jsonb := p_input -> 'nodes';
 
@@ -199,38 +200,14 @@ branches jsonb := p_input -> 'branches';
 g_id integer;
 
 BEGIN 
-  /*
 
-{
-    "name": "My Graph",
-    "nodes": [
-      {
-        "uid": "1",
-        "node_type": "InitNode",
-        "label": "Initializer Node",
-        "metadata": {
-          "field1": "Okay"
-        }
-      }
-    ],
-    "branches": [
-      {
-        "conditional": "",
-        "label": "Loop it",
-        "prev": "1",
-        "next": "1"
-      }
-    ]
-}
-  
-   */
-  
-  IF v_name IS NULL THEN RAISE EXCEPTION 'Name is required for upsert'; END IF;
+  IF v_uid IS NULL THEN RAISE EXCEPTION 'UID is required for upsert'; END IF;
+  IF v_label IS NULL THEN RAISE EXCEPTION 'Label is required for upsert'; END IF;
 
-  SELECT g.id INTO g_id FROM graphs g WHERE g."name" = v_name;
+  SELECT g.id INTO g_id FROM graphs g WHERE g."uid" = v_uid;
 
   IF g_id IS NULL THEN
-    INSERT INTO graphs ("name") VALUES (v_name) RETURNING id INTO g_id;
+    INSERT INTO graphs ("label", "uid") VALUES (v_label, v_uid) RETURNING id INTO g_id;
   END IF;
 
   DELETE FROM nodes n WHERE n.graph_id = g_id;
@@ -247,20 +224,22 @@ BEGIN
     (SELECT id FROM node_types  WHERE "name"=(j ->> 'node_type')) AS node_type_id,
     g_id,
     j ->> 'label',
-    j -> 'metadata'
+    COALESCE(j -> 'metadata', '{}'::jsonb)
   FROM
     jsonb_array_elements(nodes) j;
 
   INSERT INTO branches (
     "conditional",
     "label",
+    "uid",
     "graph_id",
     "node",
     "next_node"
   )
   SELECT
-    b ->> 'conditional',
+    COALESCE(b ->> 'conditional', ''),
     b ->> 'label',
+    b ->> 'uid',
     g_id,
     b ->> 'prev',
     b ->> 'next'
