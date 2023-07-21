@@ -175,7 +175,9 @@ def render_flowchart_png(flowchart_id: str):
     )
 
     fig = plt.figure()
-    nx.draw(flowchart.graph, pos=pos, with_labels=True)
+    nx.draw(flowchart.graph, pos=pos, with_labels=False)
+    nx.draw_networkx_edge_labels(flowchart.graph, pos=pos, edge_labels=flowchart.graph.edges)
+    nx.draw_networkx_labels(flowchart.graph, pos=pos, labels={node: node.label for node in flowchart.nodes})
 
     png_image = io.BytesIO()
     plt.savefig(png_image, format="png")
