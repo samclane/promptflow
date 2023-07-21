@@ -9,7 +9,8 @@ CREATE INDEX IF NOT EXISTS idx_node_types_name ON node_types(name);
 -- Graphs
 CREATE TABLE IF NOT EXISTS graphs (
   id SERIAL PRIMARY KEY NOT NULL,
-  name TEXT UNIQUE NOT NULL,
+  uid TEXT UNIQUE NOT NULL,
+  "label" TEXT NOT NULL,
   created TIMESTAMP NOT NULL DEFAULT current_timestamp
 );
 -- Nodes
@@ -27,6 +28,7 @@ CREATE INDEX IF NOT EXISTS idx_nodes_graph_id_and_uid ON nodes(graph_id, uid);
 -- Branches
 CREATE TABLE IF NOT EXISTS branches (
   id SERIAL PRIMARY KEY NOT NULL,
+  uid TEXT NOT NULL,
   conditional TEXT NOT NULL,
   "label" TEXT NOT NULL,
   graph_id integer NOT NULL,
@@ -37,7 +39,8 @@ CREATE TABLE IF NOT EXISTS branches (
   ON UPDATE CASCADE,
   FOREIGN KEY (graph_id, next_node) REFERENCES nodes(graph_id, uid) 
   ON DELETE CASCADE 
-  ON UPDATE CASCADE
+  ON UPDATE CASCADE,
+  UNIQUE (graph_id, uid)
 );
 
 -- Jobs
@@ -147,6 +150,7 @@ CREATE OR REPLACE VIEW graph_view AS
     g.id AS graph_id,
     g.created AS created,
     g."name" AS graph_name,
+    g."uid" AS graph_uid,
     n."label" AS node_label,
     n.metadata AS node_type_metadata,
     nt."name" AS node_type_name,
@@ -171,6 +175,7 @@ RETURNS TABLE (
   graph_id integer,
   created timestamp,
   graph_name TEXT,
+  graph_uid TEXT,
   node_label TEXT,
   node_metadata jsonb,
   node_type_name TEXT,
