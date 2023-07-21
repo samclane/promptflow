@@ -17,6 +17,7 @@ import { FlowchartListContainerComponent } from './flowchart-list-container.comp
 import { FlowchartDisplayComponent } from './flowchart-display.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AddNodeComponent } from './add-node.component';
+import {FlowchartImportJson} from './flowchart-import-json.component';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -41,6 +42,7 @@ const routes: Routes = [
     HomeComponent,
     FlowchartListContainerComponent,
     FlowchartDisplayComponent,
+    FlowchartImportJson,
     AddNodeComponent
   ],
   imports: [
