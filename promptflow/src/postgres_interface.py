@@ -174,12 +174,12 @@ class GraphNamesAndIds(BaseModel):
         name (str): The name of the graph.
     """
 
-    id: int
-    name: str
+    uid: str
+    label: str
 
     @staticmethod
     def hydrate(row: Tuple[Any, ...]):
-        return GraphNamesAndIds(id=row[0], name=row[1])
+        return GraphNamesAndIds(uid=row[0], label=row[1])
 
 
 def row_results_to_class_list(class_name, list_of_rows):
@@ -286,12 +286,12 @@ class DBInterface(ABC):
         """
 
     @abstractmethod
-    def get_flowchart_by_id(self, id) -> Flowchart:
+    def get_flowchart_by_uid(self, uid) -> Flowchart:
         """
         Gets the flowchart from the database with the given ID.
 
         Args:
-            id (int): The ID of the flowchart to retrieve.
+            uid (int): The UID (Unique ID) of the flowchart to retrieve.
 
         Returns:
             Flowchart: The flowchart with the given ID.
@@ -530,22 +530,22 @@ class PostgresInterface(DBInterface):
             )
             flowchart.add_connector(connector)
 
-    def get_flowchart_by_id(self, id) -> Flowchart:
+    def get_flowchart_by_uid(self, uid) -> Flowchart:
         with self.conn.cursor() as cursor:
             cursor.execute(
-                "SELECT * FROM graph_view where graph_id=%s", (id,)
+                "SELECT * FROM graph_view where graph_uid=%s", (uid,)
             )  # todo select id,name from graph_view  for function get_graph_view
             # todo for function get_graph_view_to_flowchart_list select id,name from graph_view where id = input_id
             rows = cursor.fetchall()
             if not rows:
-                raise ValueError(f"Flowchart with id {id} not found")
+                raise ValueError(f"Flowchart with uid {uid} not found")
             self.conn.commit()
             graph_nodes = row_results_to_class_list(GraphView, rows)
             return self.build_flowcharts_from_graph_view(graph_nodes)[0]
 
     def get_all_flowchart_ids_and_names(self) -> List[GraphNamesAndIds]:
         with self.conn.cursor() as cursor:
-            cursor.execute("SELECT id, label FROM graphs")
+            cursor.execute("SELECT uid, label FROM graphs")
             rows = cursor.fetchall()
             self.conn.commit()
             return row_results_to_class_list(GraphNamesAndIds, rows)
@@ -562,11 +562,11 @@ class PostgresInterface(DBInterface):
             )
             self.conn.commit()
 
-    def delete_flowchart(self, flowchart_id: int):
+    def delete_flowchart(self, flowchart_id: str):
         with self.conn.cursor() as cursor:
             cursor.execute(
                 """
-                DELETE FROM graphs WHERE id = %s
+                DELETE FROM graphs WHERE uid = %s
                 """,
                 [flowchart_id],
             )

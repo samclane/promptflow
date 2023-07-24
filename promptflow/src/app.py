@@ -143,7 +143,7 @@ def get_flowchart(flowchart_id: str) -> dict:
     """Get a flowchart by id."""
     promptflow.logger.info("Getting flowchart")
     try:
-        flowchart = Flowchart.get_flowchart_by_id(flowchart_id, interface)
+        flowchart = Flowchart.get_flowchart_by_uid(flowchart_id, interface)
     except ValueError:
         interface.conn.rollback()
         return {"message": "Flowchart not found", "error": traceback.format_exc()}
@@ -172,7 +172,7 @@ def run_flowchart_endpoint(flowchart_id: str, background_tasks: BackgroundTasks)
 @app.get("/flowcharts/{flowchart_id}/png")
 def render_flowchart_png(flowchart_id: str):
     """Render a flowchart as a png."""
-    flowchart = Flowchart.get_flowchart_by_id(flowchart_id, interface)
+    flowchart = Flowchart.get_flowchart_by_uid(flowchart_id, interface)
     pos = flowchart.arrange_networkx(
         lambda *args, **kwargs: nx.layout.spring_layout(*args, **kwargs, seed=1337)
     )
@@ -245,7 +245,7 @@ async def job_logs_ws(websocket: WebSocket, job_id: int):
 def stop_flowchart(flowchart_id: str):
     """Stop the flowchart."""
     promptflow.logger.info("Stopping flowchart")
-    flowchart = Flowchart.get_flowchart_by_id(flowchart_id, interface)
+    flowchart = Flowchart.get_flowchart_by_uid(flowchart_id, interface)
     flowchart.is_running = False
     flowchart.is_dirty = True
     return {"message": "Flowchart stopped", "flowchart": flowchart.serialize()}
@@ -255,7 +255,7 @@ def stop_flowchart(flowchart_id: str):
 def clear_flowchart(flowchart_id: str):
     """Clear the flowchart."""
     promptflow.logger.info("Clearing flowchart")
-    flowchart = Flowchart.get_flowchart_by_id(flowchart_id, interface)
+    flowchart = Flowchart.get_flowchart_by_uid(flowchart_id, interface)
     flowchart.clear()
     return {"message": "Flowchart cleared", "flowchart": flowchart.serialize()}
 
@@ -264,7 +264,7 @@ def clear_flowchart(flowchart_id: str):
 def cost_flowchart(flowchart_id: str) -> dict:
     """Get the approx cost to run the flowchart"""
     promptflow.logger.info("Getting cost of flowchart")
-    flowchart = Flowchart.get_flowchart_by_id(flowchart_id, interface)
+    flowchart = Flowchart.get_flowchart_by_uid(flowchart_id, interface)
     state = State()
     cost = flowchart.cost(state)
     return {"cost": cost}
@@ -275,7 +275,7 @@ def save_as(flowchart_id: str) -> Response:
     """
     Serialize the flowchart and save it to a file
     """
-    flowchart = Flowchart.get_flowchart_by_id(flowchart_id, interface)
+    flowchart = Flowchart.get_flowchart_by_uid(flowchart_id, interface)
     filename = flowchart.name
     if filename:
         with zipfile.ZipFile(filename, "w", zipfile.ZIP_DEFLATED) as archive:
@@ -331,56 +331,10 @@ def get_node_types() -> dict:
     return {"node_types": node_types}
 
 
-# Force FastAPI to accept a JSON body for the node type
-class NodeType(BaseModel):
-    node_type: str
-    id: int
-    uid: str
-    name: Optional[str] = None
-
-
-@app.post("/flowcharts/{flowchart_id}/nodes")
-def add_node(flowchart_id: str, nodetype: NodeType) -> dict:
-    """Add a node to the flowchart."""
-    node_cls = node_map.get(nodetype.node_type)
-    if not node_cls:
-        return {"message": "Node not added: invalid node_type"}
-    flowchart = Flowchart.get_flowchart_by_id(flowchart_id, interface)
-    node_type_id = interface.get_node_type_id(nodetype.node_type)
-    node = node_cls(
-        flowchart,
-        nodetype.node_type,
-        node_type_id=node_type_id,
-        id=nodetype.id,
-        uid=nodetype.uid,
-        name=nodetype.name,
-    )
-    if node:
-        flowchart.add_node(node)
-        interface.save_flowchart(flowchart)
-        return {"message": "Node added", "node": node.serialize()}
-    else:
-        return {"message": "Node not added: invalid node_type"}
-
-
-@app.delete("/flowcharts/{flowchart_id}/nodes/{node_id}")
-def remove_node(node_id: str, flowchart_id: str) -> dict:
-    """Remove a node from the flowchart."""
-    flowchart = Flowchart.get_flowchart_by_id(flowchart_id, interface)
-    node = flowchart.find_node(node_id)
-    flowchart.remove_node(node)
-    interface.save_flowchart(flowchart)
-    return {"message": "Node removed", "node": node.serialize()}
-
-
-class NodeData(BaseModel):
-    target_node_id: str
-
-
 @app.get("/flowcharts/{flowchart_id}/nodes/{node_id}/options")
 def get_node_options(flowchart_id: str, node_id: str) -> dict:
     """Get the editable options for a node."""
-    flowchart = Flowchart.get_flowchart_by_id(flowchart_id, interface)
+    flowchart = Flowchart.get_flowchart_by_uid(flowchart_id, interface)
     node = flowchart.find_node(node_id)
     options = node.get_options()
     return {"options": options}
@@ -389,7 +343,7 @@ def get_node_options(flowchart_id: str, node_id: str) -> dict:
 @app.post("/flowcharts/{flowchart_id}/nodes/{node_id}/options")
 def update_node_options(flowchart_id: str, node_id: str, data: dict) -> dict:
     """Update the editable options for a node."""
-    flowchart = Flowchart.get_flowchart_by_id(flowchart_id, interface)
+    flowchart = Flowchart.get_flowchart_by_uid(flowchart_id, interface)
     node = flowchart.find_node(node_id)
     node.update(data)
     interface.save_flowchart(flowchart)

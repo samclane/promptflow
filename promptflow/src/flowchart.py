@@ -62,11 +62,11 @@ class Flowchart:
         self.is_running = False
 
     @classmethod
-    def get_flowchart_by_id(cls, id, interface: DBInterface):
+    def get_flowchart_by_uid(cls, uid, interface: DBInterface):
         """
-        Return a flowchart by id
+        Return a flowchart by uid
         """
-        return interface.get_flowchart_by_id(id)
+        return interface.get_flowchart_by_uid(uid)
 
     @classmethod
     def deserialize(
@@ -78,7 +78,7 @@ class Flowchart:
         flowchart = cls(
             interface,
             uid=data["uid"],
-            name=data.get("name", "Untitled"),
+            name=data.get("label", "Untitled"),
             created=data.get("created", time.time()),
         )
         for node_data in data["nodes"]:
