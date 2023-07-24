@@ -161,7 +161,7 @@ def test_get_flowcharts():
 @pytest.mark.parametrize(
     "create_test_flowchart", ["simple", "advanced", "chat_gpt"], indirect=True
 )
-def test_get_flowchart_by_id(create_test_flowchart):
+def test_get_flowchart_by_uid(create_test_flowchart):
     # Simulate a GET request to the /flowcharts/{flowchart_id} endpoint
     response = client.get(f"/flowcharts/{create_test_flowchart}")
 

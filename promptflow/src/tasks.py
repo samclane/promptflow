@@ -32,7 +32,7 @@ def run_flowchart(self, flowchart_id: str, db_config_init: dict) -> dict:
 
     try:
         logging.info("Running flowchart")
-        flowchart: Flowchart = Flowchart.get_flowchart_by_id(flowchart_id, interface)
+        flowchart: Flowchart = Flowchart.get_flowchart_by_uid(flowchart_id, interface)
         if flowchart is None:
             raise ValueError(f"Flowchart with id {flowchart_id} not found")
         init_state = State()
