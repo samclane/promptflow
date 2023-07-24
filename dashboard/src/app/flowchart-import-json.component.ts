@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, Component} from "@angular/core";
-import {combineLatest} from "rxjs";
+import {combineLatest, take} from "rxjs";
 import {FlowchartService} from "./flowchart.service";
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 
@@ -28,9 +28,10 @@ export class FlowchartImportJson {
     if (this.flowchartForm.valid) {
       const parsedFlowchart = JSON.parse(this.flowchartForm.get('flowchartJson')?.value);
       console.log(parsedFlowchart);
-      this.flowchartService.upsertFlowchart(parsedFlowchart).subscribe(() => {
-        // Handle successful import...
-        });
+      this.flowchartService.upsertFlowchart(parsedFlowchart).pipe(take(1)).subscribe(() => {
+        this.flowchartForm.reset();
+        this.flowchartService.getFlowcharts();
+      });
     }
   }
 }
