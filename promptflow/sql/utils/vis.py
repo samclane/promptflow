@@ -3,7 +3,7 @@ from graphviz import Graph
 
 # Connect to the PostgreSQL database
 conn = psycopg2.connect(
-    host="172.18.0.3", database="promptflow", user="postgres", password="postgres"
+    host="172.21.0.2", database="promptflow", user="postgres", password="postgres"
 )
 cursor = conn.cursor()
 

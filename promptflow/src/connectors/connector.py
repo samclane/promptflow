@@ -28,11 +28,13 @@ class Connector(Serializable):
         prev: NodeBase,
         next: NodeBase,
         condition: Optional[TextData | dict] = None,
-        id: Optional[str] = None,
+        uid: Optional[str] = None,
     ):
         self.prev = prev
         self.next = next
-        self.id = id
+        self.uid = uid
+        if self.uid is None:
+            raise ValueError("uid must be specified")
         self.flowchart = prev.flowchart
         prev.output_connectors.append(self)
         next.input_connectors.append(self)
@@ -58,16 +60,17 @@ class Connector(Serializable):
         return self.condition.label
 
     @classmethod
-    def deserialize(cls, prev: NodeBase, next: NodeBase, condition: TextData):
-        return cls(prev, next, condition)
+    def deserialize(cls, prev: NodeBase, next: NodeBase, condition: TextData, uid: str):
+        return cls(prev, next, condition, uid)
 
     def serialize(self):
         return {
-            "id": self.id,
-            "prev": self.prev.id,
-            "next": self.next.id,
+            "uid": self.uid,
+            "prev": self.prev.uid,
+            "next": self.next.uid,
             "conditional": self.condition.text,
             "label": self.condition.label,
+            "graph_id": self.flowchart.uid,
         }
 
     def delete(self, *args):

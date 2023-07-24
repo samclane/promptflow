@@ -37,10 +37,9 @@ class NodeBase(Serializable, ABC):
         self.logger = logging.getLogger(__name__)
         self.logger.info("Creating node %s", label)
         self.flowchart = flowchart
-        self.id: str = kwargs.get("id", None)
-        if self.id is None:
-            raise ValueError("id must be specified")
-        self.uid: str = kwargs.get("uid", str(uuid4()))
+        self.uid: str = kwargs.get("uid", None)
+        if self.uid is None:
+            raise ValueError("uid must be specified")
 
         self._label = label
         self.input_connectors: list[Connector] = []
@@ -71,11 +70,11 @@ class NodeBase(Serializable, ABC):
 
     def __eq__(self, __o: object) -> bool:
         if isinstance(__o, NodeBase):
-            return self.id == __o.id
+            return self.uid == __o.uid
         return False
 
     def __hash__(self) -> int:
-        return hash(self.id)
+        return hash(self.uid)
 
     @property
     def connectors(self) -> list["Connector"]:
@@ -160,14 +159,13 @@ class NodeBase(Serializable, ABC):
 
     def serialize(self) -> dict[str, Any]:
         return {
-            "id": self.id,
             "uid": self.uid,
             "label": self.label,
             "center_x": self.center_x,
             "center_y": self.center_y,
             "node_type": self.__class__.__name__,
             "node_type_id": self.node_type_id,
-            "graph_id": self.flowchart.id,
+            "graph_id": self.flowchart.uid,
             "metadata": {},
         }
 

@@ -101,7 +101,7 @@ def populate_node_map():
 
     interface = PostgresInterface(
         DatabaseConfig(
-            host="172.18.0.3",
+            host="172.21.0.2",
             database="postgres",
             user="postgres",
             password="postgres",

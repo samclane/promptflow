@@ -252,7 +252,12 @@ def test_get_node_types():
     "create_test_flowchart", ["simple", "advanced", "chat_gpt"], indirect=True
 )
 def test_add_node(create_test_flowchart):
-    data = {"node_type": "InputNode", "id": "1", "uid": "test_add_node", "label": "Start"}
+    data = {
+        "node_type": "InputNode",
+        "id": "1",
+        "uid": "test_add_node",
+        "label": "Start",
+    }
     response = client.post(f"/flowcharts/{create_test_flowchart}/nodes", json=data)
     assert response.status_code == 200
     assert "Node added" in response.json()["message"]

@@ -30,7 +30,7 @@ class Flowchart:
     """
 
     interface: DBInterface
-    id: int
+    uid: str
     name: str
     created: float
     nodes: list[NodeBase]
@@ -39,13 +39,13 @@ class Flowchart:
     def __init__(
         self,
         interface: DBInterface,
-        id: int,
+        uid: str,
         name: Optional[str] = None,
         created: Optional[float] = None,
     ):
         self.interface = interface
-        self.id = id
-        if not self.id:
+        self.uid = uid
+        if not self.uid:
             raise ValueError("Flowchart id not provided")
         self.name = name or "Untitled"
         self.created = created or time.time()
@@ -77,7 +77,7 @@ class Flowchart:
         """
         flowchart = cls(
             interface,
-            id=data["id"],
+            uid=data["uid"],
             name=data.get("name", "Untitled"),
             created=data.get("created", time.time()),
         )
@@ -89,7 +89,12 @@ class Flowchart:
         for connector_data in data["branches"]:
             prev = flowchart.find_node(connector_data["prev"])
             next = flowchart.find_node(connector_data["next"])
-            connector = Connector(prev, next, connector_data.get("conditional", ""))
+            connector = Connector(
+                prev,
+                next,
+                connector_data.get("conditional", ""),
+                uid=connector_data["uid"],
+            )
             flowchart.add_connector(connector)
         flowchart.is_dirty = False
         return flowchart
@@ -137,7 +142,7 @@ class Flowchart:
         Given a node id, find and return the node
         """
         for node in self.nodes:
-            if node.id == node_id:
+            if node.uid == node_id:
                 return node
         raise ValueError(f"No node with id {node_id} found")
 
@@ -279,8 +284,8 @@ class Flowchart:
         Write the flowchart to a dictionary
         """
         data: dict[str, Any] = {
-            "id": self.id,
-            "name": self.name,
+            "uid": self.uid,
+            "label": self.name,
             "created": str(self.created),
         }
         data["nodes"] = []
@@ -352,12 +357,12 @@ class Flowchart:
         """
         mermaid_str = "graph TD\n"
         for node in self.nodes:
-            mermaid_str += f"{node.id}({node.label})\n"
+            mermaid_str += f"{node.uid}({node.label})\n"
         for connector in self.connectors:
             if connector.condition_label:
-                mermaid_str += f"{connector.prev.id} -->|{connector.condition_label}| {connector.next.id}\n"
+                mermaid_str += f"{connector.prev.uid} -->|{connector.condition_label}| {connector.next.uid}\n"
             else:
-                mermaid_str += f"{connector.prev.id} --> {connector.next.id}\n"
+                mermaid_str += f"{connector.prev.uid} --> {connector.next.uid}\n"
 
         return mermaid_str
 
@@ -369,18 +374,18 @@ class Flowchart:
         <graphml xmlns="http://graphml.graphdrawing.org/xmlns">
         """
         for node in self.nodes:
-            graphml_string += f"""<node id="{node.id}">
+            graphml_string += f"""<node id="{node.uid}">
             <data key="d0">{node.label}</data>
             </node>
             """
         for connector in self.connectors:
             if connector.condition_label:
-                graphml_string += f"""<edge source="{connector.prev.id}" target="{connector.next.id}">
+                graphml_string += f"""<edge source="{connector.prev.uid}" target="{connector.next.uid}">
                 <data key="d0">{connector.condition_label}</data>
                 </edge>
                 """
             else:
-                graphml_string += f"""<edge source="{connector.prev.id}" target="{connector.next.id}"/>
+                graphml_string += f"""<edge source="{connector.prev.uid}" target="{connector.next.uid}"/>
                 """
         graphml_string += "\r</graphml>"
         return graphml_string

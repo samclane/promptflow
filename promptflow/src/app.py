@@ -68,7 +68,7 @@ promptflow = PromptFlowApp()
 
 interface = PostgresInterface(
     DatabaseConfig(
-        host=os.getenv("POSTGRES_HOST", "172.18.0.3"),
+        host=os.getenv("POSTGRES_HOST", "172.21.0.2"),
         database=os.getenv("POSTGRES_DB", "postgres"),
         user=os.getenv("POSTGRES_USER", "postgres"),
         password=os.getenv("POSTGRES_PASSWORD", "postgres"),
@@ -112,7 +112,10 @@ def get_flowcharts() -> list[dict]:
 class FlowchartJson(BaseModel):
     """A flowchart json file"""
 
-    flowchart: dict
+    label: str
+    uid: str
+    nodes: list[dict]
+    branches: list[dict]
 
 
 def add_node_type_ids(flowchart: dict):
@@ -127,8 +130,8 @@ def upsert_flowchart_json(flowchart_json: FlowchartJson) -> dict:
     """Upsert a flowchart json file."""
     promptflow.logger.info("Upserting flowchart")
     try:
-        flowchart = add_node_type_ids(flowchart_json.flowchart)
-        flowchart = Flowchart.deserialize(interface, flowchart_json.flowchart)
+        flowchart = add_node_type_ids(flowchart_json.dict())
+        flowchart = Flowchart.deserialize(interface, flowchart)
         interface.save_flowchart(flowchart)
     except ValueError:
         return {"message": "Invalid flowchart json", "error": traceback.format_exc()}
@@ -176,8 +179,12 @@ def render_flowchart_png(flowchart_id: str):
 
     fig = plt.figure()
     nx.draw(flowchart.graph, pos=pos, with_labels=False)
-    nx.draw_networkx_edge_labels(flowchart.graph, pos=pos, edge_labels=flowchart.graph.edges)
-    nx.draw_networkx_labels(flowchart.graph, pos=pos, labels={node: node.label for node in flowchart.nodes})
+    nx.draw_networkx_edge_labels(
+        flowchart.graph, pos=pos, edge_labels=flowchart.graph.edges
+    )
+    nx.draw_networkx_labels(
+        flowchart.graph, pos=pos, labels={node: node.label for node in flowchart.nodes}
+    )
 
     png_image = io.BytesIO()
     plt.savefig(png_image, format="png")
@@ -340,8 +347,14 @@ def add_node(flowchart_id: str, nodetype: NodeType) -> dict:
         return {"message": "Node not added: invalid node_type"}
     flowchart = Flowchart.get_flowchart_by_id(flowchart_id, interface)
     node_type_id = interface.get_node_type_id(nodetype.node_type)
-    node = node_cls(flowchart, nodetype.node_type, node_type_id=node_type_id,
-                    id=nodetype.id, uid=nodetype.uid, name=nodetype.name)
+    node = node_cls(
+        flowchart,
+        nodetype.node_type,
+        node_type_id=node_type_id,
+        id=nodetype.id,
+        uid=nodetype.uid,
+        name=nodetype.name,
+    )
     if node:
         flowchart.add_node(node)
         interface.save_flowchart(flowchart)

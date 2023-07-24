@@ -76,6 +76,7 @@ class GraphView(BaseModel):
     graph_id: conint(gt=0)
     created: datetime
     graph_name: constr(min_length=1)
+    graph_uid: constr(min_length=1)
     node_label: Optional[constr(min_length=1)]
     node_type_metadata: Optional[Dict[str, Any]]
     node_type_name: Optional[constr(min_length=1)]
@@ -102,16 +103,17 @@ class GraphView(BaseModel):
             graph_id=row[0],
             created=row[1],
             graph_name=row[2],
-            node_label=row[3],
-            node_type_metadata=row[4],
-            node_type_name=row[5],
-            next_node=row[6],
-            current_node=row[7],
-            conditional=row[8],
-            has_conditional=row[9],
-            branch_label=row[10],
-            branch_id=row[11],
-            node_type_id=row[12],
+            graph_uid=row[3],
+            node_label=row[4],
+            node_type_metadata=row[5],
+            node_type_name=row[6],
+            next_node=row[7],
+            current_node=row[8],
+            conditional=row[9],
+            has_conditional=row[10],
+            branch_label=row[11],
+            branch_id=row[12],
+            node_type_id=row[13],
         )
 
 
@@ -423,7 +425,7 @@ class PostgresInterface(DBInterface):
 
         # Todo: Add connectors to flowchart in a single pass
         for row in graph_view:
-            flowchart = list(filter(lambda x: x.id == row.graph_id, flowcharts))[0]
+            flowchart = list(filter(lambda x: x.uid == row.graph_id, flowcharts))[0]
             if row.next_node:
                 self.add_connector_to_flowchart(flowchart, row)
 
@@ -432,7 +434,7 @@ class PostgresInterface(DBInterface):
     def new_flowchart(self) -> Flowchart:
         with self.conn.cursor() as cursor:
             name = {
-                "name": "New Flowchart" + str(datetime.now()),
+                "label": "New Flowchart" + str(datetime.now()),
                 "nodes": [],
                 "branches": [],
             }
@@ -450,7 +452,7 @@ class PostgresInterface(DBInterface):
                 raise ValueError("No flowchart data returned from the database")
             id = row[0]
             return Flowchart(
-                interface=self, id=id, name=name["name"], created=datetime.now()
+                interface=self, uid=id, name=name["name"], created=datetime.now()
             )
 
     def get_node_type_id(self, node_type):
@@ -469,13 +471,13 @@ class PostgresInterface(DBInterface):
     def get_or_create_flowchart(
         self, flowcharts: List[Flowchart], row: GraphView
     ) -> Flowchart:
-        existing_ids = [x.id for x in flowcharts]
+        existing_ids = [x.uid for x in flowcharts]
 
         if row.graph_id not in existing_ids:
             flowchart = Flowchart(self, row.graph_id, row.graph_name, row.created)
             flowcharts.append(flowchart)
         else:
-            flowchart = next((x for x in flowcharts if x.id == row.graph_id), None)
+            flowchart = next((x for x in flowcharts if x.uid == row.graph_id), None)
             if flowchart is None:
                 raise ValueError(f"Flowchart with graph_id {row.graph_id} not found")
 
@@ -496,7 +498,7 @@ class PostgresInterface(DBInterface):
                 "label": row.node_label,
                 "center_x": 0,
                 "center_y": 0,
-                "id": row.current_node,
+                "uid": row.current_node,
                 "node_type_id": row.node_type_id,
             },
         )
@@ -509,7 +511,7 @@ class PostgresInterface(DBInterface):
         # check if the connector is already in the flowchart
         if not row.branch_id:
             return
-        if row.branch_id in map(lambda x: x.id, flowchart.connectors):
+        if row.branch_id in map(lambda x: x.uid, flowchart.connectors):
             return
         if not row.current_node or not row.next_node:
             return
@@ -543,7 +545,7 @@ class PostgresInterface(DBInterface):
 
     def get_all_flowchart_ids_and_names(self) -> List[GraphNamesAndIds]:
         with self.conn.cursor() as cursor:
-            cursor.execute("SELECT id, name FROM graphs")
+            cursor.execute("SELECT id, label FROM graphs")
             rows = cursor.fetchall()
             self.conn.commit()
             return row_results_to_class_list(GraphNamesAndIds, rows)
