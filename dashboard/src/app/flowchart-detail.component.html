@@ -1,8 +1,8 @@
 <div class="p-4 md:p-8 bg-white rounded-lg shadow-lg max-w-3xl mx-auto mt-10" *ngIf="flowchart !== undefined">
-  <h2 class="text-4xl font-semibold mb-4">{{ flowchart.name }}</h2>
+  <h2 class="text-4xl font-semibold mb-4">{{ flowchart.label }}</h2>
 
   <div class="p-4 bg-blue-100 rounded-lg">
-    <p class="font-semibold text-lg mb-2"><strong>ID:</strong> {{ flowchart.id }}</p>
+    <p class="font-semibold text-lg mb-2"><strong>ID:</strong> {{ flowchart.uid }}</p>
     <div>
       <button class="px-4 py-2 mr-2 font-semibold text-white bg-blue-500 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50" (click)="runFlowchart()">Run Flowchart</button>
       <button class="px-4 py-2 font-semibold text-gray-700 bg-gray-200 rounded hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50" (click)="stopFlowchart()">Stop Flowchart</button>
@@ -14,11 +14,11 @@
   
   <div class="mt-6">
     <h3 class="text-2xl font-semibold mb-2">Add Node:</h3>
-    <app-add-node [flowchartId]="flowchart.id" ></app-add-node>
+    <app-add-node [flowchartId]="flowchart.uid" ></app-add-node>
   </div>
 
   <div class="mt-6">
     <h3 class="text-2xl font-semibold mb-2">Jobs:</h3>
-    <app-job-list [graphId]="flowchart.id" ></app-job-list>
+    <app-job-list [graphId]="flowchart.uid" ></app-job-list>
   </div>
 </div>

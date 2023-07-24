@@ -2,8 +2,8 @@ import { PFNode } from './node';
 import { Branch } from './branch';
 
 export interface Flowchart {
-    id: string;
-    name: string;
+    uid: string;
+    label: string;
     nodes: PFNode[];
     branches: Branch[];
     status: string;
