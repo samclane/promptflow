@@ -21,10 +21,15 @@ export class JobListComponent implements OnInit {
   }
 
   getJobs(): void {
-    if (!this.graphId) return;
-    this.jobsService.getJobsByGraphId(this.graphId).pipe(take(1)).subscribe(jobs => {
-      this.jobs = jobs;
-    });
+    if (!this.graphId) {
+      this.jobsService.getJobs().pipe(take(1)).subscribe(jobs => {
+        this.jobs = jobs;
+      });
+    } else {
+      this.jobsService.getJobsByGraphId(this.graphId).pipe(take(1)).subscribe(jobs => {
+        this.jobs = jobs;
+      });
+    }
   }
 
   sortJobs<T extends keyof Job>(property: T): Job[] {
