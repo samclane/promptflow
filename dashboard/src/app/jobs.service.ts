@@ -2,35 +2,40 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { Job, JobLog } from './job';
+import {environment} from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class JobsService {
-  private apiUrl = 'http://localhost:8000';  // Your API URL
-
   constructor(private http: HttpClient) { }
 
+  get apiUrl() {
+    return environment.promptflowApiBaseUrl;
+  }
 
+  private buildUrl(path: string): string {
+    return `${this.apiUrl}${path}`;
+  }
 
   getJobs(): Observable<Job[]> {
-    return this.http.get(`${this.apiUrl}/jobs`) as Observable<Job[]>;
+    return this.http.get<Job[]>(this.buildUrl('/jobs'));
   }
 
   getJobsByGraphId(graphId: string): Observable<Job[]> {
-    return this.http.get(`${this.apiUrl}/jobs?graph_id=${graphId}`) as Observable<Job[]>;
+    return this.http.get<Job[]>(this.buildUrl('/jobs'), { params: { graph_id: graphId } });
   }
 
   getJob(jobId: string): Observable<Job> {
-    return this.http.get(`${this.apiUrl}/jobs/${jobId}`) as Observable<Job>;
+    return this.http.get<Job>(this.buildUrl(`/jobs/${jobId}`));
   }
 
   getJobLogs(jobId: string): Observable<JobLog> {
-    return this.http.get(`${this.apiUrl}/jobs/${jobId}/logs`) as Observable<JobLog>;
+    return this.http.get<JobLog>(this.buildUrl(`/jobs/${jobId}/logs`));
   }
 
-  createJob(jobData: Object): Observable<Job> {
-    return this.http.post(`${this.apiUrl}/jobs`, jobData) as Observable<Job>;
+  createJob(jobData: Record<string, unknown>): Observable<Job> {
+    return this.http.post<Job>(this.buildUrl(`/jobs`), jobData);
   }
 
   getJobCount(): Observable<number> {
