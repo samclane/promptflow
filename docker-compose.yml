@@ -2,6 +2,7 @@ version: '3.8'
 
 services:
   db:
+    container_name: promptflow-postgres
     image: postgres
     restart: always
     ports:
@@ -15,10 +16,12 @@ services:
         - my_dbdata:/var/lib/postgresql/data
 
   backend:
-    image: promptflow  
+    container_name: promptflow-backend
+    build:
+      dockerfile: Dockerfile
     command: ["uvicorn", "promptflow.src.app:app", "--host", "0.0.0.0", "--port", "8000"]
     ports:
-      - 8000:8000
+      - 8069:8000
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -30,7 +33,9 @@ services:
       - db
 
   worker:
-    image: promptflow
+    container_name: promtpflow-worker
+    build:
+      dockerfile: Dockerfile
     command: ["celery", "-A", "promptflow.src.tasks", "worker", "-l", "info"]
     mem_limit: 3G
     environment:
@@ -39,6 +44,7 @@ services:
       - redis
 
   redis: 
+    container_name: promptflow-redis
     image: "redis:alpine"
 
 volumes:
