@@ -173,7 +173,9 @@ class Flowchart:
         self.is_dirty = True
         return connector
 
-    def initialize(self, state: State) -> Optional[State]:
+    def initialize(
+        self, state: State, logging_function: Callable[[str], None]
+    ) -> Optional[State]:
         """
         Initialize the flowchart
         """
@@ -184,7 +186,7 @@ class Flowchart:
             return state
         queue: Queue[NodeBase] = Queue()
         queue.put(init_node)
-        return self.run(state, queue)
+        return self.run(state, queue, logging_function=logging_function)
 
     def run(
         self,
@@ -264,7 +266,7 @@ class Flowchart:
                     # if connector.node2 not in queue:
                     if queue.queue.count(connector.next) == 0:
                         queue.put(connector.next)
-                        self.run(state, queue)
+                        self.run(state, queue, logging_function=logging_function)
                     self.logger.info(f"Added node {connector.next.label} to queue")
 
         if queue.empty():
