@@ -12,7 +12,3 @@ COPY . .
 RUN apt-get update && apt-get install build-essential -y
 RUN pip3 install --upgrade pip
 RUN pip3 install -r promptflow/requirements-no-nvidia.txt
-
-
-# CMD ["celery", "-A", "promptflow.src.tasks", "worker", "-l", "info"]
-# CMD ["uvicorn", "promptflow.src.app:app", "--host", "0.0.0.0", "--port", "8000"]
