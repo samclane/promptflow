@@ -4,6 +4,7 @@ window, menu, and canvas. It also handles the saving and loading of
 flowcharts.
 """
 
+import base64
 import sys
 
 sys.path.append("./")
@@ -48,7 +49,7 @@ from promptflow.src.nodes.embedding_node import EmbeddingsIngestNode
 from promptflow.src.nodes.node_base import NodeBase
 from promptflow.src.postgres_interface import DatabaseConfig, PostgresInterface
 from promptflow.src.state import State
-from promptflow.src.tasks import run_flowchart
+from promptflow.src.tasks import render_flowchart, run_flowchart
 
 
 class PromptFlowApp:
@@ -181,25 +182,10 @@ def run_flowchart_endpoint(flowchart_uid: str, background_tasks: BackgroundTasks
 @app.get("/flowcharts/{flowchart_id}/png")
 def render_flowchart_png(flowchart_id: str):
     """Render a flowchart as a png."""
-    flowchart = Flowchart.get_flowchart_by_uid(flowchart_id, interface)
-    pos = flowchart.arrange_networkx(
-        lambda *args, **kwargs: nx.layout.spring_layout(*args, **kwargs, seed=1337)
-    )
-
-    fig = plt.figure()
-    nx.draw(flowchart.graph, pos=pos, with_labels=False)
-    nx.draw_networkx_edge_labels(
-        flowchart.graph, pos=pos, edge_labels=flowchart.graph.edges
-    )
-    nx.draw_networkx_labels(
-        flowchart.graph, pos=pos, labels={node: node.label for node in flowchart.nodes}
-    )
-
-    png_image = io.BytesIO()
-    plt.savefig(png_image, format="png")
-    png_image.seek(0)
-
-    return StreamingResponse(png_image, media_type="image/png")
+    png_image = render_flowchart.apply_async(
+        (flowchart_id, interface.config.dict())
+    ).get()
+    return StreamingResponse(io.BytesIO(png_image), media_type="image/png")
 
 
 @app.get("/jobs")

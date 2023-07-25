@@ -1,5 +1,10 @@
+import base64
+import io
 import logging
 import traceback
+
+import matplotlib.pyplot as plt
+import networkx as nx
 
 from promptflow.src.celery_app import celery_app
 from promptflow.src.flowchart import Flowchart
@@ -56,3 +61,30 @@ def run_flowchart(self, flowchart_uid: str, db_config_init: dict) -> dict:
             f"Task failed: run_flowchart, Error: {str(traceback.format_exc())}"
         )
         raise self.retry(exc=e)
+
+
+@celery_app.task(bind=True, name="promptflow.src.app.render_flowchart")
+def render_flowchart(self, flowchart_uid: str, db_config_init: dict):
+    logging.info("Task started: render_flowchart")
+    db_config = DatabaseConfig(**db_config_init)
+    interface = PostgresInterface(db_config)
+    flowchart = Flowchart.get_flowchart_by_uid(flowchart_uid, interface)
+    pos = flowchart.arrange_networkx(
+        lambda *args, **kwargs: nx.layout.spring_layout(*args, **kwargs, seed=1337)
+    )
+
+    fig = plt.figure()
+    nx.draw(flowchart.graph, pos=pos, with_labels=False)
+    nx.draw_networkx_edge_labels(
+        flowchart.graph, pos=pos, edge_labels=flowchart.graph.edges
+    )
+    nx.draw_networkx_labels(
+        flowchart.graph, pos=pos, labels={node: node.label for node in flowchart.nodes}
+    )
+
+    png_image = io.BytesIO()
+    plt.savefig(png_image, format="png")
+    png_image.seek(0)
+
+    # convert bytes to base64 string
+    return base64.b64encode(png_image.read())
