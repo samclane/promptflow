@@ -3,6 +3,10 @@ Primary application class. This class is responsible for creating the
 window, menu, and canvas. It also handles the saving and loading of
 flowcharts.
 """
+
+import sys
+sys.path.append('./')
+
 import dotenv
 
 dotenv.load_dotenv()
