@@ -10,7 +10,7 @@ from typing import Any
 
 import openai
 import torch
-from PIL import Image, ImageTk
+from PIL import Image
 from transformers import AutoModelForCausalLM, AutoProcessor
 
 from promptflow.src.nodes.node_base import NodeBase
@@ -42,9 +42,8 @@ class OpenImageFile(ImageNode):
     filename = ""
 
     def run_subclass(self, before_result: Any, state) -> str:
-        # convert tkphotoimage to PIL image
         pil_image = Image.open(self.filename)
-        self.image = ImageTk.PhotoImage(pil_image)
+        self.image = pil_image
         state.data = self.image
         return state.result
 
@@ -74,9 +73,8 @@ class JSONImageFile(ImageNode):
             data = json.loads(state.result)
         except json.decoder.JSONDecodeError:
             return "Invalid JSON"
-        # convert tkphotoimage to PIL image
         pil_image = Image.open(data[self.filename_key])
-        self.image = ImageTk.PhotoImage(pil_image)
+        self.image = pil_image
         state.data = self.image
         return state.result
 
@@ -110,7 +108,7 @@ class DallENode(ImageNode):
         # show the image
         imgdata = base64.b64decode(response["data"][0]["b64_json"])
         pil_image = Image.open(io.BytesIO(imgdata))
-        self.image = ImageTk.PhotoImage(pil_image)
+        self.image = pil_image
         state.data = self.image
         return state.result
 
@@ -138,8 +136,7 @@ class CaptionNode(ImageNode):
         checkpoint = "microsoft/git-base"
         processor = AutoProcessor.from_pretrained(checkpoint)
         device = "cuda" if torch.cuda.is_available() else "cpu"
-        # convert tkphotoimage to PIL image
-        pil_image = ImageTk.getimage(state.data)
+        pil_image = state.data
         inputs = processor(images=pil_image, return_tensors="pt").to(device)
         pixel_values = inputs.pixel_values
         model = AutoModelForCausalLM.from_pretrained(checkpoint)
@@ -174,8 +171,7 @@ class SaveImageNode(ImageNode):
         self.filename = kwargs.get("filename", "")
 
     def run_subclass(self, before_result: Any, state) -> str:
-        # convert tkphotoimage to PIL image
-        pil_image = ImageTk.getimage(state.data)
+        pil_image = state.data
         pil_image.save(self.filename)
         return state.result
 
