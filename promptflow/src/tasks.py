@@ -23,18 +23,18 @@ def log_result_generator(interface: DBInterface, job_id: int):
 
 
 @celery_app.task(bind=True, name="promptflow.src.app.run_flowchart")
-def run_flowchart(self, flowchart_id: str, db_config_init: dict) -> dict:
+def run_flowchart(self, flowchart_uid: str, db_config_init: dict) -> dict:
     logging.info("Task started: run_flowchart")
     db_config = DatabaseConfig(**db_config_init)
     interface = PostgresInterface(db_config)
-    job_id = interface.create_job({"celery_id": self.request.id}, flowchart_id)
-    interface.update_job_status(job_id, "PENDING")
 
     try:
         logging.info("Running flowchart")
-        flowchart: Flowchart = Flowchart.get_flowchart_by_uid(flowchart_id, interface)
+        flowchart: Flowchart = Flowchart.get_flowchart_by_uid(flowchart_uid, interface)
         if flowchart is None:
-            raise ValueError(f"Flowchart with id {flowchart_id} not found")
+            raise ValueError(f"Flowchart with uid {flowchart_uid} not found")
+        job_id = interface.create_job({"celery_id": self.request.id}, flowchart.id)
+        interface.update_job_status(job_id, "PENDING")
         init_state = State()
         init_state = flowchart.initialize(init_state)
         logging.info("Flowchart initialized")

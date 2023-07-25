@@ -35,6 +35,7 @@ class Flowchart:
     created: float
     nodes: list[NodeBase]
     connectors: list[Connector]
+    id = None
 
     def __init__(
         self,

@@ -166,10 +166,10 @@ def delete_flowchart(flowchart_id: str) -> dict:
     return {"message": "Flowchart deleted", "flowchart_id": flowchart_id}
 
 
-@app.get("/flowcharts/{flowchart_id}/run")
-def run_flowchart_endpoint(flowchart_id: str, background_tasks: BackgroundTasks):
+@app.get("/flowcharts/{flowchart_uid}/run")
+def run_flowchart_endpoint(flowchart_uid: str, background_tasks: BackgroundTasks):
     """Queue the flowchart execution as a background task."""
-    task = run_flowchart.apply_async((flowchart_id, interface.config.dict()))
+    task = run_flowchart.apply_async((flowchart_uid, interface.config.dict()))
     return {"message": "Flowchart execution started", "task_id": str(task.id)}
 
 

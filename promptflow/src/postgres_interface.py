@@ -475,6 +475,7 @@ class PostgresInterface(DBInterface):
 
         if row.graph_id not in existing_ids:
             flowchart = Flowchart(self, row.graph_id, row.graph_name, row.created)
+            flowchart.id = row.graph_id
             flowcharts.append(flowchart)
         else:
             flowchart = next((x for x in flowcharts if x.uid == row.graph_id), None)
