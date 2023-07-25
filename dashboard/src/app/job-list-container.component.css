@@ -1,0 +1,18 @@
+.container {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  
+  h1 {
+    flex-shrink: 1;
+  }
+  
+  .scrollable-area {
+    overflow: auto;
+    flex-grow: 1;
+  }
+  
+
+  
