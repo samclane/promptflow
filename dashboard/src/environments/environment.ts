@@ -4,7 +4,7 @@
 
 export const environment = {
   production: false,
-  promptflowApiBaseUrl: 'http://127.0.0.1:8000'
+  promptflowApiBaseUrl: 'http://127.0.0.1:8069'
 };
 
 /*
