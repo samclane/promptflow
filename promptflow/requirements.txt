@@ -85,6 +85,7 @@ loguru==0.7.0
 markdown-it-py==2.2.0
 MarkupSafe==2.1.2
 matplotlib-inline==0.1.6
+matplotlib
 mccabe==0.7.0
 mdit-py-plugins==0.3.5
 mdurl==0.1.2
@@ -183,7 +184,6 @@ torchvision==0.15.1
 tqdm==4.65.0
 traitlets==5.9.0
 transformers==4.29.0
-triton==2.0.0
 twine==4.0.2
 typing_extensions==4.5.0
 tzdata==2023.3

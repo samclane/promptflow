@@ -1,38 +1,31 @@
 version: '3.8'
 
 services:
-    db:
-        image: postgres
-        restart: always
-        ports:
-            - "5432:5432"
-        environment:
-            POSTGRES_USER: postgres
-            POSTGRES_PASSWORD: postgres
-            POSTGRES_DB: postgres
-        volumes:
-            - my_dbdata:/var/lib/postgresql/data
+  db:
+    image: postgres
+    restart: always
+    ports:
+        - "5432:5152"
+    environment:
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: postgres
+        POSTGRES_DB: postgres
+    volumes:
+        - my_dbdata:/var/lib/postgresql/data
 
-    backend:
-        build: ./promptflow
-        volumes:
-        - ./promptflow:/app
-        ports:
-        - 8000:8000
+  backend:
+    image: promptflow  
+    command: ["uvicorn", "promptflow.src.app:app", "--host", "0.0.0.0", "--port", "8000"]
+    ports:
+      - 8000:8000
+    mem_limit: 3G
 
-    frontend:
-        build: ./dashboard
-        volumes:
-        - ./dashboard:/usr/share/nginx/html
-        ports:
-        - 4200:80
+  worker:
+    image: promptflow
+    command: ["celery", "-A", "promptflow.src.tasks", "worker", "-l", "info"]
+    mem_limit: 3G
+  redis: 
+    image: "redis:alpine"
 
-    worker:
-        build: ./promptflow/src
-        volumes:
-        - ./promptflow/src:/worker
-
-    redis: 
-        image: "redis:alpine"
 volumes:
-    my_dbdata:
+  my_dbdata:
