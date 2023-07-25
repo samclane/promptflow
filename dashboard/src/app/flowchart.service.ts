@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, map, ReplaySubject, Subject, switchMap, shareReplay, filter, tap, startWith, catchError, of } from 'rxjs';
 import { Flowchart, FlowchartConfirmation } from './flowchart';
 import {environment} from 'src/environments/environment';
+import { blob } from 'd3';
 
 @Injectable({
   providedIn: 'root'
@@ -71,9 +72,9 @@ export class FlowchartService {
     this.deleteFlowchartSource.next(flowchartId);
   }
 
-  getFlowchartPng(flowchartId: string): Observable<Blob> {
+  getFlowchartPng(flowchartId: string): Observable<string> {
     // I think this cast is lying
-    return this.http.get(`${this.apiUrl}/flowcharts/${flowchartId}/png`, { responseType: 'blob' }) as Observable<Blob>;
+    return this.http.get(`${this.apiUrl}/flowcharts/${flowchartId}/png`, { responseType: 'text' }) as Observable<string>;
   }
   
 }

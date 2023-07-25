@@ -11,7 +11,8 @@ CREATE TABLE IF NOT EXISTS graphs (
   id SERIAL PRIMARY KEY NOT NULL,
   uid TEXT UNIQUE NOT NULL,
   "label" TEXT NOT NULL,
-  created TIMESTAMP NOT NULL DEFAULT current_timestamp
+  created TIMESTAMP NOT NULL DEFAULT current_timestamp,
+  image bytea
 );
 -- Nodes
 CREATE TABLE IF NOT EXISTS nodes (
