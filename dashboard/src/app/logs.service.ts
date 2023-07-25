@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { WebSocketService } from './web-socket.service';
 import { Observable } from 'rxjs';
 import { LogWrapper } from './log';
+import {environment} from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -12,7 +13,8 @@ export class LogsService {
   constructor(private webSocketService: WebSocketService) { }
 
   startLogging(jobId: string): void {
-    const url = `ws://localhost:8000/jobs/${jobId}/ws`;
+    const baseUrl = environment.promptflowApiBaseUrl;
+    const url = `ws://${baseUrl}/jobs/${jobId}/ws`;
     this.webSocketService.connect(url, jobId);
     this.logs$ = this.webSocketService.getObservable();
   }
