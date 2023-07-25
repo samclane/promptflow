@@ -1,0 +1,4 @@
+.scrollable-area {
+    overflow: auto;
+    height: 21em;
+}
