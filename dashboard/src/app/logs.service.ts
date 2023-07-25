@@ -13,8 +13,8 @@ export class LogsService {
   constructor(private webSocketService: WebSocketService) { }
 
   startLogging(jobId: string): void {
-    const baseUrl = environment.promptflowApiBaseUrl;
-    const url = `ws://${baseUrl}/jobs/${jobId}/ws`;
+    const baseUrl = environment.promptflowWsBaseUrl;
+    const url = `${baseUrl}/jobs/${jobId}/ws`;
     this.webSocketService.connect(url, jobId);
     this.logs$ = this.webSocketService.getObservable();
   }
