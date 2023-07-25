@@ -185,6 +185,7 @@ def render_flowchart_png(flowchart_id: str):
     png_image = render_flowchart.apply_async(
         (flowchart_id, interface.config.dict())
     ).get()
+    interface.store_b64_image(png_image, flowchart_id)
     return StreamingResponse(io.BytesIO(png_image), media_type="image/png")
 
 
