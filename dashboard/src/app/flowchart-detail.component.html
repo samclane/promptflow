@@ -13,8 +13,7 @@
   </div>
   
   <div class="mt-6">
-    <h3 class="text-2xl font-semibold mb-2">Add Node:</h3>
-    <app-add-node [flowchartId]="flowchart.uid" ></app-add-node>
+    <app-flowchart-import-json [flowchartJson]="flowchart | json"></app-flowchart-import-json>
   </div>
 
   <div class="mt-6">
