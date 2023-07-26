@@ -21,6 +21,7 @@
     "rxjs": "~7.5.0",
     "tailwind": "^4.0.0",
     "tslib": "^2.3.0",
+    "typescript-monads": "^8.9.0",
     "zone.js": "~0.11.4"
   },
   "devDependencies": {

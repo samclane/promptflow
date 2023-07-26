@@ -1,22 +1,13 @@
 <ng-container *ngIf="vm$ | async as vm">
-  <div class="p-4 md:p-8 bg-white rounded-lg shadow-lg max-w-3xl mx-auto mt-10 border">
+  <div class="info-container">
     <h1 class="text-4xl font-semibold mb-4">Flowcharts</h1>
-    <div class="scrollable-area">
+    <div class="max-h-[800px] overflow-y-auto">
       <ng-container *ngIf="vm.flowcharts.length > 0">
-        <div *ngFor="let flowchart of vm.flowcharts" class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl m-3 transition duration-500 ease-in-out transform hover:bg-gray-200">
-          <a [routerLink]="['/flowcharts', flowchart.uid]" class="block">
-            <div class="flex justify-between">
-              <div class="md:flex">
-                <div class="md:flex-shrink-0">
-                </div>
-                <div class="p-8">
-                  <div class="block mt-1 text-lg leading-tight font-medium text-black">{{ flowchart.label }}</div>
-                  <p class="mt-2 text-gray-500"></p>
-                </div>
-              </div>
-              <button (click)="deleteFlowchart(flowchart.uid); $event.stopPropagation();" class="p-2 bg-red-500 transition duration-200 ease-in-out text-white rounded self-center mr-4 hover:bg-red-700">Delete</button>
-            </div>
+        <div *ngFor="let flowchart of vm.flowcharts" class="info-container flex flex-row items-center justify-between">
+          <a [routerLink]="['/flowcharts', flowchart.uid]" class="text-xl hover:underline">
+            {{ flowchart.label }}
           </a>
+          <button (click)="deleteFlowchart(flowchart.uid); $event.stopPropagation();" class="p-2 bg-red-500 transition duration-200 ease-in-out text-white rounded self-center mr-4 hover:bg-red-700">Delete</button>
         </div>
       </ng-container>
       <ng-container *ngIf="vm.flowcharts.length === 0">

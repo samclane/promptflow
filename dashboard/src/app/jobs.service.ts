@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
+import { Observable, map, catchError, of } from 'rxjs';
 import { Job, JobLog } from './job';
 import {environment} from 'src/environments/environment';
+import {maybe, Maybe, none} from 'typescript-monads';
 
 @Injectable({
   providedIn: 'root'
@@ -26,8 +27,11 @@ export class JobsService {
     return this.http.get<Job[]>(this.buildUrl('/jobs'), { params: { graph_id: graphId } });
   }
 
-  getJob(jobId: string): Observable<Job> {
-    return this.http.get<Job>(this.buildUrl(`/jobs/${jobId}`));
+  getJob(jobId: string): Observable<Maybe<Job>> {
+    return this.http.get<Job>(this.buildUrl(`/jobs/${jobId}`)).pipe(
+      map((x) => maybe<Job>(x)),
+      catchError(() => of(none<Job>())),
+    )
   }
 
   getJobLogs(jobId: string): Observable<JobLog> {

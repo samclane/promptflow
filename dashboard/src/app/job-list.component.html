@@ -1,14 +1,14 @@
 <div class="overflow-x-auto">
-  <table class="mx-auto max-w-4xl w-full whitespace-nowrap rounded-lg bg-white divide-y divide-gray-300 overflow-hidden">
+  <table class="mx-auto info-container">
     <thead class="bg-gray-50">
       <tr class="text-left font-bold">
-        <th class="px-6 py-4 text-xs leading-4 tracking-wider text-gray-500 hover:bg-gray-200" (click)="sortJobs('job_id')">Job ID <span [innerHTML]="currentSortColumn === 'job_id' ? (sortDirection == 1 ? '&darr;' : '&uarr;') : ''"></span></th>
-        <th class="px-6 py-4 text-xs leading-4 tracking-wider text-gray-500 hover:bg-gray-200" (click)="sortJobs('graph_id')">Graph ID <span [innerHTML]="currentSortColumn === 'graph_id' ? (sortDirection == 1 ? '&darr;' : '&uarr;') : ''"></span></th>
-        <th class="px-6 py-4 text-xs leading-4 tracking-wider text-gray-500 hover:bg-gray-200" (click)="sortJobs('job_status')">Status <span [innerHTML]="currentSortColumn === 'job_status' ? (sortDirection == 1 ? '&darr;' : '&uarr;') : ''"></span></th>
-        <th class="px-6 py-4 text-xs leading-4 tracking-wider text-gray-500 hover:bg-gray-200" (click)="sortJobs('created')">Created <span [innerHTML]="currentSortColumn === 'created' ? (sortDirection == 1 ? '&darr;' : '&uarr;') : ''"></span></th>
-        <th class="px-6 py-4 text-xs leading-4 tracking-wider text-gray-500 hover:bg-gray-200" (click)="sortJobs('updated')">Updated <span [innerHTML]="currentSortColumn === 'updated' ? (sortDirection == 1 ? '&darr;' : '&uarr;') : ''"></span></th>
-        <th class="px-6 py-4 text-xs leading-4 tracking-wider text-gray-500 hover:bg-gray-200" (click)="sortJobs('metadata')">Metadata <span [innerHTML]="currentSortColumn === 'metadata' ? (sortDirection == 1 ? '&darr;' : '&uarr;') : ''"></span></th>
-        <th class="px-6 py-4 text-xs leading-4 tracking-wider text-gray-500 hover:bg-gray-200">Actions</th>
+        <th class="cursor-pointer px-6 py-4 text-xs leading-4 tracking-wider text-gray-500 hover:bg-gray-200" (click)="sortJobs('job_id')">Job ID <span [innerHTML]="currentSortColumn === 'job_id' ? (sortDirection == 1 ? '&darr;' : '&uarr;') : ''"></span></th>
+        <th class="cursor-pointer px-6 py-4 text-xs leading-4 tracking-wider text-gray-500 hover:bg-gray-200" (click)="sortJobs('graph_id')">Graph ID <span [innerHTML]="currentSortColumn === 'graph_id' ? (sortDirection == 1 ? '&darr;' : '&uarr;') : ''"></span></th>
+        <th class="cursor-pointer px-6 py-4 text-xs leading-4 tracking-wider text-gray-500 hover:bg-gray-200" (click)="sortJobs('job_status')">Status <span [innerHTML]="currentSortColumn === 'job_status' ? (sortDirection == 1 ? '&darr;' : '&uarr;') : ''"></span></th>
+        <th class="cursor-pointer px-6 py-4 text-xs leading-4 tracking-wider text-gray-500 hover:bg-gray-200" (click)="sortJobs('created')">Created <span [innerHTML]="currentSortColumn === 'created' ? (sortDirection == 1 ? '&darr;' : '&uarr;') : ''"></span></th>
+        <th class="cursor-pointer px-6 py-4 text-xs leading-4 tracking-wider text-gray-500 hover:bg-gray-200" (click)="sortJobs('updated')">Updated <span [innerHTML]="currentSortColumn === 'updated' ? (sortDirection == 1 ? '&darr;' : '&uarr;') : ''"></span></th>
+        <th class="cursor-pointer px-6 py-4 text-xs leading-4 tracking-wider text-gray-500 hover:bg-gray-200" (click)="sortJobs('metadata')">Metadata <span [innerHTML]="currentSortColumn === 'metadata' ? (sortDirection == 1 ? '&darr;' : '&uarr;') : ''"></span></th>
+        <th class="cursor-pointer px-6 py-4 text-xs leading-4 tracking-wider text-gray-500 hover:bg-gray-200">Actions</th>
       </tr>
     </thead>
     <tbody class="bg-white divide-y divide-gray-300">

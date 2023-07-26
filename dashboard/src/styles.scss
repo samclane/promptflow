@@ -2,14 +2,7 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
-.btn {
-  @apply py-2 px-4 font-semibold rounded-lg shadow-md;
-}
 
-.btn-primary {
-  @apply text-white bg-primary;
-}
-
-.btn-primary:hover {
-  @apply bg-blue-700;
+.info-container {
+  @apply border p-4 md:p-8 rounded-lg shadow-lg;
 }

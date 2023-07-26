@@ -1,1 +1,1 @@
-<div id='flowchart-display'></div>
+<img *ngIf="base64Img$ | async as b64img" [src]="b64img" class="border shadow-md rounded-lg p-1" /> 
