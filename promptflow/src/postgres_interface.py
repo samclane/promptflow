@@ -426,7 +426,7 @@ class PostgresInterface(DBInterface):
 
         # Todo: Add connectors to flowchart in a single pass
         for row in graph_view:
-            flowchart = list(filter(lambda x: x.uid == row.graph_id, flowcharts))[0]
+            flowchart = list(filter(lambda x: x.uid == row.graph_uid, flowcharts))[0]
             if row.next_node:
                 self.add_connector_to_flowchart(flowchart, row)
 
