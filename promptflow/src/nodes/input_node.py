@@ -13,7 +13,7 @@ class InputNode(NodeBase):
     """
 
     def before(self, state):
-        return {"input": input()}  # todo tie this into a frontend
+        return {"input": ""}
 
     def run_subclass(self, before_result, state):
         if before_result["input"] == "":

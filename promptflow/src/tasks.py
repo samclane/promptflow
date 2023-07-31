@@ -42,14 +42,18 @@ def run_flowchart(self, flowchart_uid: str, db_config_init: dict) -> dict:
         interface.update_job_status(job_id, "PENDING")
         init_state = State()
         init_state = flowchart.initialize(
-            init_state, logging_function=log_result_generator(interface, job_id)
+            self.request.id,
+            init_state,
+            logging_function=log_result_generator(interface, job_id),
         )
         logging.info("Flowchart initialized")
 
         state = init_state
         interface.update_job_status(job_id, "RUNNING")
         state = flowchart.run(
-            state, logging_function=log_result_generator(interface, job_id)
+            self.request.id,
+            state,
+            logging_function=log_result_generator(interface, job_id),
         )
         interface.update_job_status(job_id, "DONE")
 

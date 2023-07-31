@@ -662,7 +662,7 @@ class PostgresInterface(DBInterface):
             rows = cursor.fetchall()
             self.conn.commit()
             return list(map(lambda x: x[0], rows))
-        
+
     def store_b64_image(self, image: str, flowchart_uid: str):
         image_bytes = base64.b64decode(image)
         with self.conn.cursor() as cursor:
@@ -672,9 +672,8 @@ class PostgresInterface(DBInterface):
             WHERE uid = %s
             """
             cursor.execute(query, (image_bytes, flowchart_uid))
-            
+
         self.conn.commit()
-        
 
     def listener(self, manager, loop: asyncio.AbstractEventLoop):
         self.conn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)

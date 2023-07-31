@@ -7,6 +7,8 @@ flowcharts.
 import base64
 import sys
 
+import redis
+
 sys.path.append("./")
 
 import dotenv
@@ -177,6 +179,18 @@ def run_flowchart_endpoint(flowchart_uid: str, background_tasks: BackgroundTasks
     """Queue the flowchart execution as a background task."""
     task = run_flowchart.apply_async((flowchart_uid, interface.config.dict()))
     return {"message": "Flowchart execution started", "task_id": str(task.id)}
+
+
+class Input(BaseModel):
+    input: str
+
+
+@app.post("/flowcharts/{flowchart_uid}/{task_id}/input")
+def post_input(flowchart_uid: str, task_id: str, input: Input):
+    """Post input to a flowchart execution."""
+    red = redis.StrictRedis("redis", 6379, charset="utf-8", decode_responses=True)
+    red.publish(f"{flowchart_uid}/{task_id}/input", input.input)
+    return {"message": "Input received", "input": input.input}
 
 
 @app.get("/flowcharts/{flowchart_id}/png")

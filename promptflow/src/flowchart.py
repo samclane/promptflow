@@ -3,6 +3,7 @@ This module contains the Flowchart class, which manages the nodes and connectors
 """
 from __future__ import annotations
 
+import json
 import logging
 import threading
 import time
@@ -10,6 +11,7 @@ from queue import Queue
 from typing import TYPE_CHECKING, Any, Callable, Optional
 
 import networkx as nx
+import redis
 
 from promptflow.src.connectors.connector import Connector
 from promptflow.src.connectors.partial_connector import PartialConnector
@@ -174,7 +176,7 @@ class Flowchart:
         return connector
 
     def initialize(
-        self, state: State, logging_function: Callable[[str], None]
+        self, task_id: str, state: State, logging_function: Callable[[str], None]
     ) -> Optional[State]:
         """
         Initialize the flowchart
@@ -186,10 +188,11 @@ class Flowchart:
             return state
         queue: Queue[NodeBase] = Queue()
         queue.put(init_node)
-        return self.run(state, queue, logging_function=logging_function)
+        return self.run(task_id, state, queue, logging_function=logging_function)
 
     def run(
         self,
+        task_id: str,
         state: Optional[State],
         queue: Optional[Queue[NodeBase]] = None,
         logging_function: Callable[[str], None] = lambda x: None,
@@ -215,6 +218,25 @@ class Flowchart:
             cur_node: NodeBase = queue.get()
             self.logger.info(f"Running node {cur_node.label}")
             before_result = cur_node.before(state)
+            if before_result and "input" in before_result:
+                self.logger.info(f"Node {cur_node.label} requires input")
+                red = redis.StrictRedis(
+                    "redis", 6379, charset="utf-8", decode_responses=True
+                )
+                red.publish("messages", "INPUT_REQUIRED")
+                # wait for input
+                sub = red.pubsub()
+                sub.subscribe(f"{self.uid}/{task_id}/input")
+                input_received = False
+                while not input_received:
+                    for msg in sub.listen():
+                        self.logger.info(f"Received message: {msg}")
+                        if msg and msg["type"] == "message":
+                            data = msg.get("data")
+                            if data:
+                                before_result["input"] = data
+                                input_received = True
+                                break
             try:
                 thread = threading.Thread(
                     target=cur_node.run_node,
@@ -266,7 +288,9 @@ class Flowchart:
                     # if connector.node2 not in queue:
                     if queue.queue.count(connector.next) == 0:
                         queue.put(connector.next)
-                        self.run(state, queue, logging_function=logging_function)
+                        self.run(
+                            task_id, state, queue, logging_function=logging_function
+                        )
                     self.logger.info(f"Added node {connector.next.label} to queue")
 
         if queue.empty():

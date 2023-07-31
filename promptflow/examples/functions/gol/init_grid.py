@@ -6,8 +6,9 @@ def main(state: State):
     Initialize a grid for conway's game of life
     """
     # imports
-    import numpy as np
     import random
+
+    import numpy as np
 
     # get the grid size
     grid_size: int = int(state.snapshot["grid_size"])
