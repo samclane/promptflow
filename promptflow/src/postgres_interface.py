@@ -451,9 +451,9 @@ class PostgresInterface(DBInterface):
             row = cursor.fetchone()
             if not row:
                 raise ValueError("No flowchart data returned from the database")
-            id = row[0]
+            uid = row[3]
             return Flowchart(
-                interface=self, uid=id, name=name["name"], created=datetime.now()
+                interface=self, uid=uid, name=name["name"], created=datetime.now()
             )
 
     def get_node_type_id(self, node_type):
@@ -475,7 +475,7 @@ class PostgresInterface(DBInterface):
         existing_ids = [x.uid for x in flowcharts]
 
         if row.graph_id not in existing_ids:
-            flowchart = Flowchart(self, row.graph_id, row.graph_name, row.created)
+            flowchart = Flowchart(self, row.graph_uid, row.graph_name, row.created)
             flowchart.id = row.graph_id
             flowcharts.append(flowchart)
         else:
