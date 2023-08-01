@@ -222,7 +222,7 @@ class Flowchart:
             if before_result and "input" in before_result:
                 self.logger.info(f"Node {cur_node.label} requires input")
                 red = redis.StrictRedis.from_url(os.environ.get("REDIS_URL"))
-                red.publish("messages", "INPUT_REQUIRED")
+                red.publish(f"{self.uid}/{task_id}/messages", "INPUT_REQUIRED")
                 # wait for input
                 sub = red.pubsub()
                 sub.subscribe(f"{self.uid}/{task_id}/input")
