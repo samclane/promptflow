@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy, Input } from '@angular/core';
 import { LogsService } from './logs.service';
 import { WebSocketService } from './web-socket.service';
 import { Subscription, take } from 'rxjs';
+import { LogWrapper } from './log';
 
 @Component({
   selector: 'app-job-logs',
@@ -13,7 +14,7 @@ export class JobLogsComponent implements OnInit, OnDestroy {
   logs: string = '';
   private logSubscription?: Subscription;
 
-  constructor(private logsService: LogsService, private webSocketService: WebSocketService) { }
+  constructor(private logsService: LogsService, private webSocketService: WebSocketService<LogWrapper>) { }
 
   ngOnInit(): void {
     this.logsService.startLogging(this.jobId);

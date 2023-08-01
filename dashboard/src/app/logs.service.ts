@@ -10,7 +10,7 @@ import {environment} from 'src/environments/environment';
 export class LogsService {
   private logs$!: Observable<LogWrapper>;
 
-  constructor(private webSocketService: WebSocketService) { }
+  constructor(private webSocketService: WebSocketService<LogWrapper>) { }
 
   startLogging(jobId: string): void {
     const baseUrl = environment.promptflowWsBaseUrl;

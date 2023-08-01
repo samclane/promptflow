@@ -1,12 +1,11 @@
 import { Injectable } from '@angular/core';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
-import { LogWrapper } from './log';
 
 @Injectable({
   providedIn: 'root'
 })
-export class WebSocketService {
-  private socket$!: WebSocketSubject<LogWrapper>;
+export class WebSocketService<T> {
+  private socket$!: WebSocketSubject<T>;
 
   public connect(url: string, jobId: string): void {
     if (!this.socket$ || this.socket$.closed) {
@@ -14,7 +13,7 @@ export class WebSocketService {
     }
   }
 
-  public getObservable(): WebSocketSubject<LogWrapper> {
+  public getObservable(): WebSocketSubject<T> {
     return this.socket$;
   }
 
