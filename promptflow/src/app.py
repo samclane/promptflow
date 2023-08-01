@@ -188,7 +188,7 @@ class Input(BaseModel):
 @app.post("/flowcharts/{flowchart_uid}/{task_id}/input")
 def post_input(flowchart_uid: str, task_id: str, input: Input):
     """Post input to a flowchart execution."""
-    red = redis.StrictRedis("redis", 6379, charset="utf-8", decode_responses=True)
+    red = redis.StrictRedis.from_url(os.getenv("REDIS_URL"))
     red.publish(f"{flowchart_uid}/{task_id}/input", input.input)
     return {"message": "Input received", "input": input.input}
 
@@ -205,14 +205,14 @@ def render_flowchart_png(flowchart_id: str):
 
 @app.get("/jobs")
 def get_all_jobs(
-    graph_id: Optional[str] = None,
+    graph_uid: Optional[str] = None,
     status: Optional[str] = None,
     limit: Optional[int] = None,
 ):
     """
     Get all running jobs
     """
-    return interface.get_all_jobs(graph_id, status, limit)
+    return interface.get_all_jobs(graph_uid, status, limit)
 
 
 @app.get("/jobs/{job_id}")

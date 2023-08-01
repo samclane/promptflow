@@ -1,6 +1,10 @@
 # Configuration for the Celery instance
 import os
 
+import dotenv
+
+dotenv.load_dotenv()
+
 broker_url = os.getenv(
     "REDIS_URL", "redis://localhost:6379/0"
 )  # The URL of the message broker (Redis in this case)

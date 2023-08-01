@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import threading
 import time
 from queue import Queue
@@ -147,7 +148,7 @@ class Flowchart:
         for node in self.nodes:
             if node.uid == node_id:
                 return node
-        raise ValueError(f"No node with id {node_id} found")
+        raise ValueError(f"No node with uid {node_id} found")
 
     def add_node(self, node: NodeBase, offset: tuple[int, int] = (0, 0)) -> NodeBase:
         """
@@ -220,9 +221,7 @@ class Flowchart:
             before_result = cur_node.before(state)
             if before_result and "input" in before_result:
                 self.logger.info(f"Node {cur_node.label} requires input")
-                red = redis.StrictRedis(
-                    "redis", 6379, charset="utf-8", decode_responses=True
-                )
+                red = redis.StrictRedis.from_url(os.environ.get("REDIS_URL"))
                 red.publish("messages", "INPUT_REQUIRED")
                 # wait for input
                 sub = red.pubsub()

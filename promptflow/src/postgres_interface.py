@@ -451,9 +451,9 @@ class PostgresInterface(DBInterface):
             row = cursor.fetchone()
             if not row:
                 raise ValueError("No flowchart data returned from the database")
-            uid = row[3]
+            id = row[0]
             return Flowchart(
-                interface=self, uid=uid, name=name["name"], created=datetime.now()
+                interface=self, uid=id, name=name["name"], created=datetime.now()
             )
 
     def get_node_type_id(self, node_type):
@@ -474,14 +474,14 @@ class PostgresInterface(DBInterface):
     ) -> Flowchart:
         existing_ids = [x.uid for x in flowcharts]
 
-        if row.graph_id not in existing_ids:
+        if row.graph_uid not in existing_ids:
             flowchart = Flowchart(self, row.graph_uid, row.graph_name, row.created)
             flowchart.id = row.graph_id
             flowcharts.append(flowchart)
         else:
-            flowchart = next((x for x in flowcharts if x.uid == row.graph_id), None)
+            flowchart = next((x for x in flowcharts if x.uid == row.graph_uid), None)
             if flowchart is None:
-                raise ValueError(f"Flowchart with graph_id {row.graph_id} not found")
+                raise ValueError(f"Flowchart with graph_uid {row.graph_uid} not found")
 
         return flowchart
 
@@ -614,17 +614,17 @@ class PostgresInterface(DBInterface):
 
     def get_all_jobs(
         self,
-        graph_id: Optional[str] = None,
+        graph_uid: Optional[str] = None,
         status: Optional[str] = None,
         limit: Optional[int] = None,
     ) -> List[JobView]:
         with self.conn.cursor() as cursor:
             query = """SELECT * FROM jobs_view"""
-            if graph_id or status:
+            if graph_uid or status:
                 query += """ WHERE"""
-                if graph_id:
-                    query += """ graph_id=%s""" % graph_id
-                if graph_id and status:
+                if graph_uid:
+                    query += """ graph_uid=%s""" % graph_uid
+                if graph_uid and status:
                     query += """ AND"""
                 if status:
                     query += """ status=%s""" % status
