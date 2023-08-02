@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { JobsService } from './jobs.service';
-import { map, switchMap } from 'rxjs/operators';
-import {combineLatest} from 'rxjs';
+import { map, switchMap, tap } from 'rxjs/operators';
+import { combineLatest, Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
+import { InputResponse } from './input-response';
 
 @Component({
   selector: 'app-job-detail',
@@ -16,7 +17,7 @@ export class JobDetailComponent {
     private route: ActivatedRoute,
     private jobsService: JobsService,
     private http: HttpClient,
-    ) { }
+  ) { }
 
   get apiUrl() {
     return environment.promptflowApiBaseUrl;
@@ -35,7 +36,7 @@ export class JobDetailComponent {
         map((x) => x.valueOrUndefined()),
       )
     ),
-  )
+  );
 
   public readonly vm$ = combineLatest({
     jobId: this.jobId$,
@@ -44,17 +45,16 @@ export class JobDetailComponent {
 
   public input: string = '';
 
-
-  public onSubmit(): void {
-    this.jobId$.subscribe(id => {
-      this.http.post(this.buildUrl('/jobs/' + id + '/input'), {'input': this.input}).subscribe(
-        (x) => {
-          console.log(x);
-        }
-      );
-    });
+  public get onSubmit$(): Observable<InputResponse> {
+    return this.jobId$.pipe(
+      switchMap(id =>
+        this.http.post<InputResponse>(this.buildUrl('/jobs/' + id + '/input'), {'input': this.input})
+      ),
+      tap(() => window.location.reload()),
+    );
   }
   
-
-  
+  public onSubmit(): void {
+    this.onSubmit$.subscribe();
+  }
 }

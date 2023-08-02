@@ -177,7 +177,11 @@ class Flowchart:
         return connector
 
     def initialize(
-        self, job_id: str, state: State, interface: DBInterface, logging_function: Callable[[str], None]
+        self,
+        job_id: str,
+        state: State,
+        interface: DBInterface,
+        logging_function: Callable[[str], None],
     ) -> Optional[State]:
         """
         Initialize the flowchart
@@ -189,7 +193,9 @@ class Flowchart:
             return state
         queue: Queue[NodeBase] = Queue()
         queue.put(init_node)
-        return self.run(job_id, state, queue, interface, logging_function=logging_function)
+        return self.run(
+            job_id, state, queue, interface, logging_function=logging_function
+        )
 
     def run(
         self,
@@ -289,7 +295,11 @@ class Flowchart:
                     if queue.queue.count(connector.next) == 0:
                         queue.put(connector.next)
                         self.run(
-                            job_id, state, interface, queue, logging_function=logging_function
+                            job_id,
+                            state,
+                            interface,
+                            queue,
+                            logging_function=logging_function,
                         )
                     self.logger.info(f"Added node {connector.next.label} to queue")
 
