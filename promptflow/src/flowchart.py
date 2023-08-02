@@ -177,7 +177,7 @@ class Flowchart:
         return connector
 
     def initialize(
-        self, task_id: str, state: State, logging_function: Callable[[str], None]
+        self, job_id: str, state: State, interface: DBInterface, logging_function: Callable[[str], None]
     ) -> Optional[State]:
         """
         Initialize the flowchart
@@ -189,12 +189,13 @@ class Flowchart:
             return state
         queue: Queue[NodeBase] = Queue()
         queue.put(init_node)
-        return self.run(task_id, state, queue, logging_function=logging_function)
+        return self.run(job_id, state, queue, interface, logging_function=logging_function)
 
     def run(
         self,
-        task_id: str,
+        job_id: str,
         state: Optional[State],
+        interface: DBInterface,
         queue: Optional[Queue[NodeBase]] = None,
         logging_function: Callable[[str], None] = lambda x: None,
     ) -> Optional[State]:
@@ -222,10 +223,10 @@ class Flowchart:
             if before_result and "input" in before_result:
                 self.logger.info(f"Node {cur_node.label} requires input")
                 red = redis.StrictRedis.from_url(os.environ.get("REDIS_URL"))
-                red.publish(f"{self.uid}/{task_id}/messages", "INPUT_REQUIRED")
+                interface.update_job_status(job_id, "INPUT_REQUIRED")
                 # wait for input
                 sub = red.pubsub()
-                sub.subscribe(f"{self.uid}/{task_id}/input")
+                sub.subscribe(f"{job_id}/input")
                 input_received = False
                 while not input_received:
                     for msg in sub.listen():
@@ -288,7 +289,7 @@ class Flowchart:
                     if queue.queue.count(connector.next) == 0:
                         queue.put(connector.next)
                         self.run(
-                            task_id, state, queue, logging_function=logging_function
+                            job_id, state, interface, queue, logging_function=logging_function
                         )
                     self.logger.info(f"Added node {connector.next.label} to queue")
 

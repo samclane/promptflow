@@ -3,6 +3,8 @@ import { ActivatedRoute } from '@angular/router';
 import { JobsService } from './jobs.service';
 import { map, switchMap } from 'rxjs/operators';
 import {combineLatest} from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-job-detail',
@@ -12,9 +14,17 @@ import {combineLatest} from 'rxjs';
 export class JobDetailComponent {
   constructor(
     private route: ActivatedRoute,
-    private jobsService: JobsService
-  ) { }
+    private jobsService: JobsService,
+    private http: HttpClient,
+    ) { }
 
+  get apiUrl() {
+    return environment.promptflowApiBaseUrl;
+  }
+  private buildUrl(endpoint: string): string {
+    return `${this.apiUrl}${endpoint}`;
+  }
+      
   private readonly jobId$ = this.route.params.pipe(
     map((x) => x['id']),
   );
@@ -29,6 +39,22 @@ export class JobDetailComponent {
 
   public readonly vm$ = combineLatest({
     jobId: this.jobId$,
-    job: this.job$
+    job: this.job$,
   });
+
+  public input: string = '';
+
+
+  public onSubmit(): void {
+    this.jobId$.subscribe(id => {
+      this.http.post(this.buildUrl('/jobs/' + id + '/input'), {'input': this.input}).subscribe(
+        (x) => {
+          console.log(x);
+        }
+      );
+    });
+  }
+  
+
+  
 }

@@ -47,4 +47,8 @@ export class JobsService {
       map(jobs => jobs.length)
     );
   }
+
+  submitInput(jobId: string, input: string): Observable<unknown> {
+    return this.http.post(this.buildUrl(`/jobs/${jobId}/input`), { 'input': input });
+  }
 }

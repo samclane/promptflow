@@ -185,11 +185,11 @@ class Input(BaseModel):
     input: str
 
 
-@app.post("/flowcharts/{flowchart_uid}/{task_id}/input")
-def post_input(flowchart_uid: str, task_id: str, input: Input):
+@app.post("/jobs/{task_id}/input")
+def post_input(task_id: str, input: Input):
     """Post input to a running flowchart execution."""
     red = redis.StrictRedis.from_url(os.getenv("REDIS_URL"))
-    red.publish(f"{flowchart_uid}/{task_id}/input", input.input)
+    red.publish(f"{task_id}/input", input.input)
     return {"message": "Input received", "input": input.input}
 
 
