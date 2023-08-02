@@ -12,9 +12,9 @@
   <h3 class="text-2xl font-semibold my-2">Logs:</h3>
   <app-job-logs [jobId]="vm.jobId"></app-job-logs>
 
-  <div class="p-4 bg-blue-100 rounded-lg mt-4">
+  <div class="p-4 bg-blue-100 rounded-lg mt-4" *ngIf="vm.job?.job_status === 'INPUT_REQUIRED'">
     <h3 class="text-xl font-semibold mb-2">Input required:</h3>
-    <form *ngIf="vm.job?.job_status === 'INPUT_REQUIRED'" (ngSubmit)="onSubmit()" >
+    <form (ngSubmit)="onSubmit()" >
       <input type="text" class="border border-gray-300 rounded-lg p-2 w-full" [(ngModel)]="input" name="submit"/>
       <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg mt-2">Submit</button>
     </form>
