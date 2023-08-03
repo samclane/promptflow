@@ -19,8 +19,6 @@ class NodeBase(Serializable, ABC):
     Represents a node in the flowchart, which could be a prompt, an llm, traditional code, etc.
     """
 
-    center_x: float = 0
-    center_y: float = 0
     node_color = monokai.WHITE
     prev_color = node_color
     size_px: int = 50  # arbitrary default size
@@ -44,10 +42,6 @@ class NodeBase(Serializable, ABC):
         self.input_connectors: list[Connector] = []
         self.output_connectors: list[Connector] = []
         self.visited = False  # Add a visited attribute to keep track of visited nodes
-
-        # create the label
-        self.center_y = kwargs.get("center_y", 0)
-        self.center_x = kwargs.get("center_x", 0)
 
         self.node_type_id = kwargs.get("node_type_id", None)
         if self.node_type_id is None:
@@ -82,43 +76,12 @@ class NodeBase(Serializable, ABC):
     def label(self, label: str):
         self._label = label
 
-    def get_center(
-        self, offset_x: float = 0, offset_y: float = 0
-    ) -> tuple[float, float]:
-        """
-        Node is defined by its top left and bottom right coordinates.
-        This function returns the center of the node based on those coordinates.
-        """
-        return self.center_x + offset_x, self.center_y + offset_y
-
     def begin_add_connector(self):
         """
         Start adding a connector to this node.
         Creates a temporary connector that follows the mouse.
         """
         self.flowchart.begin_add_connector(self)
-
-    def start_drag(self, event):
-        """
-        Update the flowchart's selected node and start dragging the node by
-        updating the node's x and y coordinates.
-        """
-        self.flowchart.selected_element = self
-        self.center_x = event.x
-        self.center_y = event.y
-
-    def on_drag(self, event):
-        """
-        Continuously update the node's position while dragging.
-        Update all connectors to follow the node.
-        """
-        self.center_x = event.x
-        self.center_y = event.y
-
-    def stop_drag(self, _):
-        """
-        Required to be able to drag the node.
-        """
 
     @abstractmethod
     def run_subclass(self, before_result: Any, state: State) -> str:
@@ -146,8 +109,6 @@ class NodeBase(Serializable, ABC):
         return {
             "uid": self.uid,
             "label": self.label,
-            "center_x": self.center_x,
-            "center_y": self.center_y,
             "node_type": self.__class__.__name__,
             "node_type_id": self.node_type_id,
             "graph_id": self.flowchart.uid,
@@ -192,19 +153,12 @@ class NodeBase(Serializable, ABC):
         state.snapshot[self.label] = ""
         return 0.0
 
-    def move_to(self, x: float, y: float):
-        """
-        Move the node to the given coordinates.
-        """
-        self.center_x = x
-        self.center_y = y
-
     @staticmethod
     def get_option_keys() -> list[str]:
         """
         Return the keys for the node options.
         """
-        return ["label", "center_x", "center_y"]
+        return ["label"]
 
     def get_options(self) -> dict[str, Any]:
         """

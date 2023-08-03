@@ -19,8 +19,6 @@ class PartialConnector:
         self.flowchart = flowchart
         self.logger = logging.getLogger(__name__)
         self.node = node
-        self.x = node.center_x
-        self.y = node.center_y
 
     def update(self, event):
         """

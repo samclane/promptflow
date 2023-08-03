@@ -498,8 +498,6 @@ class PostgresInterface(DBInterface):
             (row.node_type_metadata or {})
             | {
                 "label": row.node_label,
-                "center_x": 0,
-                "center_y": 0,
                 "uid": row.current_node,
                 "node_type_id": row.node_type_id,
             },

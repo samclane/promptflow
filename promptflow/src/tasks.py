@@ -80,7 +80,7 @@ def render_flowchart(self, flowchart_uid: str, db_config_init: dict):
     )
 
     fig = plt.figure()
-    plt.margins(0.2)  # Add 10% margin
+    plt.margins(0.2)
     nx.draw(flowchart.graph, pos=pos, with_labels=False)
     nx.draw_networkx_edge_labels(
         flowchart.graph, pos=pos, edge_labels=flowchart.graph.edges
