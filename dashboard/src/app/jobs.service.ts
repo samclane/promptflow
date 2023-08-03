@@ -24,7 +24,7 @@ export class JobsService {
   }
 
   getJobsByGraphId(graphId: string): Observable<Job[]> {
-    return this.http.get<Job[]>(this.buildUrl('/jobs'), { params: { graph_id: graphId } });
+    return this.http.get<Job[]>(this.buildUrl('/jobs'), { params: { graph_uid: graphId } });
   }
 
   getJob(jobId: string): Observable<Maybe<Job>> {

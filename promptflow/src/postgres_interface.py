@@ -621,7 +621,7 @@ class PostgresInterface(DBInterface):
             if graph_uid or status:
                 query += """ WHERE"""
                 if graph_uid:
-                    query += """ graph_uid=%s""" % graph_uid
+                    query += """ graph_uid='%s'""" % graph_uid
                 if graph_uid and status:
                     query += """ AND"""
                 if status:
