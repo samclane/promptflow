@@ -427,23 +427,6 @@ class Flowchart:
         graphml_string += "\r</graphml>"
         return graphml_string
 
-    def arrange_tree(self, root: NodeBase, x=0.0, y=0.0, x_gap=60.0, y_gap=60.0):
-        """
-        Arrange all nodes in a tree-like structure.
-        """
-        root.visited = True
-        root.move_to(x, y)
-        if root.get_children():
-            next_y = y + root.size_px + y_gap
-            total_width = (
-                sum(child.size_px + x_gap for child in root.get_children()) - x_gap
-            )
-            next_x = x + (root.size_px - total_width) / 2
-            for child in root.get_children():
-                if not child.visited:
-                    self.arrange_tree(child, next_x, next_y, x_gap, y_gap)
-                    next_x += child.size_px + x_gap
-
     def arrange_networkx(self, algorithm, scale=1.0):
         """
         Arrange all nodes using a networkx algorithm.
@@ -452,6 +435,4 @@ class Flowchart:
         if algorithm == nx.layout.bipartite_layout:
             kwargs["nodes"] = self.graph.nodes
         pos = algorithm(self.graph, scale=self.nodes[0].size_px * scale, **kwargs)
-        for node in self.nodes:
-            node.move_to(pos[node][0], pos[node][1])
         return pos
