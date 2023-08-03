@@ -6,6 +6,7 @@ export interface Job {
     updated: string; 
     metadata: Object;
     graph_id: number;
+    graph_uid: string;
 }
 
 export interface JobLog {

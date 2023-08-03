@@ -35,6 +35,7 @@ class JobView(BaseModel):
     updated: datetime
     metadata: Optional[Dict[str, Any]]
     graph_id: Optional[conint(gt=0)]
+    graph_uid: Optional[str]
 
     @staticmethod
     def hydrate(row: Tuple[Any, ...]) -> "JobView":
@@ -54,6 +55,7 @@ class JobView(BaseModel):
             updated=row[3],
             metadata=row[4],
             graph_id=row[5],
+            graph_uid=row[6],
         )
 
 
