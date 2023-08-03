@@ -1,8 +1,6 @@
 """
 Simulates an LLMNode, but does not actually send any data to the LLM.
 """
-from typing import Any
-
 from promptflow.src.nodes.llm_node import OpenAINode
 from promptflow.src.state import State
 

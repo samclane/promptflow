@@ -22,12 +22,8 @@ import logging
 import os
 import traceback
 import zipfile
-from concurrent.futures import ThreadPoolExecutor
-from threading import Thread
 from typing import Optional
 
-import matplotlib.pyplot as plt
-import networkx as nx
 from fastapi import (
     BackgroundTasks,
     FastAPI,
@@ -40,15 +36,11 @@ from fastapi import (
 )
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
-from PIL import Image
 from pydantic import BaseModel
 
-from promptflow.src.celery_app import celery_app
-from promptflow.src.connectors.connector import Connector
 from promptflow.src.flowchart import Flowchart
 from promptflow.src.node_map import node_map
 from promptflow.src.nodes.embedding_node import EmbeddingsIngestNode
-from promptflow.src.nodes.node_base import NodeBase
 from promptflow.src.postgres_interface import DatabaseConfig, PostgresInterface
 from promptflow.src.state import State
 from promptflow.src.tasks import render_flowchart, run_flowchart

@@ -1,8 +1,7 @@
 """A connector that is being drawn by the user"""
 import logging
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
-from promptflow.src.connectors.connector import Connector
 from promptflow.src.nodes.node_base import NodeBase
 
 if TYPE_CHECKING:

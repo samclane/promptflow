@@ -3,13 +3,11 @@ This module contains the Connector class, which represents a connection
 between two nodes in the flowchart.
 """
 import logging
-import math
-from typing import Optional, Tuple
+from typing import Optional
 
 from promptflow.src.nodes.node_base import NodeBase
 from promptflow.src.serializable import Serializable
 from promptflow.src.text_data import TextData
-from promptflow.src.themes import monokai
 
 DEFAULT_COND_TEMPLATE = """def main(state):
 \treturn True

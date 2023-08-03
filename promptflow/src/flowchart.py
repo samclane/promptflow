@@ -3,7 +3,6 @@ This module contains the Flowchart class, which manages the nodes and connectors
 """
 from __future__ import annotations
 
-import json
 import logging
 import os
 import threading
@@ -150,7 +149,7 @@ class Flowchart:
                 return node
         raise ValueError(f"No node with uid {node_id} found")
 
-    def add_node(self, node: NodeBase, offset: tuple[int, int] = (0, 0)) -> NodeBase:
+    def add_node(self, node: NodeBase) -> NodeBase:
         """
         Safely insert a node into the flowchart
         """

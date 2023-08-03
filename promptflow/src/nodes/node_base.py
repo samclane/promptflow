@@ -1,7 +1,6 @@
 """
 Base class for all nodes
 """
-import json
 import logging
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any
@@ -113,7 +112,7 @@ class NodeBase(Serializable, ABC):
             "node_type": self.__class__.__name__,
             "node_type_id": self.node_type_id,
             "graph_id": self.flowchart.uid,
-            "metadata": self.get_options()
+            "metadata": self.get_options(),
         }
 
     def delete(self):
