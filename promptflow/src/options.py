@@ -9,9 +9,6 @@ from promptflow.src.serializable import Serializable
 class Options(BaseModel, Serializable):
     """Options for PromptFlow"""
 
-    width: int = 800
-    height: int = 600
-
     def serialize(self) -> dict:
         return self.dict()
 

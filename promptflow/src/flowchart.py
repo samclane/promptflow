@@ -72,9 +72,7 @@ class Flowchart:
         return interface.get_flowchart_by_uid(uid)
 
     @classmethod
-    def deserialize(
-        cls, interface: DBInterface, data: dict[str, Any], pan=(0, 0)
-    ) -> Flowchart:
+    def deserialize(cls, interface: DBInterface, data: dict[str, Any]) -> Flowchart:
         """
         Deserialize a flowchart from a dict
         """
@@ -86,9 +84,7 @@ class Flowchart:
         )
         for node_data in data["nodes"]:
             node = node_map[node_data["node_type"]].deserialize(flowchart, node_data)
-            x_offset = pan[0]
-            y_offset = pan[1]
-            flowchart.add_node(node, (x_offset, y_offset))
+            flowchart.add_node(node)
         for connector_data in data["branches"]:
             prev = flowchart.find_node(connector_data["prev"])
             next = flowchart.find_node(connector_data["next"])
@@ -193,7 +189,7 @@ class Flowchart:
         queue: Queue[NodeBase] = Queue()
         queue.put(init_node)
         return self.run(
-            job_id, state, queue, interface, logging_function=logging_function
+            job_id, state, interface, queue, logging_function=logging_function
         )
 
     def run(
@@ -433,5 +429,5 @@ class Flowchart:
         kwargs = {}
         if algorithm == nx.layout.bipartite_layout:
             kwargs["nodes"] = self.graph.nodes
-        pos = algorithm(self.graph, scale=self.nodes[0].size_px * scale, **kwargs)
+        pos = algorithm(self.graph, scale=50, **kwargs)
         return pos

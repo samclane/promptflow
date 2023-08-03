@@ -21,9 +21,6 @@ class NodeBase(Serializable, ABC):
 
     node_color = monokai.WHITE
     prev_color = node_color
-    size_px: int = 50  # arbitrary default size
-    width: int = size_px
-    height: int = size_px
 
     def __init__(
         self,
