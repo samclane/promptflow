@@ -21,9 +21,9 @@ class OpenAIModel(enum.Enum):
     # https://platform.openai.com/docs/models
     textdavinci = "text-davinci-003"
     gpt35turbo = "gpt-3.5-turbo"
-    gpt35turbo0301 = "gpt-3.5-turbo-0301"
+    gpt35turbo_16k = "gpt-3.5-turbo-16k"
     gpt4 = "gpt-4"
-    gpt40314 = "gpt-4-0314"
+    gpt4_32k = "gpt-4-32k"
 
 
 class AnthropicModel(enum.Enum):
@@ -40,9 +40,8 @@ class GoogleModel(enum.Enum):
 
 chat_models = [
     OpenAIModel.gpt35turbo.value,
-    OpenAIModel.gpt35turbo0301.value,
     OpenAIModel.gpt4.value,
-    OpenAIModel.gpt40314.value,
+    OpenAIModel.gpt4_32k.value,
     GoogleModel.chat_bison_001.value,
 ]
 
@@ -50,10 +49,10 @@ chat_models = [
 # https://openai.com/pricing
 prompt_cost_1k = {
     OpenAIModel.textdavinci.value: 0.02,
-    OpenAIModel.gpt35turbo.value: 0.002,
-    OpenAIModel.gpt35turbo0301.value: 0.002,
+    OpenAIModel.gpt35turbo.value: 0.0015,
+    OpenAIModel.gpt35turbo_16k.value: 0.003,
     OpenAIModel.gpt4.value: 0.03,
-    OpenAIModel.gpt40314.value: 0.03,
+    OpenAIModel.gpt4_32k.value: 0.06,
     AnthropicModel.claude_instant_v1.value: 0.00163,
     AnthropicModel.claude_instant_v1_100k.value: 0.00163,
     AnthropicModel.claude_v1.value: 0.01102,
@@ -64,9 +63,9 @@ prompt_cost_1k = {
 completion_cost_1k = {
     OpenAIModel.textdavinci.value: 0.02,
     OpenAIModel.gpt35turbo.value: 0.002,
-    OpenAIModel.gpt35turbo0301.value: 0.002,
+    OpenAIModel.gpt35turbo_16k.value: 0.004,
     OpenAIModel.gpt4.value: 0.06,
-    OpenAIModel.gpt40314.value: 0.06,
+    OpenAIModel.gpt4_32k.value: 0.12,
     AnthropicModel.claude_instant_v1.value: 0.00551,
     AnthropicModel.claude_instant_v1_100k.value: 0.00551,
     AnthropicModel.claude_v1.value: 0.03268,
@@ -180,7 +179,7 @@ class OpenAINode(NodeBase):
         Callback for when the OpenAI model is changed.
         """
         self.model = self.model
-        if self.model in [OpenAIModel.gpt4.value, OpenAIModel.gpt40314.value]:
+        if self.model in [OpenAIModel.gpt4.value, OpenAIModel.gpt4_32k.value]:
             self.logger.warning("You're using a GPT-4 model. This is costly.")
         self.logger.info(f"Selected model: {self.model}")
 
