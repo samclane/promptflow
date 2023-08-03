@@ -82,15 +82,9 @@ class WhispersNode(AudioInputNode):
             "prompt": self.prompt.serialize(),
         }
 
-    def get_options(self) -> dict[str, Any]:
-        base_options = super().get_options()
-        base_options["options"].update(
-            {
-                "prompt": self.prompt,
-            }
-        )
-        base_options["editor"] = "text"
-        return base_options
+    @staticmethod
+    def get_option_keys() -> list[str]:
+        return NodeBase.get_option_keys() + ["prompt"]
 
 
 class ElevenLabsNode(AudioOutputNode):
@@ -123,13 +117,6 @@ class ElevenLabsNode(AudioOutputNode):
         # overage is $0.30 per 1000 characters
         return 0.30 * len(state.result) / 1000
 
-    def get_options(self) -> dict[str, Any]:
-        base_options = super().get_options()
-        base_options["options"].update(
-            {
-                "voice": self.voice,
-                "model": self.model,
-            }
-        )
-        base_options["editor"] = "text"
-        return base_options
+    @staticmethod
+    def get_option_keys() -> list[str]:
+        return NodeBase.get_option_keys() + ["voice", "model"]

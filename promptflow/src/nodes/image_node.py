@@ -47,10 +47,9 @@ class OpenImageFile(ImageNode):
         state.data = self.image
         return state.result
 
-    def get_options(self) -> dict[str, Any]:
-        base_options = super().get_options()
-        base_options["options"]["filename"] = self.filename
-        return base_options
+    @staticmethod
+    def get_option_keys() -> list[str]:
+        return NodeBase.get_option_keys() + ["filename"]
 
 
 class JSONImageFile(ImageNode):
@@ -83,10 +82,9 @@ class JSONImageFile(ImageNode):
             "filename_key": self.filename_key,
         }
 
-    def get_options(self) -> dict[str, Any]:
-        base_options = super().get_options()
-        base_options["options"]["filename_key"] = self.filename_key
-        return base_options
+    @staticmethod
+    def get_option_keys() -> list[str]:
+        return NodeBase.get_option_keys() + ["filename_key"]
 
 
 class DallENode(ImageNode):
@@ -118,11 +116,9 @@ class DallENode(ImageNode):
             "size": self.size,
         }
 
-    def get_options(self) -> dict[str, Any]:
-        base_options = super().get_options()
-        base_options["options"]["n"] = self.n
-        base_options["options"]["size"] = self.size
-        return base_options
+    @staticmethod
+    def get_option_keys() -> list[str]:
+        return NodeBase.get_option_keys() + ["n", "size"]
 
 
 class CaptionNode(ImageNode):
@@ -153,10 +149,9 @@ class CaptionNode(ImageNode):
             "max_length": self.max_length,
         }
 
-    def get_options(self) -> dict[str, Any]:
-        base_options = super().get_options()
-        base_options["options"]["max_length"] = self.max_length
-        return base_options
+    @staticmethod
+    def get_option_keys() -> list[str]:
+        return NodeBase.get_option_keys() + ["max_length"]
 
 
 class SaveImageNode(ImageNode):
@@ -180,7 +175,6 @@ class SaveImageNode(ImageNode):
             "filename": self.filename,
         }
 
-    def get_options(self) -> dict[str, Any]:
-        base_options = super().get_options()
-        base_options["options"]["filename"] = self.filename
-        return base_options
+    @staticmethod
+    def get_option_keys() -> list[str]:
+        return NodeBase.get_option_keys() + ["filename"]

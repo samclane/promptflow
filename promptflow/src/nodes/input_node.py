@@ -39,10 +39,9 @@ class FileInput(NodeBase):
     def serialize(self) -> dict[str, Any]:
         return super().serialize() | {"filename": self.filename}
 
-    def get_options(self) -> dict[str, Any]:
-        base_options = super().get_options()
-        base_options["options"]["filename"] = self.filename
-        return base_options
+    @staticmethod
+    def get_option_keys() -> list[str]:
+        return NodeBase.get_option_keys() + ["filename"]
 
 
 class JSONFileInput(NodeBase):
@@ -68,7 +67,6 @@ class JSONFileInput(NodeBase):
     def serialize(self) -> dict[str, Any]:
         return super().serialize() | {"key": self.key}
 
-    def get_options(self) -> dict[str, Any]:
-        base_options = super().get_options()
-        base_options["options"]["key"] = self.key
-        return base_options
+    @staticmethod
+    def get_option_keys() -> list[str]:
+        return NodeBase.get_option_keys() + ["key"]

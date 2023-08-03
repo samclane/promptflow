@@ -39,10 +39,9 @@ class RegexNode(NodeBase):
             "regex": self.regex,
         }
 
-    def get_options(self) -> dict[str, Any]:
-        base_options = super().get_options()
-        base_options["options"]["regex"] = self.regex
-        return base_options
+    @staticmethod
+    def get_option_keys() -> list[str]:
+        return NodeBase.get_option_keys() + ["regex"]
 
 
 class TagNode(NodeBase):
@@ -76,8 +75,6 @@ class TagNode(NodeBase):
             "end_tag": self.end_tag,
         }
 
-    def get_options(self) -> dict[str, Any]:
-        base_options = super().get_options()
-        base_options["options"]["start_tag"] = self.start_tag
-        base_options["options"]["end_tag"] = self.end_tag
-        return base_options
+    @staticmethod
+    def get_option_keys() -> list[str]:
+        return NodeBase.get_option_keys() + ["start_tag", "end_tag"]

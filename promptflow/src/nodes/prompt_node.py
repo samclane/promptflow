@@ -50,10 +50,9 @@ class PromptNode(NodeBase):
             "prompt": self.prompt.serialize(),
         }
 
-    def get_options(self) -> dict[str, Any]:
-        base_options = super().get_options()
-        base_options["options"]["prompt"] = self.prompt.serialize()
-        return base_options
+    @staticmethod
+    def get_option_keys() -> list[str]:
+        return NodeBase.get_option_keys() + ["prompt"]
 
     @classmethod
     def deserialize(cls, flowchart: "Flowchart", data: dict) -> "PromptNode":

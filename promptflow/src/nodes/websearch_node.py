@@ -59,7 +59,6 @@ class GoogleSearchNode(WebSearchNode):
     def serialize(self):
         return super().serialize() | {"num_results": self.num_results}
 
-    def get_options(self) -> dict[str, Any]:
-        base_options = super().get_options()
-        base_options["options"]["num_results"] = self.num_results
-        return base_options
+    @staticmethod
+    def get_option_keys() -> list[str]:
+        return NodeBase.get_option_keys() + ["num_results"]

@@ -37,10 +37,9 @@ class StructuredDataNode(NodeBase, ABC):
     def serialize(self):
         return super().serialize() | {"schema": self.schema}
 
-    def get_options(self) -> dict[str, Any]:
-        base_options = super().get_options()
-        base_options["options"]["schema"] = self.schema
-        return base_options
+    @staticmethod
+    def get_option_keys() -> list[str]:
+        return NodeBase.get_option_keys() + ["schema"]
 
 
 class JsonNode(StructuredDataNode):
@@ -70,10 +69,9 @@ class JsonNode(StructuredDataNode):
     def serialize(self):
         return super().serialize() | {"schema": self.schema}
 
-    def get_options(self) -> dict[str, Any]:
-        base_options = super().get_options()
-        base_options["options"]["schema"] = self.schema
-        return base_options
+    @staticmethod
+    def get_option_keys() -> list[str]:
+        return NodeBase.get_option_keys() + ["schema"]
 
 
 class JsonerizerNode(NodeBase):

@@ -337,12 +337,21 @@ def load_from(file: UploadFile = File(...)) -> dict:
 @app.get("/nodes/types")
 def get_node_types() -> dict:
     """Get all node types."""
-    node_types = NodeBase.get_all_node_types()
-    return {"node_types": node_types}
+    node_types = node_map.keys()
+    return {"node_types": list(node_types)}
+
+
+@app.get("/nodes/{node_type}/options")
+def get_node_options(node_type: str) -> dict:
+    """Get the editable options for a node."""
+    subclass = node_map[node_type]
+    # filter out abstract classes
+    # get the name of each subclass
+    return {"options": subclass.get_option_keys()}
 
 
 @app.get("/flowcharts/{flowchart_id}/nodes/{node_id}/options")
-def get_node_options(flowchart_id: str, node_id: str) -> dict:
+def get_specific_node_options(flowchart_id: str, node_id: str) -> dict:
     """Get the editable options for a node."""
     flowchart = Flowchart.get_flowchart_by_uid(flowchart_id, interface)
     node = flowchart.find_node(node_id)

@@ -68,11 +68,9 @@ class HttpNode(NodeBase):
             "request_type": self.request_type,
         }
 
-    def get_options(self) -> dict[str, Any]:
-        base_options = super().get_options()
-        base_options["options"]["url"] = self.url
-        base_options["options"]["request_type"] = self.request_type
-        return base_options
+    @staticmethod
+    def get_option_keys() -> list[str]:
+        return NodeBase.get_option_keys() + ["url", "request_type"]
 
 
 class JSONRequestNode(NodeBase):
@@ -118,11 +116,9 @@ class JSONRequestNode(NodeBase):
             "request_type": self.request_type,
         }
 
-    def get_options(self) -> dict[str, Any]:
-        base_options = super().get_options()
-        base_options["options"]["key"] = self.key
-        base_options["options"]["request_type"] = self.request_type
-        return base_options
+    @staticmethod
+    def get_option_keys() -> list[str]:
+        return NodeBase.get_option_keys() + ["key", "request_type"]
 
 
 class ScrapeNode(NodeBase):
@@ -187,7 +183,6 @@ class ScrapeNode(NodeBase):
             "key": self.key,
         }
 
-    def get_options(self) -> dict[str, Any]:
-        base_options = super().get_options()
-        base_options["options"]["key"] = self.key
-        return base_options
+    @staticmethod
+    def get_option_keys() -> list[str]:
+        return NodeBase.get_option_keys() + ["key"]

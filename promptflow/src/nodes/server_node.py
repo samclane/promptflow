@@ -43,8 +43,6 @@ class ServerInputNode(NodeBase):
     def serialize(self) -> dict[str, Any]:
         return super().serialize() | {"host": self.host, "port": self.port}
 
-    def get_options(self) -> dict[str, Any]:
-        base_options = super().get_options()
-        base_options["options"]["host"] = self.host
-        base_options["options"]["port"] = self.port
-        return base_options
+    @staticmethod
+    def get_option_keys() -> list[str]:
+        return NodeBase.get_option_keys() + ["host", "port"]

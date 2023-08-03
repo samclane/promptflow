@@ -74,8 +74,6 @@ class FuncNode(NodeBase, ABC):
         node.func = TextData(data["func"]["label"], data["func"]["text"], flowchart)
         return node
 
-    def get_options(self) -> dict[str, Any]:
-        base_options = super().get_options()
-        base_options["func"] = self.func.serialize() if self.func else None
-        base_options["editor"] = "python"
-        return base_options
+    @staticmethod
+    def get_option_keys() -> list[str]:
+        return NodeBase.get_option_keys() + ["func"]

@@ -40,10 +40,9 @@ class AssertNode(NodeBase):
             "assertion": self.assertion.serialize(),
         }
 
-    def get_options(self) -> dict[str, Any]:
-        base_options = super().get_options()
-        base_options["options"]["assertion"] = self.assertion.serialize()
-        return base_options
+    @staticmethod
+    def get_option_keys() -> list[str]:
+        return NodeBase.get_option_keys() + ["assertion"]
 
 
 class LoggingNode(NodeBase):
@@ -73,10 +72,9 @@ class LoggingNode(NodeBase):
             "debug_str": self.debug_str.serialize(),
         }
 
-    def get_options(self) -> dict[str, Any]:
-        base_options = super().get_options()
-        base_options["options"]["debug_str"] = self.debug_str.serialize()
-        return base_options
+    @staticmethod
+    def get_option_keys() -> list[str]:
+        return NodeBase.get_option_keys() + ["debug_str"]
 
 
 class InterpreterNode(NodeBase):

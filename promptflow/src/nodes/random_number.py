@@ -24,8 +24,6 @@ class RandomNode(NodeBase):
             "max": self.max,
         }
 
-    def get_options(self) -> dict[str, Any]:
-        base_options = super().get_options()
-        base_options["options"]["min"] = self.min
-        base_options["options"]["max"] = self.max
-        return base_options
+    @staticmethod
+    def get_option_keys() -> list[str]:
+        return NodeBase.get_option_keys() + ["min", "max"]

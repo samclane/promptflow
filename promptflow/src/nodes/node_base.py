@@ -4,7 +4,6 @@ Base class for all nodes
 import logging
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any
-from uuid import uuid4
 
 from promptflow.src.serializable import Serializable
 from promptflow.src.state import State
@@ -53,20 +52,6 @@ class NodeBase(Serializable, ABC):
         self.node_type_id = kwargs.get("node_type_id", None)
         if self.node_type_id is None:
             raise ValueError("node_type_id must be specified")
-
-    @classmethod
-    def get_all_node_types(cls) -> list[str]:
-        """
-        Return a list of all node types.
-        """
-        # get all subclasses of NodeBase
-        subclasses = NodeBase.__subclasses__()
-        # filter out abstract classes
-        subclasses = [
-            subclass for subclass in subclasses if not subclass.__abstractmethods__
-        ]
-        # get the name of each subclass
-        return [subclass.__name__ for subclass in subclasses]
 
     def __eq__(self, __o: object) -> bool:
         if isinstance(__o, NodeBase):
@@ -214,15 +199,18 @@ class NodeBase(Serializable, ABC):
         self.center_x = x
         self.center_y = y
 
+    @staticmethod
+    def get_option_keys() -> list[str]:
+        """
+        Return the keys for the node options.
+        """
+        return ["label", "center_x", "center_y"]
+
     def get_options(self) -> dict[str, Any]:
         """
         Return the options for the node.
         """
+        options = {key: getattr(self, key) for key in self.get_option_keys()}
         return {
-            "options": {
-                "label": self.label,
-                "center_x": self.center_x,
-                "center_y": self.center_y,
-            },
-            "editor": None,
+            "options": options,
         }
