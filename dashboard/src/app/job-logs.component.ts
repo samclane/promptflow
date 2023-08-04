@@ -27,6 +27,5 @@ export class JobLogsComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.unsubscribe.next();
-    this.unsubscribe.complete();
   }
 }
