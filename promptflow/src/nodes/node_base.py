@@ -157,6 +157,13 @@ class NodeBase(Serializable, ABC):
         """
         return ["label"]
 
+    @classmethod
+    def description(cls) -> str:
+        """
+        Return the description for the node, stored in the docstring.
+        """
+        return cls.__doc__ or ""
+
     def get_options(self) -> dict[str, Any]:
         """
         Return the options for the node.

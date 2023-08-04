@@ -30,7 +30,11 @@ from pydantic import BaseModel  # pylint: disable=no-name-in-module
 from promptflow.src.flowchart import Flowchart
 from promptflow.src.node_map import node_map
 from promptflow.src.nodes.embedding_node import EmbeddingsIngestNode
-from promptflow.src.postgres_interface import DatabaseConfig, GraphNamesAndIds, PostgresInterface
+from promptflow.src.postgres_interface import (
+    DatabaseConfig,
+    GraphNamesAndIds,
+    PostgresInterface,
+)
 from promptflow.src.state import State
 from promptflow.src.tasks import render_flowchart, run_flowchart
 
@@ -147,9 +151,7 @@ def post_input(task_id: str, input: Input):
     """Post input to a running flowchart execution."""
     redis_url = os.getenv("REDIS_URL")
     if not redis_url:
-        raise HTTPException(
-            status_code=500, detail="Redis URL not found"
-        )
+        raise HTTPException(status_code=500, detail="Redis URL not found")
     red = redis.StrictRedis.from_url(redis_url)
     red.publish(f"{task_id}/input", input.input)
     return {"message": "Input received", "input": input.input}
@@ -294,6 +296,13 @@ def get_node_options(node_type: str) -> dict:
     # filter out abstract classes
     # get the name of each subclass
     return {"options": subclass.get_option_keys()}
+
+
+@app.get("/nodes/{node_type}/description")
+def get_node_description(node_type: str) -> dict:
+    """Get the description for a node."""
+    subclass = node_map[node_type]
+    return {"description": subclass.description()}
 
 
 @app.get("/flowcharts/{flowchart_id}/nodes/{node_id}/options")

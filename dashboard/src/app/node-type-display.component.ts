@@ -7,6 +7,7 @@ import { environment } from 'src/environments/environment';
 interface NodeType {
   nodeType: string;
   options: string[];
+  description: string;
 }
 
 @Component({
@@ -32,8 +33,11 @@ export class NodeListComponent implements OnInit {
       switchMap(({ node_types }) =>
         forkJoin(
           node_types.map(nodeType =>
-            this.http.get<{ options: string[] }>(this.buildUrl(`/nodes/${nodeType}/options`)).pipe(
-              map(({ options }) => ({ nodeType, options }))
+            forkJoin({
+              options: this.http.get<{ options: string[] }>(this.buildUrl(`/nodes/${nodeType}/options`)),
+              description: this.http.get<{ description: string }>(this.buildUrl(`/nodes/${nodeType}/description`))
+            }).pipe(
+              map(({ options, description }) => ({ nodeType, options: options.options, description: description.description }))
             )
           )
         )
