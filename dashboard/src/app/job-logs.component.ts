@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, Input } from '@angular/core';
 import { LogsService } from './logs.service';
-import { Subscription, timer, Subject } from 'rxjs';
-import { switchMap, retry } from 'rxjs/operators';
+import { timer, Subject } from 'rxjs';
+import { switchMap, retry, takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-job-logs',
@@ -11,23 +11,22 @@ import { switchMap, retry } from 'rxjs/operators';
 export class JobLogsComponent implements OnInit, OnDestroy {
   @Input() jobId!: string;
   logs = new Subject<string>();
-  private logSubscription?: Subscription;
+  private unsubscribe = new Subject<void>();
 
   constructor(private logsService: LogsService) { }
 
   ngOnInit(): void {
-    this.logSubscription = timer(0, 1000).pipe(
+    timer(0, 1000).pipe(
       switchMap(() => this.logsService.getLogs(this.jobId)),
-      retry()
+      retry(),
+      takeUntil(this.unsubscribe)
     ).subscribe(logs => {
       this.logs.next(logs.logs.map((x) => x.message).join('\n'));
     });
   }
 
   ngOnDestroy(): void {
-    if (this.logSubscription) {
-      this.logSubscription.unsubscribe();
-    }
-    this.logs.complete();
+    this.unsubscribe.next();
+    this.unsubscribe.complete();
   }
 }
