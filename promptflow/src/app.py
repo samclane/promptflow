@@ -285,25 +285,21 @@ def load_from(file: UploadFile = File(...)) -> dict:
 @app.get("/nodes/types")
 def get_node_types() -> dict:
     """Get all node types."""
-    node_types = node_map.keys()
-    return {"node_types": list(node_types)}
+    return {
+        "node_types": list(node_map.keys()),
+        "descriptions": {k: v.description() for k, v in node_map.items()},
+        "options": {k: v.get_option_keys() for k, v in node_map.items()},
+    }
 
 
-@app.get("/nodes/{node_type}/options")
-def get_node_options(node_type: str) -> dict:
-    """Get the editable options for a node."""
+@app.get("/nodes/{node_type}")
+def get_node_type_info(node_type: str) -> dict:
+    """Get the description and options for a node."""
     subclass = node_map[node_type]
-    # filter out abstract classes
-    # get the name of each subclass
-    return {"options": subclass.get_option_keys()}
-
-
-@app.get("/nodes/{node_type}/description")
-def get_node_description(node_type: str) -> dict:
-    """Get the description for a node."""
-    subclass = node_map[node_type]
-    return {"description": subclass.description()}
-
+    return {
+        "description": subclass.description(),
+        "options": subclass.get_option_keys(),
+    }
 
 @app.get("/flowcharts/{flowchart_id}/nodes/{node_id}/options")
 def get_specific_node_options(flowchart_id: str, node_id: str) -> dict:

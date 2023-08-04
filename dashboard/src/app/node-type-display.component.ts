@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, forkJoin } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 
 interface NodeType {
@@ -29,18 +29,9 @@ export class NodeListComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.nodeTypes$ = this.http.get<{ node_types: string[] }>(this.buildUrl('/nodes/types')).pipe(
-      switchMap(({ node_types }) =>
-        forkJoin(
-          node_types.map(nodeType =>
-            forkJoin({
-              options: this.http.get<{ options: string[] }>(this.buildUrl(`/nodes/${nodeType}/options`)),
-              description: this.http.get<{ description: string }>(this.buildUrl(`/nodes/${nodeType}/description`))
-            }).pipe(
-              map(({ options, description }) => ({ nodeType, options: options.options, description: description.description }))
-            )
-          )
-        )
+    this.nodeTypes$ = this.http.get<{ node_types: string[], descriptions: {[key: string]: string}, options: {[key: string]: string[]} }>(this.buildUrl('/nodes/types')).pipe(
+      map(({ node_types, descriptions, options }) => 
+        node_types.map(nodeType => ({ nodeType, options: options[nodeType], description: descriptions[nodeType] }))
       )
     );
   }
