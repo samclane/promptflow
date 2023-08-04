@@ -7,8 +7,6 @@ flowcharts.
 import sys
 
 import redis
-from fastapi.websockets import WebSocketState
-from websockets.exceptions import ConnectionClosedOK
 
 sys.path.append("./")
 
@@ -16,7 +14,6 @@ import dotenv
 
 dotenv.load_dotenv()
 
-import asyncio
 import io
 import json
 import logging
@@ -25,16 +22,7 @@ import traceback
 import zipfile
 from typing import Optional
 
-from fastapi import (
-    BackgroundTasks,
-    FastAPI,
-    File,
-    HTTPException,
-    Response,
-    UploadFile,
-    WebSocket,
-    WebSocketDisconnect,
-)
+from fastapi import BackgroundTasks, FastAPI, File, HTTPException, Response, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel
@@ -80,30 +68,6 @@ interface = PostgresInterface(
         port=int(os.getenv("POSTGRES_PORT", 5432)),
     )
 )
-
-
-class WSConnectionManager:
-    """Handles websocket connections"""
-
-    def __init__(self) -> None:
-        self.active_connections: list[WebSocket] = []
-
-    async def connect(self, websocket: WebSocket):
-        """Add a websocket connection to the list of active connections"""
-        await websocket.accept()
-        self.active_connections.append(websocket)
-
-    async def disconnect(self, websocket: WebSocket):
-        """Remove a websocket connection from the list of active connections"""
-        self.active_connections.remove(websocket)
-
-    async def broadcast(self, message: str):
-        """Send a message to all active connections"""
-        for connection in self.active_connections:
-            await connection.send_text(message)
-
-
-ws_manager = WSConnectionManager()
 
 
 @app.get("/flowcharts")
@@ -226,12 +190,6 @@ def get_job_logs(job_id) -> dict:
         return {"logs": interface.get_job_logs(job_id)}
     except ValueError as exc:
         raise HTTPException(status_code=404, detail="Job not found") from exc
-
-
-@app.get("/jobs/{job_id}/logs")
-async def job_logs_get(job_id: int):
-    return {"logs": interface.get_job_logs(job_id)}
-
 
 
 @app.get("/flowcharts/{flowchart_id}/stop")

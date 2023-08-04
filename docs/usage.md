@@ -33,8 +33,6 @@ PromptFlow is a Python application for creating and running conversational AI pi
 
 - `GET /jobs/(int:job_id)/logs` - Get logs for a job  
 
-- `WEBSOCKET /jobs/(int:job_id)/ws` - Websocket for streaming job logs
-
 ### Nodes
 
 - `GET /nodes/types` - Get all node types
