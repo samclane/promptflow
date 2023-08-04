@@ -19,13 +19,15 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AddNodeComponent } from './add-node.component';
 import {FlowchartImportJson} from './flowchart-import-json.component';
 import { JobListContainerComponent } from './job-list-container.component';
+import { NodeListComponent } from './node-type-display.component';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'flowcharts', component: FlowchartListContainerComponent },
   { path: 'flowcharts/:id', component: FlowchartDetailComponent },
   { path: 'jobs', component: JobListContainerComponent },
-  { path: 'jobs/:id', component: JobDetailComponent }
+  { path: 'jobs/:id', component: JobDetailComponent },
+  { path: 'nodes', component: NodeListComponent },
 ];
 
 
@@ -45,7 +47,8 @@ const routes: Routes = [
     FlowchartDisplayComponent,
     FlowchartImportJson,
     AddNodeComponent,
-    JobListContainerComponent
+    JobListContainerComponent,
+    NodeListComponent
   ],
   imports: [
     BrowserModule,
