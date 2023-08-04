@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, Input } from '@angular/core';
 import { LogsService } from './logs.service';
-import { Subscription, timer } from 'rxjs';
+import { Subscription, timer, Subject } from 'rxjs';
 import { switchMap, retry } from 'rxjs/operators';
 
 @Component({
@@ -10,7 +10,7 @@ import { switchMap, retry } from 'rxjs/operators';
 })
 export class JobLogsComponent implements OnInit, OnDestroy {
   @Input() jobId!: string;
-  logs: string = '';
+  logs = new Subject<string>();
   private logSubscription?: Subscription;
 
   constructor(private logsService: LogsService) { }
@@ -20,10 +20,7 @@ export class JobLogsComponent implements OnInit, OnDestroy {
       switchMap(() => this.logsService.getLogs(this.jobId)),
       retry()
     ).subscribe(logs => {
-      this.logs = '';
-      for (let log of logs.logs) {
-        this.logs += log.message + '\n';
-      }
+      this.logs.next(logs.logs.map((x) => x.message).join('\n'));
     });
   }
 
@@ -31,5 +28,6 @@ export class JobLogsComponent implements OnInit, OnDestroy {
     if (this.logSubscription) {
       this.logSubscription.unsubscribe();
     }
+    this.logs.complete();
   }
 }
