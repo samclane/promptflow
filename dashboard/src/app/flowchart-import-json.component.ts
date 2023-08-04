@@ -1,8 +1,7 @@
-import {ChangeDetectionStrategy, Component, Input, OnChanges, SimpleChanges} from "@angular/core";
-import {combineLatest, take} from "rxjs";
-import {FlowchartService} from "./flowchart.service";
-import {FormControl, FormGroup, Validators} from '@angular/forms';
-import { Flowchart } from "./flowchart";
+import { ChangeDetectionStrategy, Component, Input, OnChanges, SimpleChanges } from "@angular/core";
+import { combineLatest, take } from "rxjs";
+import { FlowchartService } from "./flowchart.service";
+import { AbstractControl, FormControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-flowchart-import-json',
@@ -12,10 +11,11 @@ import { Flowchart } from "./flowchart";
 export class FlowchartImportJson implements OnChanges {
   public flowchartForm: FormGroup;
   @Input() public flowchartJson: string | undefined;
+  public userHasTyped: boolean = false;
 
   constructor(private readonly flowchartService: FlowchartService) {
     this.flowchartForm = new FormGroup({
-      flowchartJson: new FormControl('', Validators.required)
+      flowchartJson: new FormControl('', [Validators.required, this.jsonValidator])
     });
   }
 
@@ -35,10 +35,20 @@ export class FlowchartImportJson implements OnChanges {
     if (this.flowchartForm.valid) {
       const parsedFlowchart = JSON.parse(this.flowchartForm.get('flowchartJson')?.value);
       this.flowchartService.upsertFlowchart(parsedFlowchart).pipe(take(1)).subscribe(() => {
-        console.log('Flowchart imported!')
         this.flowchartForm.reset();
         this.flowchartService.getFlowcharts();
       });
     }
   }
+
+  jsonValidator(control: AbstractControl): ValidationErrors | null {
+    try {
+      JSON.parse(control.value);
+    } catch (e) {
+      return { jsonInvalid: true };
+    }
+
+    return null;
+  };
+
 }
