@@ -3,7 +3,7 @@
     <h1 class="text-4xl font-semibold mb-4">Flowcharts</h1>
     <div class="max-h-[800px] overflow-y-auto">
       <ng-container *ngIf="vm.flowcharts.length > 0">
-        <div *ngFor="let flowchart of vm.flowcharts" class="info-container flex flex-row items-center justify-between">
+        <div *ngFor="let flowchart of vm.flowcharts" class="info-container flex flex-row items-center justify-between my-4">
           <a [routerLink]="['/flowcharts', flowchart.uid]" class="text-xl hover:underline">
             {{ flowchart.label }}
           </a>
