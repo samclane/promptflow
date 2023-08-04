@@ -228,23 +228,10 @@ def get_job_logs(job_id) -> dict:
         raise HTTPException(status_code=404, detail="Job not found") from exc
 
 
-@app.websocket("/jobs/{job_id}/ws")
-async def job_logs_ws(websocket: WebSocket, job_id: int):
-    await ws_manager.connect(websocket)
-    try:
-        while True:
-            if websocket.client_state == WebSocketState.DISCONNECTED:
-                break
-            await websocket.send_text(
-                json.dumps({"logs": interface.get_job_logs(job_id)})
-            )
-            await asyncio.sleep(1)
-    except WebSocketDisconnect:
-        pass
-    except ConnectionClosedOK:
-        pass
-    finally:
-        await ws_manager.disconnect(websocket)
+@app.get("/jobs/{job_id}/logs")
+async def job_logs_get(job_id: int):
+    return {"logs": interface.get_job_logs(job_id)}
+
 
 
 @app.get("/flowcharts/{flowchart_id}/stop")

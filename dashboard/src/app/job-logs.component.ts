@@ -1,8 +1,7 @@
 import { Component, OnInit, OnDestroy, Input } from '@angular/core';
 import { LogsService } from './logs.service';
-import { WebSocketService } from './web-socket.service';
-import { Subscription, take } from 'rxjs';
-import { LogWrapper } from './log';
+import { Subscription, interval } from 'rxjs';
+import { startWith, switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-job-logs',
@@ -14,15 +13,17 @@ export class JobLogsComponent implements OnInit, OnDestroy {
   logs: string = '';
   private logSubscription?: Subscription;
 
-  constructor(private logsService: LogsService, private webSocketService: WebSocketService<LogWrapper>) { }
+  constructor(private logsService: LogsService) { }
 
   ngOnInit(): void {
-    this.logsService.startLogging(this.jobId);
-    this.logSubscription = this.logsService.getLogs().pipe(take(1)).subscribe(logs => {
-        this.logs = '';
-        for (let log of logs.logs) {
-            this.logs += log.message + '\n';
-        }
+    this.logSubscription = interval(1000).pipe(
+      startWith(0),
+      switchMap(() => this.logsService.getLogs(this.jobId))
+    ).subscribe(logs => {
+      this.logs = '';
+      for (let log of logs.logs) {
+        this.logs += log.message + '\n';
+      }
     });
   }
 
@@ -30,6 +31,5 @@ export class JobLogsComponent implements OnInit, OnDestroy {
     if (this.logSubscription) {
       this.logSubscription.unsubscribe();
     }
-    this.webSocketService.close();
   }
 }
