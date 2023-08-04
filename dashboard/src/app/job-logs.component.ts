@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, Input } from '@angular/core';
 import { LogsService } from './logs.service';
-import { Subscription, interval } from 'rxjs';
-import { startWith, switchMap } from 'rxjs/operators';
+import { Subscription, timer } from 'rxjs';
+import { switchMap, retry } from 'rxjs/operators';
 
 @Component({
   selector: 'app-job-logs',
@@ -16,9 +16,9 @@ export class JobLogsComponent implements OnInit, OnDestroy {
   constructor(private logsService: LogsService) { }
 
   ngOnInit(): void {
-    this.logSubscription = interval(1000).pipe(
-      startWith(0),
-      switchMap(() => this.logsService.getLogs(this.jobId))
+    this.logSubscription = timer(0, 1000).pipe(
+      switchMap(() => this.logsService.getLogs(this.jobId)),
+      retry()
     ).subscribe(logs => {
       this.logs = '';
       for (let log of logs.logs) {
