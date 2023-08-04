@@ -4,10 +4,11 @@ window, menu, and canvas. It also handles the saving and loading of
 flowcharts.
 """
 
-import base64
 import sys
 
 import redis
+from fastapi.websockets import WebSocketState
+from websockets.exceptions import ConnectionClosedOK
 
 sys.path.append("./")
 
@@ -231,16 +232,19 @@ def get_job_logs(job_id) -> dict:
 async def job_logs_ws(websocket: WebSocket, job_id: int):
     await ws_manager.connect(websocket)
     try:
-        await websocket.send_text(json.dumps({"logs": interface.get_job_logs(job_id)}))
         while True:
-            await asyncio.sleep(1)
+            if websocket.client_state == WebSocketState.DISCONNECTED:
+                break
             await websocket.send_text(
                 json.dumps({"logs": interface.get_job_logs(job_id)})
             )
+            await asyncio.sleep(1)
     except WebSocketDisconnect:
+        pass
+    except ConnectionClosedOK:
+        pass
+    finally:
         await ws_manager.disconnect(websocket)
-    except ValueError as exc:
-        raise HTTPException(status_code=404, detail="Job not found") from exc
 
 
 @app.get("/flowcharts/{flowchart_id}/stop")
