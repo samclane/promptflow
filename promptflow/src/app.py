@@ -25,12 +25,12 @@ from typing import Optional
 from fastapi import BackgroundTasks, FastAPI, File, HTTPException, Response, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
-from pydantic import BaseModel
+from pydantic import BaseModel  # pylint: disable=no-name-in-module
 
 from promptflow.src.flowchart import Flowchart
 from promptflow.src.node_map import node_map
 from promptflow.src.nodes.embedding_node import EmbeddingsIngestNode
-from promptflow.src.postgres_interface import DatabaseConfig, PostgresInterface
+from promptflow.src.postgres_interface import DatabaseConfig, GraphNamesAndIds, PostgresInterface
 from promptflow.src.state import State
 from promptflow.src.tasks import render_flowchart, run_flowchart
 
@@ -71,7 +71,7 @@ interface = PostgresInterface(
 
 
 @app.get("/flowcharts")
-def get_flowcharts() -> list[dict]:
+def get_flowcharts() -> list[GraphNamesAndIds]:
     """Get all flowcharts."""
     promptflow.logger.info("Getting flowcharts")
     flowcharts = interface.get_all_flowchart_ids_and_names()
@@ -145,7 +145,12 @@ class Input(BaseModel):
 @app.post("/jobs/{task_id}/input")
 def post_input(task_id: str, input: Input):
     """Post input to a running flowchart execution."""
-    red = redis.StrictRedis.from_url(os.getenv("REDIS_URL"))
+    redis_url = os.getenv("REDIS_URL")
+    if not redis_url:
+        raise HTTPException(
+            status_code=500, detail="Redis URL not found"
+        )
+    red = redis.StrictRedis.from_url(redis_url)
     red.publish(f"{task_id}/input", input.input)
     return {"message": "Input received", "input": input.input}
 

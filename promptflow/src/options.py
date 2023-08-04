@@ -1,7 +1,7 @@
 """
 Manage and validate options for the promptflow application
 """
-from pydantic import BaseModel
+from pydantic import BaseModel  # pylint: disable=no-name-in-module
 
 from promptflow.src.serializable import Serializable
 

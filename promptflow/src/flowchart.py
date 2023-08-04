@@ -173,7 +173,7 @@ class Flowchart:
 
     def initialize(
         self,
-        job_id: str,
+        job_id: int,
         state: State,
         interface: DBInterface,
         logging_function: Callable[[str], None],
@@ -194,7 +194,7 @@ class Flowchart:
 
     def run(
         self,
-        job_id: str,
+        job_id: int,
         state: Optional[State],
         interface: DBInterface,
         queue: Optional[Queue[NodeBase]] = None,
@@ -223,7 +223,10 @@ class Flowchart:
             before_result = cur_node.before(state)
             if before_result and "input" in before_result:
                 self.logger.info(f"Node {cur_node.label} requires input")
-                red = redis.StrictRedis.from_url(os.environ.get("REDIS_URL"))
+                redis_url = os.environ.get("REDIS_URL")
+                if not redis_url:
+                    raise ValueError("REDIS_URL not set")
+                red = redis.StrictRedis.from_url(redis_url)
                 interface.update_job_status(job_id, "INPUT_REQUIRED")
                 # wait for input
                 sub = red.pubsub()
@@ -427,7 +430,7 @@ class Flowchart:
         Arrange all nodes using a networkx algorithm.
         """
         kwargs = {}
-        if algorithm == nx.layout.bipartite_layout:
+        if algorithm == nx.layout.bipartite_layout:  # pylint: disable=no-member
             kwargs["nodes"] = self.graph.nodes
         pos = algorithm(self.graph, scale=50, **kwargs)
         return pos

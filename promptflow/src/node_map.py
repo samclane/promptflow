@@ -105,18 +105,19 @@ def populate_node_map():
             database="postgres",
             user="postgres",
             password="postgres",
+            port=5432,
         )
     )
 
     conn = interface.conn
-    cur = interface.cursor
-    for node_name in node_map:
-        cur.execute(
-            """
-            INSERT INTO node_types (name) VALUES (%s) ON CONFLICT DO NOTHING
-            """,
-            (node_name,),
-        )
+    with conn.cursor() as cur:
+        for node_name in node_map:
+            cur.execute(
+                """
+                INSERT INTO node_types (name) VALUES (%s) ON CONFLICT DO NOTHING
+                """,
+                (node_name,),
+            )
     conn.commit()
 
     conn.close()
