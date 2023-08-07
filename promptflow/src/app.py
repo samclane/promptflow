@@ -157,6 +157,12 @@ def post_input(task_id: str, input: Input):
     return {"message": "Input received", "input": input.input}
 
 
+@app.get("/jobs/{job_id}/output")
+def get_output(job_id: str):
+    """Get output from a running flowchart execution."""
+    return interface.get_job_output(job_id)
+
+
 @app.get("/flowcharts/{flowchart_id}/png")
 def render_flowchart_png(flowchart_id: str):
     """Render a flowchart as a png."""
@@ -301,6 +307,7 @@ def get_node_type_info(node_type: str) -> dict:
         "options": subclass.get_option_keys(),
     }
 
+
 @app.get("/flowcharts/{flowchart_id}/nodes/{node_id}/options")
 def get_specific_node_options(flowchart_id: str, node_id: str) -> dict:
     """Get the editable options for a node."""
@@ -326,10 +333,3 @@ def handle_exception(request, exc):
         status_code=exc.status_code,
         content={"message": str(exc.detail)},
     )
-
-
-# @app.on_event("startup")
-# def startup_event():
-#     loop = asyncio.new_event_loop()
-#     thread = Thread(target=interface.listener, args=(manager, loop,))
-#     thread.start()

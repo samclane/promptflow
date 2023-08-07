@@ -77,6 +77,18 @@ CREATE TABLE IF NOT EXISTS job_logs (
   created timestamp NOT NULL DEFAULT current_timestamp
 );
 
+CREATE TABLE IF NOT EXISTS job_output_types (
+   type TEXT UNIQUE NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS job_outputs (
+   job_id bigint REFERENCES jobs(id) ON DELETE CASCADE ON UPDATE CASCADE NOT NULL,
+   output_type TEXT REFERENCES job_output_types(type) ON DELETE CASCADE ON UPDATE CASCADE NOT NULL, 
+   output TEXT
+);
+
+INSERT INTO job_output_types (type) VALUES ('JSON'), ('TEXT'), ('URL') ON CONFLICT (type) DO UPDATE SET type = EXCLUDED.type;
+
 CREATE OR REPLACE VIEW jobs_view AS
   SELECT 
     j.id,

@@ -58,6 +58,10 @@ def run_flowchart(self, flowchart_uid: str, db_config_init: dict) -> dict:
             logging_function=log_result_generator(interface, job_id),
         )
         interface.update_job_status(job_id, "DONE")
+        if state is not None:
+            interface.insert_job_output(job_id, "JSON", str(state.serialize()))
+        else:
+            interface.insert_job_output(job_id, "JSON", str({}))
 
         logging.info("Finished running flowchart")
         logging.info("Task completed: run_flowchart")

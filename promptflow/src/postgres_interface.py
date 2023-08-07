@@ -389,6 +389,45 @@ class DBInterface(ABC):
             List[dict]: The job log with the given ID.
         """
 
+    @abstractmethod
+    def store_b64_image(self, image: str, flowchart_uid: str):
+        """
+        Stores a base64 encoded image in the database.
+
+        Args:
+            image (str): The base64 encoded image.
+            flowchart_uid (str): The UID of the flowchart.
+
+        Returns:
+            None
+        """
+
+    @abstractmethod
+    def insert_job_output(self, job_id: int, output_type: str, output: str):
+        """
+        Inserts a job output into the database.
+
+        Args:
+            job_id (int): The ID of the job.
+            output_type (str): The type of output.
+            output (str): The output.
+
+        Returns:
+            None
+        """
+
+    @abstractmethod
+    def get_job_output(self, job_id: int) -> List[dict]:
+        """
+        Gets the output of a job.
+
+        Args:
+            job_id (int): The ID of the task.
+
+        Returns:
+            List[dict]: The output of the job.
+        """
+
 
 class PostgresInterface(DBInterface):
     """
@@ -678,18 +717,27 @@ class PostgresInterface(DBInterface):
             """
             cursor.execute(query, (image_bytes, flowchart_uid))
 
-        self.conn.commit()
+            self.conn.commit()
 
-    def listener(self, manager, loop: asyncio.AbstractEventLoop):
-        self.conn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
+    def insert_job_output(self, job_id: int, output_type: str, output: str):
+        with self.conn.cursor() as cursor:
+            cursor.execute(
+                """
+                INSERT INTO job_outputs (job_id, output_type, output)
+                VALUES (%s, %s, %s)
+                """,
+                (job_id, output_type, output),
+            )
+            self.conn.commit()
 
-        with self.conn.cursor() as cur:
-            cur.execute("LISTEN job_log_created;")
-
-            while True:
-                self.conn.poll()
-                while self.conn.notifies:
-                    notify = self.conn.notifies.pop(0)
-                    loop.run_in_executor(
-                        None, asyncio.run, manager.send_message(notify.payload)
-                    )
+    def get_job_output(self, job_id: int):
+        with self.conn.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT output_type, output FROM job_outputs WHERE job_id = %s
+                """,
+                (job_id,),
+            )
+            rows = cursor.fetchall()
+            self.conn.commit()
+            return rows
