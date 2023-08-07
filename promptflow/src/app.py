@@ -20,7 +20,7 @@ import logging
 import os
 import traceback
 import zipfile
-from typing import Optional
+from typing import List, Optional
 
 from fastapi import BackgroundTasks, FastAPI, File, HTTPException, Response, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -75,7 +75,7 @@ interface = PostgresInterface(
 
 
 @app.get("/flowcharts")
-def get_flowcharts() -> list[GraphNamesAndIds]:
+def get_flowcharts() -> List[GraphNamesAndIds]:
     """Get all flowcharts."""
     promptflow.logger.info("Getting flowcharts")
     flowcharts = interface.get_all_flowchart_ids_and_names()
@@ -124,7 +124,7 @@ def get_flowchart(flowchart_id: str) -> dict:
 
 
 @app.delete("/flowcharts/{flowchart_id}")
-def delete_flowchart(flowchart_id: str) -> dict:
+def delete_flowchart(flowchart_id: str) -> dict[str, str]:
     """Delete a flowchart by id."""
     promptflow.logger.info("Deleting flowchart")
     try:
@@ -136,7 +136,7 @@ def delete_flowchart(flowchart_id: str) -> dict:
 
 
 @app.get("/flowcharts/{flowchart_uid}/run")
-def run_flowchart_endpoint(flowchart_uid: str, background_tasks: BackgroundTasks):
+def run_flowchart_endpoint(flowchart_uid: str, background_tasks: BackgroundTasks) -> dict[str, str]:
     """Queue the flowchart execution as a background task."""
     task = run_flowchart.apply_async((flowchart_uid, interface.config.dict()))
     return {"message": "Flowchart execution started", "task_id": str(task.id)}
@@ -147,7 +147,7 @@ class Input(BaseModel):
 
 
 @app.post("/jobs/{task_id}/input")
-def post_input(task_id: str, input: Input):
+def post_input(task_id: str, input: Input) -> dict[str, str]:
     """Post input to a running flowchart execution."""
     redis_url = os.getenv("REDIS_URL")
     if not redis_url:
@@ -158,13 +158,13 @@ def post_input(task_id: str, input: Input):
 
 
 @app.get("/jobs/{job_id}/output")
-def get_output(job_id: int):
+def get_output(job_id: int) -> dict:
     """Get output from a running flowchart execution."""
     return interface.get_job_output(job_id).dict()
 
 
 @app.get("/flowcharts/{flowchart_id}/png")
-def render_flowchart_png(flowchart_id: str):
+def render_flowchart_png(flowchart_id: str) -> StreamingResponse:
     """Render a flowchart as a png."""
     png_image = render_flowchart.apply_async(
         (flowchart_id, interface.config.dict())
@@ -216,7 +216,7 @@ def stop_flowchart(flowchart_id: str):
 
 
 @app.get("/flowcharts/{flowchart_id}/clear")
-def clear_flowchart(flowchart_id: str):
+def clear_flowchart(flowchart_id: str) -> dict:
     """Clear the flowchart."""
     promptflow.logger.info("Clearing flowchart")
     flowchart = Flowchart.get_flowchart_by_uid(flowchart_id, interface)
