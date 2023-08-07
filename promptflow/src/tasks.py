@@ -89,9 +89,16 @@ def render_flowchart(self, flowchart_uid: str, db_config_init: dict):
     nx.draw_networkx_edge_labels(
         flowchart.graph, pos=pos, edge_labels=flowchart.graph.edges
     )
+
+    label_pos = {
+        k: [v[0], v[1] - 5] for k, v in pos.items()
+    }  # Offsetting the y-position of labels
     nx.draw_networkx_labels(
-        flowchart.graph, pos=pos, labels={node: node.label for node in flowchart.nodes}
+        flowchart.graph,
+        pos=label_pos,
+        labels={node: node.label for node in flowchart.nodes},
     )
+
     plt.tight_layout()
 
     png_image = io.BytesIO()

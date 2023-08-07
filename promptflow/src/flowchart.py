@@ -425,7 +425,7 @@ class Flowchart:
         graphml_string += "\r</graphml>"
         return graphml_string
 
-    def arrange_networkx(self, algorithm, scale=1.0):
+    def arrange_networkx(self, algorithm: Callable) -> dict[str, tuple[float, float]]:
         """
         Arrange all nodes using a networkx algorithm.
         """
