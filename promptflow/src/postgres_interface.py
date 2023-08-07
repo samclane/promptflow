@@ -125,6 +125,29 @@ class GraphView(BaseModel):
         )
 
 
+class JobResult(BaseModel):
+    job_id: conint(gt=0)
+    output_type: constr(min_length=1)
+    output: Optional[str]
+
+    @staticmethod
+    def hydrate(row: Tuple[Any, ...]) -> "JobResult":
+        """
+        Hydrates a JobResult instance from a dictionary representing a database row.
+
+        Args:
+            row (Dict[str, Any]): Dictionary representing a database row.
+
+        Returns:
+            JobResult: A JobResult instance populated with the data from the row.
+        """
+        return JobResult(
+            job_id=row[0],
+            output_type=row[1],
+            output=row[2],
+        )
+
+
 class DatabaseConfig(BaseModel):
     """
     Model representing the configuration for connecting to a database.
@@ -417,7 +440,7 @@ class DBInterface(ABC):
         """
 
     @abstractmethod
-    def get_job_output(self, job_id: int) -> List[dict]:
+    def get_job_output(self, job_id: int) -> Optional[Tuple[Any, ...]]:
         """
         Gets the output of a job.
 
@@ -425,7 +448,7 @@ class DBInterface(ABC):
             job_id (int): The ID of the task.
 
         Returns:
-            List[dict]: The output of the job.
+            Optional[Tuple[Any, ...]]: The output of the job.
         """
 
 
@@ -730,14 +753,16 @@ class PostgresInterface(DBInterface):
             )
             self.conn.commit()
 
-    def get_job_output(self, job_id: int):
+    def get_job_output(self, job_id: int) -> JobResult:
         with self.conn.cursor() as cursor:
             cursor.execute(
                 """
-                SELECT output_type, output FROM job_outputs WHERE job_id = %s
+                SELECT job_id, output_type, output FROM job_outputs WHERE job_id = %s
                 """,
                 (job_id,),
             )
-            rows = cursor.fetchall()
+            row = cursor.fetchone()
             self.conn.commit()
-            return rows
+            if not row:
+                raise ValueError(f"Job with id {job_id} not found")
+            return JobResult.hydrate(row)
