@@ -158,7 +158,7 @@ def post_input(task_id: str, input: Input):
 
 
 @app.get("/jobs/{job_id}/output")
-def get_output(job_id: str):
+def get_output(job_id: int):
     """Get output from a running flowchart execution."""
     return interface.get_job_output(job_id)
 
