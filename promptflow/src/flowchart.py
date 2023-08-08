@@ -2,6 +2,7 @@
 This module contains the Flowchart class, which manages the nodes and connectors of a flowchart.
 """
 from __future__ import annotations
+import datetime
 
 import logging
 import os
@@ -11,6 +12,7 @@ from queue import Queue
 from typing import TYPE_CHECKING, Any, Callable, Optional
 
 import networkx as nx
+from pydantic import BaseModel  # pylint: disable=no-name-in-module
 import redis
 
 from promptflow.src.connectors.connector import Connector
@@ -24,6 +26,16 @@ if TYPE_CHECKING:
 
 from promptflow.src.state import State
 from promptflow.src.text_data import TextData
+
+
+class FlowchartJson(BaseModel):
+    """A flowchart json file"""
+
+    label: str
+    uid: str
+    nodes: list[dict]
+    branches: list[dict]
+    created: Optional[datetime.datetime] = None
 
 
 class Flowchart:
@@ -314,7 +326,7 @@ class Flowchart:
             self._partial_connector.delete(None)
         self._partial_connector = PartialConnector(self, node)
 
-    def serialize(self) -> dict[str, Any]:
+    def serialize(self) -> FlowchartJson:
         """
         Write the flowchart to a dictionary
         """
@@ -329,7 +341,7 @@ class Flowchart:
         data["branches"] = []
         for connector in self.connectors:
             data["branches"].append(connector.serialize())
-        return data
+        return FlowchartJson(**data)
 
     def remove_node(self, node: NodeBase) -> None:
         """

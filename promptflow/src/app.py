@@ -22,12 +22,12 @@ import traceback
 import zipfile
 from typing import Dict, List, Optional
 
-from fastapi import BackgroundTasks, FastAPI, File, HTTPException, Response, UploadFile
+from fastapi import FastAPI, File, HTTPException, Response, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel  # pylint: disable=no-name-in-module
 
-from promptflow.src.flowchart import Flowchart
+from promptflow.src.flowchart import Flowchart, FlowchartJson
 from promptflow.src.node_map import node_map
 from promptflow.src.nodes.embedding_node import EmbeddingsIngestNode
 from promptflow.src.postgres_interface import (
@@ -85,15 +85,6 @@ def get_flowcharts() -> List[GraphNamesAndIds]:
     return flowcharts
 
 
-class FlowchartJson(BaseModel):
-    """A flowchart json file"""
-
-    label: str
-    uid: str
-    nodes: list[dict]
-    branches: list[dict]
-
-
 class ErrorResponse(BaseModel):
     """A response for an error"""
 
@@ -110,7 +101,9 @@ def add_node_type_ids(flowchart: dict) -> dict:
 
 
 @app.post("/flowcharts")
-def upsert_flowchart_json(flowchart_json: FlowchartJson) -> dict | ErrorResponse:
+def upsert_flowchart_json(
+    flowchart_json: FlowchartJson,
+) -> FlowchartJson | ErrorResponse:
     """Upsert a flowchart json file."""
     promptflow.logger.info("Upserting flowchart")
     try:
@@ -127,7 +120,7 @@ def upsert_flowchart_json(flowchart_json: FlowchartJson) -> dict | ErrorResponse
 
 
 @app.get("/flowcharts/{flowchart_id}")
-def get_flowchart(flowchart_id: str) -> dict | ErrorResponse:
+def get_flowchart(flowchart_id: str) -> FlowchartJson | ErrorResponse:
     """Get a flowchart by id."""
     promptflow.logger.info("Getting flowchart")
     try:
@@ -142,8 +135,15 @@ def get_flowchart(flowchart_id: str) -> dict | ErrorResponse:
     return flowchart.serialize()
 
 
+class FlowchartUpdate(BaseModel):
+    """A flowchart update"""
+
+    message: str
+    flowchart_id: str
+
+
 @app.delete("/flowcharts/{flowchart_id}")
-def delete_flowchart(flowchart_id: str) -> dict[str, str] | ErrorResponse:
+def delete_flowchart(flowchart_id: str) -> FlowchartUpdate | ErrorResponse:
     """Delete a flowchart by id."""
     promptflow.logger.info("Deleting flowchart")
     try:
@@ -155,7 +155,7 @@ def delete_flowchart(flowchart_id: str) -> dict[str, str] | ErrorResponse:
             error=traceback.format_exc(),
             data={"flowchart_id": flowchart_id},
         )
-    return {"message": "Flowchart deleted", "flowchart_id": flowchart_id}
+    return FlowchartUpdate(message="Flowchart deleted", flowchart_id=flowchart_id)
 
 
 class RunSuccessResponse(BaseModel):
@@ -166,9 +166,7 @@ class RunSuccessResponse(BaseModel):
 
 
 @app.get("/flowcharts/{flowchart_uid}/run")
-def run_flowchart_endpoint(
-    flowchart_uid: str, background_tasks: BackgroundTasks
-) -> RunSuccessResponse:
+def run_flowchart_endpoint(flowchart_uid: str) -> RunSuccessResponse:
     """Queue the flowchart execution as a background task."""
     task = run_flowchart.apply_async((flowchart_uid, interface.config.dict()))
     return RunSuccessResponse(
@@ -250,7 +248,7 @@ class FlowchartUpdateResponse(BaseModel):
     """A response for a flowchart update"""
 
     message: str
-    flowchart: dict
+    flowchart: FlowchartJson
 
 
 @app.get("/flowcharts/{flowchart_id}/stop")
@@ -319,7 +317,7 @@ def save_as(flowchart_id: str) -> Response:
 
 
 @app.post("/flowcharts/load_from")
-def load_from(file: UploadFile = File(...)) -> dict | ErrorResponse:
+def load_from(file: UploadFile = File(...)) -> FlowchartJson | ErrorResponse:
     """
     Read a json file and deserialize as a flowchart
     """
@@ -340,7 +338,7 @@ def load_from(file: UploadFile = File(...)) -> dict | ErrorResponse:
                         node["label_file"] = label_file
                 flowchart = Flowchart.deserialize(interface, data)
                 interface.save_flowchart(flowchart)
-                return {"flowchart": flowchart.serialize()}
+                return flowchart.serialize()
     else:
         promptflow.logger.info("No file selected to load from")
         # return {"message": "No file selected to load from"}
