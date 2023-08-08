@@ -117,7 +117,11 @@ def upsert_flowchart_json(flowchart_json: FlowchartJson) -> dict | ErrorResponse
         flowchart = Flowchart.deserialize(interface, flowchart)
         interface.save_flowchart(flowchart)
     except ValueError:
-        return {"message": "Invalid flowchart json", "error": traceback.format_exc()}
+        return ErrorResponse(
+            message="Invalid flowchart json",
+            error=traceback.format_exc(),
+            data=flowchart_json.dict(),
+        )
     return flowchart.serialize()
 
 
@@ -129,7 +133,11 @@ def get_flowchart(flowchart_id: str) -> dict | ErrorResponse:
         flowchart = Flowchart.get_flowchart_by_uid(flowchart_id, interface)
     except ValueError:
         interface.conn.rollback()
-        return {"message": "Flowchart not found", "error": traceback.format_exc()}
+        return ErrorResponse(
+            message="Flowchart not found",
+            error=traceback.format_exc(),
+            data={"flowchart_id": flowchart_id},
+        )
     return flowchart.serialize()
 
 
@@ -141,7 +149,11 @@ def delete_flowchart(flowchart_id: str) -> dict[str, str] | ErrorResponse:
         interface.delete_flowchart(flowchart_id)
     except ValueError:
         interface.conn.rollback()
-        return {"message": "Flowchart not found", "error": traceback.format_exc()}
+        return ErrorResponse(
+            message="Flowchart not found",
+            error=traceback.format_exc(),
+            data={"flowchart_id": flowchart_id},
+        )
     return {"message": "Flowchart deleted", "flowchart_id": flowchart_id}
 
 
