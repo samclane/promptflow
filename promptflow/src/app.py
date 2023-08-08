@@ -277,6 +277,7 @@ def clear_flowchart(flowchart_id: str) -> FlowchartUpdateResponse:
 class CostResponse(BaseModel):
     """A response for a flowchart cost"""
 
+    flowchart_id: str
     cost: float
 
 
@@ -287,7 +288,7 @@ def cost_flowchart(flowchart_id: str) -> CostResponse:
     flowchart = Flowchart.get_flowchart_by_uid(flowchart_id, interface)
     state = State()
     cost = flowchart.cost(state)
-    return CostResponse(cost=cost)
+    return CostResponse(flowchart_id=flowchart_id, cost=cost)
 
 
 @app.post("/flowcharts/{flowchart_id}/save_as", response_class=Response)
@@ -362,16 +363,22 @@ class NodeTypesResponse(BaseModel):
 
     node_types: List[NodeTypeInfoResponse]
 
+
 @app.get("/nodes/types")
 def get_node_types() -> NodeTypesResponse:
     """Get all node types."""
     return NodeTypesResponse(
         node_types=[
-            NodeTypeInfoResponse(**{"name": subclass.__name__, "description": subclass.description(), "options": subclass.get_option_keys()}) for subclass in node_map.values()
+            NodeTypeInfoResponse(
+                **{
+                    "name": subclass.__name__,
+                    "description": subclass.description(),
+                    "options": subclass.get_option_keys(),
+                }
+            )
+            for subclass in node_map.values()
         ]
     )
-
-
 
 
 @app.get("/nodes/{node_type}")
@@ -381,7 +388,7 @@ def get_node_type_info(node_type: str) -> NodeTypeInfoResponse:
     return NodeTypeInfoResponse(
         name=subclass.__name__,
         description=subclass.description(),
-        options=subclass.get_option_keys()
+        options=subclass.get_option_keys(),
     )
 
 
