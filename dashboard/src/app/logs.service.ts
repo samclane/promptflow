@@ -11,9 +11,9 @@ export class LogsService {
 
   constructor(private http: HttpClient) { }
 
-  getLogs(jobId: string): Observable<LogWrapper> {
+  getLogs(jobId: string): Observable<LogWrapper[]> {
     const baseUrl = environment.promptflowApiBaseUrl;
     const url = `${baseUrl}/jobs/${jobId}/logs`;
-    return this.http.get<LogWrapper>(url);
+    return this.http.get<LogWrapper[]>(url);
   }
 }

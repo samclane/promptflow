@@ -1,4 +1,3 @@
-import asyncio
 import base64
 import json
 from abc import ABC, abstractmethod
@@ -146,6 +145,27 @@ class JobResult(BaseModel):
             output_type=row[1],
             output=row[2],
         )
+
+
+class JobLog(BaseModel):
+    """ """
+
+    log: Optional[Dict[str, Any]]
+    job_id: conint(gt=0)
+    created: datetime
+
+    @staticmethod
+    def hydrate(row: Tuple[Any, ...]) -> "JobLog":
+        """
+        Hydrates a JobLog instance from a dictionary representing a database row.
+
+        Args:
+            row (Dict[str, Any]): Dictionary representing a database row.
+
+        Returns
+            JobLog: A JobLog instance populated with the data from the row.
+        """
+        return JobLog(log=row[0], job_id=row[1], created=row[2])
 
 
 class DatabaseConfig(BaseModel):
@@ -401,7 +421,7 @@ class DBInterface(ABC):
         """
 
     @abstractmethod
-    def get_job_logs(self, job_id: int) -> List[dict]:
+    def get_job_logs(self, job_id: int) -> List[JobLog]:
         """
         Gets a job log from the database.
 
@@ -409,7 +429,7 @@ class DBInterface(ABC):
             job_id (int): The ID of the job to retrieve.
 
         Returns:
-            List[dict]: The job log with the given ID.
+            List[JobLog]: The job log with the given ID.
         """
 
     @abstractmethod
@@ -718,7 +738,7 @@ class PostgresInterface(DBInterface):
                 raise ValueError(f"Job with id {job_id} not found")
             return JobView.hydrate(row)
 
-    def get_job_logs(self, job_id: int) -> List[dict]:
+    def get_job_logs(self, job_id: int) -> List[JobLog]:
         with self.conn.cursor() as cursor:
             cursor.execute(
                 """
@@ -728,7 +748,7 @@ class PostgresInterface(DBInterface):
             )
             rows = cursor.fetchall()
             self.conn.commit()
-            return list(map(lambda x: x[0], rows))
+            return row_results_to_class_list(JobLog, rows)
 
     def store_b64_image(self, image: str, flowchart_uid: str):
         image_bytes = base64.b64decode(image)

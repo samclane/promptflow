@@ -20,8 +20,8 @@ export class JobLogsComponent implements OnInit, OnDestroy {
       switchMap(() => this.logsService.getLogs(this.jobId)),
       retry(),
       takeUntil(this.unsubscribe)
-    ).subscribe(logs => {
-      this.logs.next(logs.logs.map((x) => x.message).join('\n'));
+    ).subscribe(inc_logs => {
+      this.logs.next(inc_logs.map(log => log.log.message).join('\n'));
     });
   }
 

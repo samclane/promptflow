@@ -33,6 +33,7 @@ from promptflow.src.nodes.embedding_node import EmbeddingsIngestNode
 from promptflow.src.postgres_interface import (
     DatabaseConfig,
     GraphNamesAndIds,
+    JobLog,
     JobResult,
     JobView,
     PostgresInterface,
@@ -235,12 +236,12 @@ def get_job_by_id(job_id) -> JobView:
 
 
 @app.get("/jobs/{job_id}/logs")
-def get_job_logs(job_id) -> dict:
+def get_job_logs(job_id) -> List[JobLog]:
     """
     Get all logs for a specific job
     """
     try:
-        return {"logs": interface.get_job_logs(job_id)}
+        return interface.get_job_logs(job_id)
     except ValueError as exc:
         raise HTTPException(status_code=404, detail="Job not found") from exc
 
