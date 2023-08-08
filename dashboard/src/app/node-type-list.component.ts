@@ -19,7 +19,7 @@ export class NodeTypeListComponent implements OnInit {
   }
 
   getNodeTypes(): void {
-    this.nodeService.getNodeTypes().pipe(take(1)).subscribe(nodeTypes => this.nodeTypes = nodeTypes["node_types"]);
+    this.nodeService.getNodeTypes().pipe(take(1)).subscribe(nodeTypes => this.nodeTypes = nodeTypes["node_types"].map(nodeType => nodeType.name));
   }
 
   setCurrentNodeType(event: Event): void {

@@ -349,29 +349,29 @@ def load_from(file: UploadFile = File(...)) -> FlowchartJson | ErrorResponse:
         )
 
 
-class NodeTypeResponse(BaseModel):
-    """A response for a node type"""
-
-    node_types: List[str]
-    descriptions: Dict[str, str]
-    options: Dict[str, List[str]]
-
-
-@app.get("/nodes/types")
-def get_node_types() -> NodeTypeResponse:
-    """Get all node types."""
-    return NodeTypeResponse(
-        node_types=list(node_map.keys()),
-        descriptions={k: v.description() for k, v in node_map.items()},
-        options={k: v.get_option_keys() for k, v in node_map.items()},
-    )
-
-
 class NodeTypeInfoResponse(BaseModel):
     """A response for a node type info"""
 
+    name: str
     description: str
     options: List[str]
+
+
+class NodeTypesResponse(BaseModel):
+    """A response for a node type"""
+
+    node_types: List[NodeTypeInfoResponse]
+
+@app.get("/nodes/types")
+def get_node_types() -> NodeTypesResponse:
+    """Get all node types."""
+    return NodeTypesResponse(
+        node_types=[
+            NodeTypeInfoResponse(**{"name": subclass.__name__, "description": subclass.description(), "options": subclass.get_option_keys()}) for subclass in node_map.values()
+        ]
+    )
+
+
 
 
 @app.get("/nodes/{node_type}")
@@ -379,7 +379,9 @@ def get_node_type_info(node_type: str) -> NodeTypeInfoResponse:
     """Get the description and options for a node."""
     subclass = node_map[node_type]
     return NodeTypeInfoResponse(
-        description=subclass.description(), options=subclass.get_option_keys()
+        name=subclass.__name__,
+        description=subclass.description(),
+        options=subclass.get_option_keys()
     )
 
 

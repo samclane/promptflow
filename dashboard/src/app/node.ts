@@ -7,6 +7,12 @@ export interface PFNode {
     updated_at: string;
 }
 
+export interface NodeType {
+    name: string;
+    description: string;
+    options: string[];
+}
+
 export interface NodeTypes { 
-    node_types: string[];
+    node_types: NodeType[];
 }
