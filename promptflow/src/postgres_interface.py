@@ -289,12 +289,6 @@ class DBInterface(ABC):
         """
 
     @abstractmethod
-    def new_flowchart(self) -> Flowchart:
-        """
-        Creates a new flowchart in the database.
-        """
-
-    @abstractmethod
     def get_node_type_id(self, node_type):
         """
         Returns the node type ID for the given node type.
@@ -370,22 +364,22 @@ class DBInterface(ABC):
         """
 
     @abstractmethod
-    def delete_flowchart(self, flowchart_id: int):
+    def delete_flowchart(self, flowchart_uid: str):
         """
         Deletes the flowchart from the database.
 
         Args:
-            flowchart_id (int): The ID of the flowchart to delete.
+            flowchart_id (str): The UID of the flowchart to delete.
         """
 
     @abstractmethod
-    def create_job(self, job: dict, flowchart_id: str):
+    def create_job(self, job: dict, flowchart_id: int):
         """
         Creates a new job in the database from a celery job.
 
         Args:
             job (Job): The job to create.
-            flowchart_id (str): The ID of the flowchart to run.
+            flowchart_id (int): The ID of the flowchart to run.
         """
 
     @abstractmethod
@@ -460,7 +454,7 @@ class DBInterface(ABC):
         """
 
     @abstractmethod
-    def get_job_output(self, job_id: int) -> Optional[Tuple[Any, ...]]:
+    def get_job_output(self, job_id: int) -> JobResult:
         """
         Gets the output of a job.
 
@@ -468,7 +462,7 @@ class DBInterface(ABC):
             job_id (int): The ID of the task.
 
         Returns:
-            Optional[Tuple[Any, ...]]: The output of the job.
+            JobResult: The output of the job.
         """
 
 
@@ -521,30 +515,6 @@ class PostgresInterface(DBInterface):
 
         return flowcharts
 
-    def new_flowchart(self) -> Flowchart:
-        with self.conn.cursor() as cursor:
-            name = {
-                "label": "New Flowchart" + str(datetime.now()),
-                "nodes": [],
-                "branches": [],
-            }
-            cursor.callproc(
-                """
-                upsert_graph
-                """,
-                [
-                    json.dumps(name),
-                ],
-            )
-            self.conn.commit()
-            row = cursor.fetchone()
-            if not row:
-                raise ValueError("No flowchart data returned from the database")
-            id = row[0]
-            return Flowchart(
-                interface=self, uid=id, name=name["name"], created=datetime.now()
-            )
-
     def get_node_type_id(self, node_type):
         with self.conn.cursor() as cursor:
             cursor.execute(
@@ -568,9 +538,12 @@ class PostgresInterface(DBInterface):
             flowchart.id = row.graph_id
             flowcharts.append(flowchart)
         else:
-            flowchart = next((x for x in flowcharts if x.uid == row.graph_uid), None)
-            if flowchart is None:
-                raise ValueError(f"Flowchart with graph_uid {row.graph_uid} not found")
+            try:
+                flowchart = next((x for x in flowcharts if x.uid == row.graph_uid))
+            except StopIteration as exc:
+                raise ValueError(
+                    "Flowchart not found with uid" + row.graph_uid
+                ) from exc
 
         return flowchart
 
@@ -646,22 +619,22 @@ class PostgresInterface(DBInterface):
                 upsert_graph
                 """,
                 [
-                    json.dumps(flowchart.serialize()),
+                    json.dumps(flowchart.serialize().dict()),
                 ],
             )
             self.conn.commit()
 
-    def delete_flowchart(self, flowchart_id: str):
+    def delete_flowchart(self, flowchart_uid: str):
         with self.conn.cursor() as cursor:
             cursor.execute(
                 """
                 DELETE FROM graphs WHERE uid = %s
                 """,
-                [flowchart_id],
+                [flowchart_uid],
             )
             self.conn.commit()
 
-    def create_job(self, job: dict, flowchart_id: str) -> int:
+    def create_job(self, job: dict, flowchart_id: int) -> int:
         with self.conn.cursor() as cursor:
             cursor.callproc(
                 "create_job",

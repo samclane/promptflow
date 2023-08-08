@@ -35,7 +35,7 @@ class FlowchartJson(BaseModel):
     uid: str
     nodes: list[dict]
     branches: list[dict]
-    created: Optional[datetime.datetime] = None
+    created: Optional[str] = None
 
 
 class Flowchart:
@@ -46,24 +46,24 @@ class Flowchart:
     interface: DBInterface
     uid: str
     name: str
-    created: float
+    created: datetime.datetime
     nodes: list[NodeBase]
     connectors: list[Connector]
-    id = None
+    id: Optional[int] = None
 
     def __init__(
         self,
         interface: DBInterface,
         uid: str,
         name: Optional[str] = None,
-        created: Optional[float] = None,
+        created: Optional[datetime.datetime] = None,
     ):
         self.interface = interface
         self.uid = uid
         if not self.uid:
             raise ValueError("Flowchart id not provided")
         self.name = name or "Untitled"
-        self.created = created or time.time()
+        self.created = created or datetime.datetime.now()
         self.graph = nx.DiGraph()
         self.nodes: list[NodeBase] = []
         self.connectors: list[Connector] = []
@@ -318,6 +318,8 @@ class Flowchart:
             self.is_running = False
             return state
 
+        raise RuntimeError("Flowchart stopped unexpectedly")
+
     def begin_add_connector(self, node: NodeBase):
         """
         Start adding a connector from the given node.
@@ -393,7 +395,7 @@ class Flowchart:
         """
         Return the cost of the flowchart.
         """
-        cost = 0
+        cost = 0.0
         for node in self.nodes:
             cost += node.cost(state)
         return cost

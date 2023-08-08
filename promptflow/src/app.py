@@ -20,7 +20,7 @@ import logging
 import os
 import traceback
 import zipfile
-from typing import Dict, List, Optional
+from typing import Any, List, Optional
 
 from fastapi import FastAPI, File, HTTPException, Response, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -93,7 +93,7 @@ class ErrorResponse(BaseModel):
     data: Optional[dict]
 
 
-def add_node_type_ids(flowchart: dict) -> dict:
+def add_node_type_ids(flowchart: dict) -> dict[str, Any]:
     """Add node type ids to the flowchart"""
     for node in flowchart["nodes"]:
         node["node_type_id"] = interface.get_node_type_id(node["node_type"])
@@ -107,8 +107,8 @@ def upsert_flowchart_json(
     """Upsert a flowchart json file."""
     promptflow.logger.info("Upserting flowchart")
     try:
-        flowchart = add_node_type_ids(flowchart_json.dict())
-        flowchart = Flowchart.deserialize(interface, flowchart)
+        data = add_node_type_ids(flowchart_json.dict())
+        flowchart = Flowchart.deserialize(interface, data)
         interface.save_flowchart(flowchart)
     except ValueError:
         return ErrorResponse(
@@ -370,11 +370,9 @@ def get_node_types() -> NodeTypesResponse:
     return NodeTypesResponse(
         node_types=[
             NodeTypeInfoResponse(
-                **{
-                    "name": subclass.__name__,
-                    "description": subclass.description(),
-                    "options": subclass.get_option_keys(),
-                }
+                name=subclass.__name__,
+                description=subclass.description(),
+                options=subclass.get_option_keys(),
             )
             for subclass in node_map.values()
         ]

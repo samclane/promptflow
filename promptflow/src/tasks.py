@@ -38,12 +38,15 @@ def run_flowchart(self, flowchart_uid: str, db_config_init: dict) -> dict:
         flowchart: Flowchart = Flowchart.get_flowchart_by_uid(flowchart_uid, interface)
         if flowchart is None:
             raise ValueError(f"Flowchart with uid {flowchart_uid} not found")
+        if not flowchart.id:
+            raise ValueError(
+                f"Flowchart with uid {flowchart_uid} has not been saved to the database"
+            )
         job_id = interface.create_job({"celery_id": self.request.id}, flowchart.id)
         interface.update_job_status(job_id, "PENDING")
-        init_state = State()
         init_state = flowchart.initialize(
             job_id,
-            init_state,
+            State(),
             interface,
             logging_function=log_result_generator(interface, job_id),
         )
