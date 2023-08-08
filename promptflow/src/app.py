@@ -20,7 +20,7 @@ import logging
 import os
 import traceback
 import zipfile
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from fastapi import BackgroundTasks, FastAPI, File, HTTPException, Response, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -33,6 +33,8 @@ from promptflow.src.nodes.embedding_node import EmbeddingsIngestNode
 from promptflow.src.postgres_interface import (
     DatabaseConfig,
     GraphNamesAndIds,
+    JobResult,
+    JobView,
     PostgresInterface,
 )
 from promptflow.src.state import State
@@ -91,7 +93,15 @@ class FlowchartJson(BaseModel):
     branches: list[dict]
 
 
-def add_node_type_ids(flowchart: dict):
+class ErrorResponse(BaseModel):
+    """A response for an error"""
+
+    message: str
+    error: str
+    data: Optional[dict]
+
+
+def add_node_type_ids(flowchart: dict) -> dict:
     """Add node type ids to the flowchart"""
     for node in flowchart["nodes"]:
         node["node_type_id"] = interface.get_node_type_id(node["node_type"])
@@ -99,7 +109,7 @@ def add_node_type_ids(flowchart: dict):
 
 
 @app.post("/flowcharts")
-def upsert_flowchart_json(flowchart_json: FlowchartJson) -> dict:
+def upsert_flowchart_json(flowchart_json: FlowchartJson) -> dict | ErrorResponse:
     """Upsert a flowchart json file."""
     promptflow.logger.info("Upserting flowchart")
     try:
@@ -112,7 +122,7 @@ def upsert_flowchart_json(flowchart_json: FlowchartJson) -> dict:
 
 
 @app.get("/flowcharts/{flowchart_id}")
-def get_flowchart(flowchart_id: str) -> dict:
+def get_flowchart(flowchart_id: str) -> dict | ErrorResponse:
     """Get a flowchart by id."""
     promptflow.logger.info("Getting flowchart")
     try:
@@ -124,7 +134,7 @@ def get_flowchart(flowchart_id: str) -> dict:
 
 
 @app.delete("/flowcharts/{flowchart_id}")
-def delete_flowchart(flowchart_id: str) -> dict[str, str]:
+def delete_flowchart(flowchart_id: str) -> dict[str, str] | ErrorResponse:
     """Delete a flowchart by id."""
     promptflow.logger.info("Deleting flowchart")
     try:
@@ -135,32 +145,50 @@ def delete_flowchart(flowchart_id: str) -> dict[str, str]:
     return {"message": "Flowchart deleted", "flowchart_id": flowchart_id}
 
 
+class RunSuccessResponse(BaseModel):
+    """A response for a successful run"""
+
+    message: str
+    task_id: str
+
+
 @app.get("/flowcharts/{flowchart_uid}/run")
-def run_flowchart_endpoint(flowchart_uid: str, background_tasks: BackgroundTasks) -> dict[str, str]:
+def run_flowchart_endpoint(
+    flowchart_uid: str, background_tasks: BackgroundTasks
+) -> RunSuccessResponse:
     """Queue the flowchart execution as a background task."""
     task = run_flowchart.apply_async((flowchart_uid, interface.config.dict()))
-    return {"message": "Flowchart execution started", "task_id": str(task.id)}
+    return RunSuccessResponse(
+        message="Flowchart execution started", task_id=str(task.id)
+    )
 
 
-class Input(BaseModel):
+class UserInput(BaseModel):
+    input: str
+
+
+class UserInputResponse(BaseModel):
+    """A response for a user input"""
+
+    message: str
     input: str
 
 
 @app.post("/jobs/{task_id}/input")
-def post_input(task_id: str, input: Input) -> dict[str, str]:
+def post_input(task_id: str, user_input: UserInput) -> UserInputResponse:
     """Post input to a running flowchart execution."""
     redis_url = os.getenv("REDIS_URL")
     if not redis_url:
         raise HTTPException(status_code=500, detail="Redis URL not found")
     red = redis.StrictRedis.from_url(redis_url)
-    red.publish(f"{task_id}/input", input.input)
-    return {"message": "Input received", "input": input.input}
+    red.publish(f"{task_id}/input", user_input.input)
+    return UserInputResponse(message="Input received", input=user_input.input)
 
 
 @app.get("/jobs/{job_id}/output")
-def get_output(job_id: int) -> dict:
+def get_output(job_id: int) -> JobResult:
     """Get output from a running flowchart execution."""
-    return interface.get_job_output(job_id).dict()
+    return interface.get_job_output(job_id)
 
 
 @app.get("/flowcharts/{flowchart_id}/png")
@@ -178,7 +206,7 @@ def get_all_jobs(
     graph_uid: Optional[str] = None,
     status: Optional[str] = None,
     limit: Optional[int] = None,
-):
+) -> List[JobView]:
     """
     Get all running jobs
     """
@@ -186,10 +214,10 @@ def get_all_jobs(
 
 
 @app.get("/jobs/{job_id}")
-def get_job_by_id(job_id) -> dict:
+def get_job_by_id(job_id) -> JobView:
     """Get a specific job by id"""
     try:
-        return interface.get_job_view(job_id).dict()
+        return interface.get_job_view(job_id)
     except ValueError as exc:
         raise HTTPException(status_code=404, detail="Job not found") from exc
 
@@ -205,33 +233,50 @@ def get_job_logs(job_id) -> dict:
         raise HTTPException(status_code=404, detail="Job not found") from exc
 
 
+class FlowchartUpdateResponse(BaseModel):
+    """A response for a flowchart update"""
+
+    message: str
+    flowchart: dict
+
+
 @app.get("/flowcharts/{flowchart_id}/stop")
-def stop_flowchart(flowchart_id: str):
+def stop_flowchart(flowchart_id: str) -> FlowchartUpdateResponse:
     """Stop the flowchart."""
     promptflow.logger.info("Stopping flowchart")
     flowchart = Flowchart.get_flowchart_by_uid(flowchart_id, interface)
     flowchart.is_running = False
     flowchart.is_dirty = True
-    return {"message": "Flowchart stopped", "flowchart": flowchart.serialize()}
+    return FlowchartUpdateResponse(
+        message="Flowchart stopped", flowchart=flowchart.serialize()
+    )
 
 
 @app.get("/flowcharts/{flowchart_id}/clear")
-def clear_flowchart(flowchart_id: str) -> dict:
+def clear_flowchart(flowchart_id: str) -> FlowchartUpdateResponse:
     """Clear the flowchart."""
     promptflow.logger.info("Clearing flowchart")
     flowchart = Flowchart.get_flowchart_by_uid(flowchart_id, interface)
     flowchart.clear()
-    return {"message": "Flowchart cleared", "flowchart": flowchart.serialize()}
+    return FlowchartUpdateResponse(
+        message="Flowchart cleared", flowchart=flowchart.serialize()
+    )
+
+
+class CostResponse(BaseModel):
+    """A response for a flowchart cost"""
+
+    cost: float
 
 
 @app.get("/flowcharts/{flowchart_id}/cost")
-def cost_flowchart(flowchart_id: str) -> dict:
+def cost_flowchart(flowchart_id: str) -> CostResponse:
     """Get the approx cost to run the flowchart"""
     promptflow.logger.info("Getting cost of flowchart")
     flowchart = Flowchart.get_flowchart_by_uid(flowchart_id, interface)
     state = State()
     cost = flowchart.cost(state)
-    return {"cost": cost}
+    return CostResponse(cost=cost)
 
 
 @app.post("/flowcharts/{flowchart_id}/save_as", response_class=Response)
@@ -261,7 +306,7 @@ def save_as(flowchart_id: str) -> Response:
 
 
 @app.post("/flowcharts/load_from")
-def load_from(file: UploadFile = File(...)) -> dict:
+def load_from(file: UploadFile = File(...)) -> dict | ErrorResponse:
     """
     Read a json file and deserialize as a flowchart
     """
@@ -285,46 +330,80 @@ def load_from(file: UploadFile = File(...)) -> dict:
                 return {"flowchart": flowchart.serialize()}
     else:
         promptflow.logger.info("No file selected to load from")
-        return {"message": "No file selected to load from"}
+        # return {"message": "No file selected to load from"}
+        return ErrorResponse(
+            message="No file selected to load from",
+            error="No file selected to load from",
+            data={},
+        )
+
+
+class NodeTypeResponse(BaseModel):
+    """A response for a node type"""
+
+    node_types: List[str]
+    descriptions: Dict[str, str]
+    options: Dict[str, List[str]]
 
 
 @app.get("/nodes/types")
-def get_node_types() -> dict:
+def get_node_types() -> NodeTypeResponse:
     """Get all node types."""
-    return {
-        "node_types": list(node_map.keys()),
-        "descriptions": {k: v.description() for k, v in node_map.items()},
-        "options": {k: v.get_option_keys() for k, v in node_map.items()},
-    }
+    return NodeTypeResponse(
+        node_types=list(node_map.keys()),
+        descriptions={k: v.description() for k, v in node_map.items()},
+        options={k: v.get_option_keys() for k, v in node_map.items()},
+    )
+
+
+class NodeTypeInfoResponse(BaseModel):
+    """A response for a node type info"""
+
+    description: str
+    options: List[str]
 
 
 @app.get("/nodes/{node_type}")
-def get_node_type_info(node_type: str) -> dict:
+def get_node_type_info(node_type: str) -> NodeTypeInfoResponse:
     """Get the description and options for a node."""
     subclass = node_map[node_type]
-    return {
-        "description": subclass.description(),
-        "options": subclass.get_option_keys(),
-    }
+    return NodeTypeInfoResponse(
+        description=subclass.description(), options=subclass.get_option_keys()
+    )
+
+
+class NodeOptionsResponse(BaseModel):
+    """A response for a node options"""
+
+    options: dict
 
 
 @app.get("/flowcharts/{flowchart_id}/nodes/{node_id}/options")
-def get_specific_node_options(flowchart_id: str, node_id: str) -> dict:
+def get_specific_node_options(flowchart_id: str, node_id: str) -> NodeOptionsResponse:
     """Get the editable options for a node."""
     flowchart = Flowchart.get_flowchart_by_uid(flowchart_id, interface)
     node = flowchart.find_node(node_id)
     options = node.get_options()
-    return {"options": options}
+    return NodeOptionsResponse(options=options)
+
+
+class NodeUpdateResponse(BaseModel):
+    """A response for a node update"""
+
+    node: dict
+    message: str
 
 
 @app.post("/flowcharts/{flowchart_id}/nodes/{node_id}/options")
-def update_node_options(flowchart_id: str, node_id: str, data: dict) -> dict:
+def update_node_options(
+    flowchart_id: str, node_id: str, data: dict
+) -> NodeUpdateResponse:
     """Update the editable options for a node."""
     flowchart = Flowchart.get_flowchart_by_uid(flowchart_id, interface)
     node = flowchart.find_node(node_id)
     node.update(data)
     interface.save_flowchart(flowchart)
-    return {"message": "Node options updated", "node": node.serialize()}
+    return NodeUpdateResponse(message="Node options updated", node=node.serialize())
 
 
 @app.exception_handler(HTTPException)
