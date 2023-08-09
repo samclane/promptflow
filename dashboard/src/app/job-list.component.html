@@ -1,27 +1,27 @@
 <div class="overflow-x-auto">
-  <table class="mx-auto info-container">
+  <table class="min-w-full mx-auto info-container">
     <thead class="bg-gray-50">
       <tr class="text-left font-bold">
-        <th class="cursor-pointer px-6 py-4 text-xs leading-4 tracking-wider text-gray-500 hover:bg-gray-200" (click)="sortJobs('job_id')">Job ID <span *ngIf="currentSortColumn === 'job_id'">{{ sortDirection == 1 ? '↓' : '↑' }}</span></th>
-        <th class="cursor-pointer px-6 py-4 text-xs leading-4 tracking-wider text-gray-500 hover:bg-gray-200" (click)="sortJobs('graph_id')">Graph ID <span *ngIf="currentSortColumn === 'graph_id'">{{ sortDirection == 1 ? '↓' : '↑' }}</span></th>
-        <th class="cursor-pointer px-6 py-4 text-xs leading-4 tracking-wider text-gray-500 hover:bg-gray-200" (click)="sortJobs('graph_uid')">Graph UID <span *ngIf="currentSortColumn === 'graph_uid'">{{ sortDirection == 1 ? '↓' : '↑' }}</span></th>
-        <th class="cursor-pointer px-6 py-4 text-xs leading-4 tracking-wider text-gray-500 hover:bg-gray-200" (click)="sortJobs('job_status')">Status <span *ngIf="currentSortColumn === 'job_status'">{{ sortDirection == 1 ? '↓' : '↑' }}</span></th>
-        <th class="cursor-pointer px-6 py-4 text-xs leading-4 tracking-wider text-gray-500 hover:bg-gray-200" (click)="sortJobs('created')">Created <span *ngIf="currentSortColumn === 'created'">{{ sortDirection == 1 ? '↓' : '↑' }}</span></th>
-        <th class="cursor-pointer px-6 py-4 text-xs leading-4 tracking-wider text-gray-500 hover:bg-gray-200" (click)="sortJobs('updated')">Updated <span *ngIf="currentSortColumn === 'updated'">{{ sortDirection == 1 ? '↓' : '↑' }}</span></th>
-        <th class="cursor-pointer px-6 py-4 text-xs leading-4 tracking-wider text-gray-500 hover:bg-gray-200" (click)="sortJobs('metadata')">Metadata <span *ngIf="currentSortColumn === 'metadata'">{{ sortDirection == 1 ? '↓' : '↑' }}</span></th>
-        <th class="cursor-pointer px-6 py-4 text-xs leading-4 tracking-wider text-gray-500 hover:bg-gray-200">Actions</th>
+        <th class="w-auto cursor-pointer px-3 py-4 text-xs leading-4 tracking-wider text-gray-500 hover:bg-gray-200" (click)="sortJobs('job_id')">Job ID <span *ngIf="currentSortColumn === 'job_id'">{{ sortDirection == 1 ? '↓' : '↑' }}</span></th>
+        <th class="w-auto cursor-pointer px-3 py-4 text-xs leading-4 tracking-wider text-gray-500 hover:bg-gray-200" (click)="sortJobs('graph_id')">Graph ID <span *ngIf="currentSortColumn === 'graph_id'">{{ sortDirection == 1 ? '↓' : '↑' }}</span></th>
+        <th class="w-auto cursor-pointer px-3 py-4 text-xs leading-4 tracking-wider text-gray-500 hover:bg-gray-200" (click)="sortJobs('graph_uid')">Graph UID <span *ngIf="currentSortColumn === 'graph_uid'">{{ sortDirection == 1 ? '↓' : '↑' }}</span></th>
+        <th class="w-auto cursor-pointer px-3 py-4 text-xs leading-4 tracking-wider text-gray-500 hover:bg-gray-200" (click)="sortJobs('job_status')">Status <span *ngIf="currentSortColumn === 'job_status'">{{ sortDirection == 1 ? '↓' : '↑' }}</span></th>
+        <th class="w-auto cursor-pointer px-3 py-4 text-xs leading-4 tracking-wider text-gray-500 hover:bg-gray-200" (click)="sortJobs('created')">Created <span *ngIf="currentSortColumn === 'created'">{{ sortDirection == 1 ? '↓' : '↑' }}</span></th>
+        <th class="w-auto cursor-pointer px-3 py-4 text-xs leading-4 tracking-wider text-gray-500 hover:bg-gray-200" (click)="sortJobs('updated')">Updated <span *ngIf="currentSortColumn === 'updated'">{{ sortDirection == 1 ? '↓' : '↑' }}</span></th>
+        <th class="w-auto cursor-pointer px-3 py-4 text-xs leading-4 tracking-wider text-gray-500 hover:bg-gray-200" (click)="sortJobs('metadata')">Metadata <span *ngIf="currentSortColumn === 'metadata'">{{ sortDirection == 1 ? '↓' : '↑' }}</span></th>
+        <th class="w-auto cursor-pointer px-3 py-4 text-xs leading-4 tracking-wider text-gray-500 hover:bg-gray-200">Actions</th>
       </tr>
     </thead>
     <tbody class="bg-white divide-y divide-gray-300">
       <tr *ngFor="let job of jobs" class="text-gray-700 hover:bg-gray-100 transition-colors duration-200">
-        <td class="px-6 py-4">{{ job.job_id }}</td>
-        <td class="px-6 py-4">{{ job.graph_id }}</td>
-        <td class="px-6 py-4"><a class="hover:underline" [routerLink]="['/flowcharts', job.graph_uid]">{{ job.graph_uid }}</a></td>
-        <td class="px-6 py-4">{{ job.job_status }}</td>
-        <td class="px-6 py-4">{{ job.created }}</td>
-        <td class="px-6 py-4">{{ job.updated }}</td>
-        <td class="px-6 py-4">{{ job.metadata | json }}</td>
-        <td class="px-6 py-4">
+        <td class="px-3 py-4">{{ job.job_id }}</td>
+        <td class="px-3 py-4">{{ job.graph_id }}</td>
+        <td class="px-3 py-4"><a class="hover:underline" [routerLink]="['/flowcharts', job.graph_uid]">{{ job.graph_uid }}</a></td>
+        <td class="px-3 py-4">{{ job.job_status }}</td>
+        <td class="px-3 py-4">{{ job.created }}</td>
+        <td class="px-3 py-4">{{ job.updated }}</td>
+        <td class="px-3 py-4">{{ job.metadata | json }}</td>
+        <td class="px-3 py-4">
           <a [routerLink]="['/jobs', job.job_id]" class="inline-block px-4 py-2 text-sm font-medium text-center text-white bg-blue-600 rounded hover:bg-blue-700 transition-colors duration-200">View Details</a>
         </td>
       </tr>
