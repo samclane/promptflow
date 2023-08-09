@@ -2,8 +2,8 @@
 This module contains the Flowchart class, which manages the nodes and connectors of a flowchart.
 """
 from __future__ import annotations
-import datetime
 
+import datetime
 import logging
 import os
 import threading
@@ -12,8 +12,8 @@ from queue import Queue
 from typing import TYPE_CHECKING, Any, Callable, Optional
 
 import networkx as nx
-from pydantic import BaseModel  # pylint: disable=no-name-in-module
 import redis
+from pydantic import BaseModel  # pylint: disable=no-name-in-module
 
 from promptflow.src.connectors.connector import Connector
 from promptflow.src.connectors.partial_connector import PartialConnector

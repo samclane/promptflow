@@ -109,7 +109,9 @@ class ElevenLabsNode(AudioOutputNode):
         if isinstance(audio, bytes):
             elevenlabs.play(audio)
         else:
-            self.logger.warning("ElevenLabs API returned unexpected response" + str(audio))
+            self.logger.warning(
+                "ElevenLabs API returned unexpected response" + str(audio)
+            )
         return state.result
 
     def serialize(self):
