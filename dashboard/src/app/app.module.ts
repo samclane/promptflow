@@ -20,6 +20,7 @@ import { AddNodeComponent } from './add-node.component';
 import {FlowchartImportJson} from './flowchart-import-json.component';
 import { JobListContainerComponent } from './job-list-container.component';
 import { NodeListComponent } from './node-type-display.component';
+import { ChatComponent } from './chat.component';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -48,7 +49,8 @@ const routes: Routes = [
     FlowchartImportJson,
     AddNodeComponent,
     JobListContainerComponent,
-    NodeListComponent
+    NodeListComponent,
+    ChatComponent
   ],
   imports: [
     BrowserModule,
