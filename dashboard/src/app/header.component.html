@@ -2,12 +2,7 @@
   <nav class="container mx-auto flex items-center justify-between py-2 px-4">
     <a [routerLink]="['/']" class="text-lg font-semibold">PromptFlow</a>
     <div class="space-x-4">
-      <div class="relative group inline-block">
-          <a class="hover:text-blue-200 cursor-pointer" [routerLink]="['/flowcharts']">Flowcharts</a>
-          <div class="absolute left-0 mt-2 w-48 bg-white p-2 rounded-lg shadow-md hidden group-hover:block">
-              <a *ngFor="let flowchart of flowcharts" [routerLink]="['/flowcharts/', flowchart.uid]" class="rounded-lg block px-4 py-2 hover:bg-blue-500 text-black hover:text-white">{{ flowchart.label }}</a>
-          </div>
-      </div>
+      <a class="hover:text-blue-200 cursor-pointer" [routerLink]="['/flowcharts']">Flowcharts</a>
       <a [routerLink]="['/jobs']" class="hover:text-blue-200">Jobs</a>
       <a [routerLink]="['/nodes']" class="hover:text-blue-200">Nodes</a>
       <a [routerLink]="['/chat']" class="hover:text-blue-200">Chat</a>

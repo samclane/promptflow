@@ -4,8 +4,9 @@
     <div class="max-h-[800px] overflow-y-auto">
       <ng-container *ngIf="vm.flowcharts.length > 0">
         <div *ngFor="let flowchart of vm.flowcharts"
-          class="info-container flex flex-row items-center justify-between my-4 hover:text-white hover:bg-blue-500 transition duration-200">
-          <a [routerLink]="['/flowcharts', flowchart.uid]" class="text-xl hover:underline  ">
+         (click)="navigateToFlowchart(flowchart.uid)"
+          class="cursor-pointer info-container flex flex-row items-center justify-between my-4 hover:text-white hover:bg-blue-500 transition duration-200">
+          <a [routerLink]="['/flowcharts', flowchart.uid]" class="text-xl">
             {{ flowchart.label }}
           </a>
           <button (click)="deleteFlowchart(flowchart.uid); $event.stopPropagation();"
