@@ -424,6 +424,25 @@ def update_node_options(
     return NodeUpdateResponse(message="Node options updated", node=node.serialize())
 
 
+
+class Message(BaseModel):
+    sender: str
+    text: str
+    timestamp: str
+
+class ChatResponse(BaseModel):
+    user_message: Message
+    ai_message: Message
+    
+    
+@app.post("/chat")
+def post_message(message: Message) -> ChatResponse:
+    # Simulate an AI response (GPT-4 or similar)
+    ai_response_text = "AI's response to: " + message.text
+    ai_message = Message(sender="AI", text=ai_response_text, timestamp=message.timestamp)
+
+    return ChatResponse(user_message=message, ai_message=ai_message)
+
 @app.exception_handler(HTTPException)
 def handle_exception(request, exc):
     return JSONResponse(

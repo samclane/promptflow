@@ -1,19 +1,8 @@
 import { Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
+import { Message, ChatResponse } from './message';
 
-// Interface for a message
-interface Message {
-  sender: string;
-  text: string;
-  timestamp: string;
-}
-
-// Interface for the response from the server
-interface ChatResponse {
-  user_message: Message;
-  ai_message: Message;
-}
 
 @Component({
   selector: 'app-chat',
