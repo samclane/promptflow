@@ -37,3 +37,7 @@
 .ai-message {
   @apply bg-gray-100;
 }
+
+.loading {
+  @apply text-center text-gray-500 italic;
+}
