@@ -1,0 +1,3 @@
+<button (click)="toggleChat()" class="chat-button">{{ showChat ? 'Close' : 'Chat' }}</button>
+
+<app-chat *ngIf="showChat"></app-chat>
