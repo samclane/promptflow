@@ -1,9 +1,10 @@
 from typing import List
 import openai
-from pydantic import BaseModel
+from pydantic import BaseModel  # pylint: disable=no-name-in-module
 import requests
 import json
 import os
+from  promptflow.src.node_map import node_map
 
 
 class Message(BaseModel):
@@ -29,7 +30,7 @@ model = "gpt-4"
 messages = [
     {
         "role": "system",
-        "content": """You are an AI asstant for the PromptFlow LLM creation and management tool. PromptFlow allows users to create flowcharts that string together Python functions and LLM tools. These flow charts can then be exectued and monitored remotely from a web client, mobile client, etc.
+        "content": """You are an AI assistant for the PromptFlow LLM creation and management tool. PromptFlow allows users to create flowcharts that string together Python functions and LLM tools. These flow charts can then be executed and monitored remotely from a web client, mobile client, etc.
 Your job is to interface with the PromptFlow API in order to fulfill the user's requests. He may want to update an existing flow chart, create a new one, view running jobs, etc. You are a serious no bullshit chatbot. Act like one.
 
 Try not to guess the user's intent if you can avoid it. If anything is unclear ask the user. Don't make up values.
@@ -73,37 +74,10 @@ functions = [
                             },
                             "node_type": {
                                 "type": "string",
-                                "enum": [
-                                    "DateNode",
-                                    "DBNode",
-                                    "AssertNode",
-                                    "LoggingNode",
-                                    "InterpreterNode",
-                                    "OpenAINode",
-                                    "ClaudeNode",
-                                    "GoogleVertexNode",
-                                    "EnvNode",
-                                    "ManualEnvNode",
-                                    "FuncNode",
-                                    "HistoryNode",
-                                    "ManualHistoryNode",
-                                    "HistoryWindow",
-                                    "HttpNode",
-                                    "JSONRequestNode",
-                                    "ScrapeNode",
-                                    "InputNode",
-                                    "FileInput",
-                                    "JSONFileInput",
-                                    "FileOutput",
-                                    "JSONFileOutput",
-                                    "PromptNode",
-                                    "RandomNode",
-                                    "ServerInputNode",
-                                    "StartNode",
-                                    "InitNode",
-                                    "JsonerizerNode",
-                                ],
-                                "description": "This is the name of the node type as it apperas in the database. This value can be acquired from the get_list_of_node_types function.",
+                                "enum": list(
+                                    node_map.keys()
+                                ),
+                                "description": "This is the name of the node type as it appears in the database. This value can be acquired from the get_list_of_node_types function.",
                             },
                         },
                     },
@@ -173,16 +147,14 @@ functions = [
         "name": "get_job_logs_by_id",
         "description": "Gets the logs for a job given the job id"
     },
-    """
+"""
 
 
 def run_function(r):
     name = r["name"]
     args = json.loads(r["arguments"])
 
-    # print(r)
-
-    base = "http://localhost:8000"
+    base = "http://localhost:8000"  # TODO: change this to the real base url
     if name == "get_flowcharts":
         return requests.get(base + "/flowcharts").json()
     elif name == "get_flowchart_by_id":
@@ -195,9 +167,12 @@ def run_function(r):
 
 
 def chat(user_convo: List[Message]) -> str:
+    """
+    This function takes in a list of messages and returns a response from the model.
+    """
     payload = list(map(lambda x: x.convert_to_openai(), user_convo))
     # combine payload and `messages` into one list
-    messages_to_send = payload + messages
+    messages_to_send = messages + payload
 
     r = openai.ChatCompletion.create(
         model=model, messages=messages_to_send, functions=functions
