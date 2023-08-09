@@ -73,7 +73,6 @@ export class FlowchartImportJson implements OnChanges {
       }),
       filter((x): x is Flowchart => !('error' in x))
     ).subscribe(() => {
-      this.flowchartForm.reset();
       this.flowchartService.getFlowcharts();
     });
   }
