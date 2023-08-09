@@ -1,4 +1,4 @@
-.chat-container {
+.chat-box {
   @apply p-4 border rounded-md shadow-md;
 }
 

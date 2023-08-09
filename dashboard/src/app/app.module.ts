@@ -22,6 +22,7 @@ import { JobListContainerComponent } from './job-list-container.component';
 import { NodeListComponent } from './node-type-display.component';
 import { ChatComponent } from './chat.component';
 import { ChatButtonComponent } from './chat-button.component';
+import { ChatContainerComponent } from './chat-container.component';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -30,7 +31,7 @@ const routes: Routes = [
   { path: 'jobs', component: JobListContainerComponent },
   { path: 'jobs/:id', component: JobDetailComponent },
   { path: 'nodes', component: NodeListComponent },
-  { path: 'chat', component: ChatComponent }
+  { path: 'chat', component: ChatContainerComponent }
 ];
 
 
@@ -53,7 +54,8 @@ const routes: Routes = [
     JobListContainerComponent,
     NodeListComponent,
     ChatComponent,
-    ChatButtonComponent
+    ChatButtonComponent,
+    ChatContainerComponent
   ],
   imports: [
     BrowserModule,
