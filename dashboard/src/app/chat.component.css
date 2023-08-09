@@ -33,3 +33,7 @@
 .send-button {
   @apply px-4 py-2 bg-blue-500 text-white rounded-md;
 }
+
+.ai-message {
+  @apply bg-gray-100;
+}

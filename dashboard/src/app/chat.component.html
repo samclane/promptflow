@@ -1,6 +1,6 @@
 <div class="chat-container">
-  <div class="messages" *ngFor="let message of messages">
-    <div class="message">
+  <div class="messages" *ngFor="let message of allMessages">
+    <div class="message" [ngClass]="{'ai-message': message.sender === 'AI'}">
       <span class="sender">{{message.sender}}: &nbsp;</span>
       <span class="text">{{message.text}}</span>
       <span class="timestamp">{{message.timestamp}}</span>

@@ -29,6 +29,7 @@ const routes: Routes = [
   { path: 'jobs', component: JobListContainerComponent },
   { path: 'jobs/:id', component: JobDetailComponent },
   { path: 'nodes', component: NodeListComponent },
+  { path: 'chat', component: ChatComponent }
 ];
 
 
