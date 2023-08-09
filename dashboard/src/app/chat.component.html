@@ -6,6 +6,7 @@
       <span class="timestamp">{{message.timestamp}}</span>
     </div>
   </div>
+  <div class="loading" *ngIf="isLoading">Loading...</div>
   <form (ngSubmit)="sendMessage('User')">
     <div class="input-container">
       <input type="text" [(ngModel)]="messageInput" class="message-input" placeholder="Type a message..." name="messageInput">

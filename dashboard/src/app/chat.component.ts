@@ -14,6 +14,7 @@ export class ChatComponent {
   aiMessages: Message[] = [];
   allMessages: Message[] = []; // Combined array of user and AI messages
   messageInput: string = '';
+  isLoading: boolean = false;
 
   constructor(private http: HttpClient) {}
 
@@ -23,10 +24,13 @@ export class ChatComponent {
     const userMessage: Message = { sender, text: this.messageInput, timestamp };
     this.userMessages.push(userMessage);
     this.allMessages.push(userMessage);
+    
+    this.isLoading = true;
 
     this.http.post<ChatResponse>(this.buildUrl('/chat'), this.allMessages).subscribe(response => {
       this.aiMessages.push(response.ai_message);
       this.allMessages.push(response.ai_message);
+      this.isLoading = false;
     });
 
     this.messageInput = '';
