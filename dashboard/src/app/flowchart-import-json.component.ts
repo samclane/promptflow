@@ -15,9 +15,13 @@ export class FlowchartImportJson implements OnChanges {
     private readonly formBuilder: FormBuilder
   ) {}
 
-  @Input() public flowchartJson: string | undefined;
-
   public readonly flowchartForm = this.formBuilder.nonNullable.control('', [Validators.required, this.jsonValidator]);
+
+  @Input() set flowchartJson(j: string | undefined | null) {
+    if (!j) return;
+    this.flowchartForm.setValue(j);
+  }
+
   private readonly flowcharts$ = this.flowchartService.flowcharts$;
   
   private readonly responseErrors = new Subject<string>();
