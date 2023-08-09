@@ -20,7 +20,7 @@ class HistoryNode(NodeBase):
     """
 
     node_color = monokai.PINK
-    role_var: Optional[str] = None
+    role_var: str
 
     def run_subclass(self, before_result: Any, state: State) -> str:
         """

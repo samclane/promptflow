@@ -64,7 +64,9 @@ class WhispersNode(AudioInputNode):
     def run_subclass(self, before_result: Any, state) -> str:
         super().run_subclass(before_result, state)
         transcript = openai.Audio.translate("whisper-1", open(self.filename, "rb"))
-        return transcript["text"]
+        if isinstance(transcript, dict):
+            return transcript["text"]
+        raise ValueError("Whispers API returned unexpected response" + str(transcript))
 
     def cost(self, state):
         price_per_minute = 0.006
@@ -104,7 +106,10 @@ class ElevenLabsNode(AudioOutputNode):
         audio = elevenlabs.generate(
             text=state.result, voice="Bella", model="eleven_monolingual_v1"
         )
-        elevenlabs.play(audio)
+        if isinstance(audio, bytes):
+            elevenlabs.play(audio)
+        else:
+            self.logger.warning("ElevenLabs API returned unexpected response" + str(audio))
         return state.result
 
     def serialize(self):

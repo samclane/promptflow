@@ -81,7 +81,7 @@ class NodeBase(Serializable, ABC):
         self.flowchart.begin_add_connector(self)
 
     @abstractmethod
-    def run_subclass(self, before_result: Any, state: State) -> str:
+    def run_subclass(self, before_result: Any, state: State) -> str | None:
         """
         Code that will be run when the node is executed.
         """

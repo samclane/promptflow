@@ -6,7 +6,7 @@ import io
 import json
 from abc import ABC
 from enum import Enum
-from typing import Any
+from typing import Any, Optional
 
 import openai
 import torch
@@ -94,7 +94,7 @@ class DallENode(ImageNode):
 
     n = 1
     size = ImageSize.s256x256.value
-    image = None
+    image: Optional[Image.Image] = None
 
     def run_subclass(self, before_result: Any, state) -> str:
         response = openai.Image.create(
@@ -103,6 +103,8 @@ class DallENode(ImageNode):
             size=self.size,
             response_format="b64_json",
         )
+        if not isinstance(response, dict):
+            return f"Invalid response: {response}"
         # show the image
         imgdata = base64.b64decode(response["data"][0]["b64_json"])
         pil_image = Image.open(io.BytesIO(imgdata))

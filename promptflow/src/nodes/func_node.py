@@ -47,6 +47,8 @@ class FuncNode(NodeBase, ABC):
         """
         Evaluate the Python function and return the result.
         """
+        if not self.func:
+            self.func = TextData("func.py", DEFAULT_FUNC_TEMPLATE, self.flowchart)
         loc = state.copy() | {"result": None}
         try:
             exec(self.func.text, dict(globals()), loc.snapshot)
@@ -63,8 +65,8 @@ class FuncNode(NodeBase, ABC):
     def serialize(self):
         return super().serialize() | {
             "func": {
-                "label": self.func.label,
-                "text": self.func.text,
+                "label": self.func.label if self.func else "",
+                "text": self.func.text if self.func else "",
             }
         }
 

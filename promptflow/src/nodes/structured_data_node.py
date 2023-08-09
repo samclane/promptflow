@@ -4,7 +4,7 @@ Nodes for handling structured data.
 import ast
 import json
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, Optional
 
 import jsonschema
 
@@ -17,8 +17,8 @@ class StructuredDataNode(NodeBase, ABC):
     Base class for nodes that handle structured data.
     """
 
-    schema = None
-    text_input = None
+    schema: Optional[dict] = None
+    text_input: Optional[str] = None
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -30,8 +30,8 @@ class StructuredDataNode(NodeBase, ABC):
         Validate the data.
         """
 
-    def run_subclass(self, before_result: Any, state: State) -> str:
-        validation: str = self.validate(state.result)
+    def run_subclass(self, before_result: Any, state: State) -> str | None:
+        validation: str | None = self.validate(state.result)
         return validation
 
     def serialize(self):
@@ -54,6 +54,8 @@ class JsonNode(StructuredDataNode):
         self.schema = kwargs.get("schema", None)
 
     def validate(self, data):
+        if not self.schema:
+            raise ValueError("No schema provided")
         try:
             data = json.loads(data)
         except json.JSONDecodeError:

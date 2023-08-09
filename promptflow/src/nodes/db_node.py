@@ -131,7 +131,7 @@ class PGMLNode(DBNode):
 
 class SQLiteQueryNode(DBNode):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, SQLiteInterface, **kwargs)
+        super().__init__(*args, interface=SQLiteInterface, **kwargs)
 
     def run_subclass(self, before_result: Any, state) -> str:
         super().run_subclass(before_result, state)

@@ -59,7 +59,8 @@ class HttpNode(NodeBase):
             data = json.loads(state.result)
         except json.decoder.JSONDecodeError:
             return "Invalid JSON"
-        response = request_functions[self.request_type](self.url, json=data)
+        kwargs = {"json": data} if self.request_type == RequestType.POST.value else {}
+        response = request_functions[self.request_type](self.url, **kwargs)
         return response.text
 
     def serialize(self):
@@ -107,7 +108,8 @@ class JSONRequestNode(NodeBase):
                 data[self.key] = "https://" + data[self.key]
         except json.decoder.JSONDecodeError:
             return "Invalid JSON"
-        response = request_functions[self.request_type](data[self.key], json=data)
+        kwargs = {"json": data} if self.request_type == RequestType.POST.value else {}
+        response = request_functions[self.request_type](data[self.key], **kwargs)
         return response.text
 
     def serialize(self):
