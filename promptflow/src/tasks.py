@@ -90,7 +90,11 @@ def render_flowchart(self, flowchart_uid: str, db_config_init: dict):
     plt.margins(0.2)
     nx.draw(flowchart.graph, pos=pos, with_labels=False)
     nx.draw_networkx_edge_labels(
-        flowchart.graph, pos=pos, edge_labels=flowchart.graph.edges
+        flowchart.graph,
+        pos=pos,
+        edge_labels={
+            e: c.label for e, c in zip(flowchart.graph.edges, flowchart.connectors)
+        },
     )
 
     label_pos = {
