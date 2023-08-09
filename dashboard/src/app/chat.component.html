@@ -1,4 +1,4 @@
-<div class="chat-container">
+<div class="chat-box">
   <div class="messages" *ngFor="let message of allMessages">
     <div class="message" [ngClass]="{'ai-message': message.sender === 'AI'}">
       <span class="sender">{{message.sender}}: &nbsp;</span>
