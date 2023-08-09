@@ -1,45 +1,54 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { NodeService } from './node.service';
 import { FlowchartService } from './flowchart.service';
-import { Flowchart } from './flowchart';
-import { take } from 'rxjs/operators';
+import { filter, share, startWith, switchMap, tap } from 'rxjs/operators';
+import {JobListComponent} from './job-list.component';
+import {combineLatest, merge, Subject} from 'rxjs';
 
 @Component({
   selector: 'app-flowchart-detail',
   templateUrl: './flowchart-detail.component.html',
   styleUrls: ['./flowchart-detail.component.css']
 })
-export class FlowchartDetailComponent implements OnInit {
-  id!: string;
-  flowchart?: Flowchart
+export class FlowchartDetailComponent {
+  @ViewChild(JobListComponent) jobListComponent?: JobListComponent;
 
   constructor(
     private route: ActivatedRoute,
-    private nodeService: NodeService,
     private flowchartService: FlowchartService
   ) {
-    this.id = this.route.snapshot.paramMap.get('id')!;
    }
 
-  ngOnInit(): void {
-    this.flowchartService.getFlowchart(this.id).pipe(take(1)).subscribe(flowchart => {
-      this.flowchart = flowchart;
-    });
-  }
+  public readonly id = this.route.snapshot.paramMap.get('id');
+  private readonly flowchart$ = this.flowchartService.getFlowchart(this.id ?? '');
+
+  private readonly flowChartActionSource = new Subject<'RUN' | 'STOP'>();
+  private readonly flowChartAction$ = this.flowChartActionSource.pipe(share())
+
+  private readonly flowChartActionProcess$ = merge(
+    this.flowChartAction$.pipe(
+      filter((x) => x === 'RUN'),
+      switchMap(() => this.flowchartService.runFlowchart(this.id ?? ''))
+    ),
+    this.flowChartAction$.pipe(
+      filter((x) => x === 'STOP'),
+      switchMap(() => this.flowchartService.stopFlowchart(this.id ?? ''))
+    )
+  ).pipe(
+    tap(() => this.jobListComponent?.getJobs()),
+    startWith(null)
+  );
+
+  public readonly vm$ = combineLatest({
+    flowChartActionProcess: this.flowChartActionProcess$,
+    flowchart: this.flowchart$
+  }); 
 
   runFlowchart(): void {
-    if (this.id) {
-        this.flowchartService.runFlowchart(this.id).pipe(take(1)).subscribe(() => {
-        // Handle successful execution...
-        });
-    }
+    this.flowChartActionSource.next('RUN');
   }
-    stopFlowchart(): void {
-        if (this.id) {
-            this.flowchartService.stopFlowchart(this.id).pipe(take(1)).subscribe(() => {
-            // Handle successful stop...
-            });
-        }
-    }
+
+  stopFlowchart(): void {
+    this.flowChartActionSource.next('STOP');
   }
+}
