@@ -6,8 +6,10 @@
       <span class="timestamp">{{message.timestamp}}</span>
     </div>
   </div>
-  <div class="input-container">
-    <input type="text" [(ngModel)]="messageInput" class="message-input" placeholder="Type a message...">
-    <button (click)="sendMessage('User')" class="send-button">Send</button>
-  </div>
+  <form (ngSubmit)="sendMessage('User')">
+    <div class="input-container">
+      <input type="text" [(ngModel)]="messageInput" class="message-input" placeholder="Type a message..." name="messageInput">
+      <button type="submit" class="send-button">Send</button>
+    </div>
+  </form>
 </div>
