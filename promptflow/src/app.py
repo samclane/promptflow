@@ -4,9 +4,12 @@ window, menu, and canvas. It also handles the saving and loading of
 flowcharts.
 """
 
+import datetime
 import sys
 
 import redis
+
+from promptflow.src import chatbot
 
 sys.path.append("./")
 
@@ -424,24 +427,20 @@ def update_node_options(
     return NodeUpdateResponse(message="Node options updated", node=node.serialize())
 
 
-
-class Message(BaseModel):
-    sender: str
-    text: str
-    timestamp: str
-
-class ChatResponse(BaseModel):
-    user_message: Message
-    ai_message: Message
-    
-    
 @app.post("/chat")
-def post_message(message: Message) -> ChatResponse:
+def post_message(messages: List[chatbot.Message]) -> chatbot.ChatResponse:
     # Simulate an AI response (GPT-4 or similar)
-    ai_response_text = "AI's response to: " + message.text
-    ai_message = Message(sender="AI", text=ai_response_text, timestamp=message.timestamp)
 
-    return ChatResponse(user_message=message, ai_message=ai_message)
+    ai_response = chatbot.chat(messages)
+    return chatbot.ChatResponse(
+        user_message=messages[-1],
+        ai_message=chatbot.Message(
+            text=ai_response,
+            sender="AI",
+            timestamp=datetime.datetime.now().strftime("%H:%M:%S"),
+        ),
+    )
+
 
 @app.exception_handler(HTTPException)
 def handle_exception(request, exc):

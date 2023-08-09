@@ -21,11 +21,12 @@ export class ChatComponent {
   sendMessage(sender: string) {
     const timestamp = new Date().toLocaleTimeString();
     const userMessage: Message = { sender, text: this.messageInput, timestamp };
+    this.userMessages.push(userMessage);
+    this.allMessages.push(userMessage);
 
-    this.http.post<ChatResponse>(this.buildUrl('/chat'), userMessage).subscribe(response => {
-      this.userMessages.push(response.user_message);
+    this.http.post<ChatResponse>(this.buildUrl('/chat'), this.allMessages).subscribe(response => {
       this.aiMessages.push(response.ai_message);
-      this.allMessages.push(response.user_message, response.ai_message); // Interleaving messages
+      this.allMessages.push(response.ai_message);
     });
 
     this.messageInput = '';
