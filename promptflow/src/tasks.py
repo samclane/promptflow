@@ -90,36 +90,39 @@ def render_flowchart(self, flowchart_uid: str, db_config_init: dict):
     fig = plt.figure()
     plt.box(False)
     plt.margins(0.2)
+    node_size = max(list(map(lambda x: len(x.label) * 350, flowchart.nodes)))
     for shape in NodeShape:
+        nodes = filter(lambda x: x.node_shape == shape, flowchart.nodes)
         nx.draw_networkx_nodes(
-            flowchart.graph.subgraph(
-                filter(lambda x: x.node_shape == shape, flowchart.nodes)
-            ),
+            flowchart.graph.subgraph(nodes),
             pos=pos,
             node_shape=shape.value,
-            node_color=list(
-                map(
-                    lambda x: x.node_color,
-                    filter(lambda x: x.node_shape == shape, flowchart.nodes),
-                )
-            ),
+            node_color=list(map(lambda x: x.node_color, nodes)),
+            node_size=node_size,
         )
+    nx.draw_networkx_edges(
+        flowchart.graph,
+        pos=pos,
+        edgelist=flowchart.graph.edges,
+        node_size=node_size,
+    )
     nx.draw_networkx_edge_labels(
         flowchart.graph,
         pos=pos,
         edge_labels={
             e: c.label for e, c in zip(flowchart.graph.edges, flowchart.connectors)
         },
+        rotate=False,
+        bbox=dict(
+            boxstyle="round", pad=0.2, facecolor="white", edgecolor="none", alpha=1
+        ),
     )
-    nx.draw_networkx_edges(flowchart.graph, pos=pos, edgelist=flowchart.graph.edges)
 
-    label_pos = {
-        k: [v[0], v[1] - 5] for k, v in pos.items()
-    }  # Offsetting the y-position of labels
     nx.draw_networkx_labels(
         flowchart.graph,
-        pos=label_pos,
+        pos=pos,
         labels={node: node.label for node in flowchart.nodes},
+        font_size=10,
     )
 
     plt.tight_layout()
