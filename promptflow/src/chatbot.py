@@ -148,45 +148,58 @@ functions = [
 """
 
 
-def run_function(r):
-    name = r["name"]
-    args = json.loads(r["arguments"])
+def run_function(r) -> dict:
+    try:
+        name = r.get("name")
+        args_json = r.get("arguments", "{}")
+        args = json.loads(args_json)
 
-    base = "http://localhost:8000"  # TODO: change this to the real base url
-    if name == "get_flowcharts":
-        return requests.get(base + "/flowcharts").json()
-    elif name == "get_flowchart_by_id":
-        id = args.get("flowchart_id", "")
-        return requests.get(base + "/flowcharts/" + id).json()
-    elif name == "upsert_flow_chart_by_id":
-        return requests.post(base + "/flowcharts/", json=args).json()
-    elif name == "get_list_of_node_types":
-        return requests.get(base + "/nodes/types").json()
+        base = "http://localhost:8000"  # TODO: change this to the real base url
+        if name == "get_flowcharts":
+            return requests.get(base + "/flowcharts").json()
+        elif name == "get_flowchart_by_id":
+            id = args.get("flowchart_id", "")
+            if not id:
+                raise ValueError("flowchart_id is required")
+            return requests.get(base + "/flowcharts/" + id).json()
+        elif name == "upsert_flow_chart_by_id":
+            return requests.post(base + "/flowcharts/", json=args).json()
+        elif name == "get_list_of_node_types":
+            return requests.get(base + "/nodes/types").json()
+        else:
+            raise ValueError(f"Unknown function name: {name}")
+    except Exception as e:
+        return {"error": str(e)}
 
 
 def chat(user_convo: List[Message]) -> str:
     """
     This function takes in a list of messages and returns a response from the model.
     """
-    payload = list(map(lambda x: x.convert_to_openai(), user_convo))
-    # combine payload and `messages` into one list
-    messages_to_send = messages + payload
+    try:
+        payload = list(map(lambda x: x.convert_to_openai(), user_convo))
+        # combine payload and `messages` into one list
+        messages_to_send = messages + payload
 
-    r = openai.ChatCompletion.create(
-        model=model, messages=messages_to_send, functions=functions
-    )
-    message = r["choices"][0]["message"]
-    while message.get("function_call"):
-        resp = run_function(message["function_call"])
-        messages.append(
-            {
-                "role": "function",
-                "name": message["function_call"]["name"],
-                "content": json.dumps(resp),
-            }
-        )
         r = openai.ChatCompletion.create(
-            model=model, messages=messages, functions=functions
+            model=model, messages=messages_to_send, functions=functions
         )
+        if "choices" not in r:
+            raise ValueError(f"Unexpected response from OpenAI: {r}")
         message = r["choices"][0]["message"]
-    return message["content"]
+        while message.get("function_call"):
+            resp = run_function(message["function_call"])
+            messages.append(
+                {
+                    "role": "function",
+                    "name": message["function_call"]["name"],
+                    "content": json.dumps(resp),
+                }
+            )
+            r = openai.ChatCompletion.create(
+                model=model, messages=messages, functions=functions
+            )
+            message = r["choices"][0]["message"]
+        return message["content"]
+    except Exception as e:
+        return str(e)
