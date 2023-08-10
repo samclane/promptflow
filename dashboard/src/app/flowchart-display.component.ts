@@ -1,6 +1,6 @@
-import { Component, ElementRef, OnInit } from '@angular/core';
+import { Component, ElementRef, AfterViewInit } from '@angular/core';
 import * as flowchart from 'flowchart.js';
-import { map } from 'rxjs';
+import { switchMap, map } from 'rxjs/operators';
 import { FlowchartService } from './flowchart.service';
 import { ActivatedRoute } from '@angular/router';
 
@@ -9,7 +9,7 @@ import { ActivatedRoute } from '@angular/router';
   templateUrl: './flowchart-display.component.html',
   styleUrls: ['./flowchart-display.component.css']
 })
-export class FlowchartDisplayComponent implements OnInit {
+export class FlowchartDisplayComponent implements AfterViewInit {
 
   constructor(
     private route: ActivatedRoute,
@@ -18,18 +18,15 @@ export class FlowchartDisplayComponent implements OnInit {
   ) { }
 
   private readonly flowchartId$ = this.route.params.pipe(
-    map((x) => x['id']),
+    map((x) => x['id'])
   );
 
-  ngOnInit(): void {
-    this.flowchartId$.subscribe( id =>
-      this.flowchartService.getFlowchartJsString(id)
-      .subscribe(data => {
-        const diagram = flowchart.parse(data.toString());
-        console.log(data.toString());
-        diagram.drawSVG(this.el.nativeElement.querySelector('#diagram'));
-      })
+  ngAfterViewInit(): void {
+    this.flowchartId$.pipe(
+      switchMap((id) => this.flowchartService.getFlowchartJsString(id)),
+      map((x) => flowchart.parse(x))
+    ).subscribe(
+      (c) => c.drawSVG(this.el.nativeElement.querySelector("#diagram"))
     )
-
   }
 }
