@@ -3,5 +3,5 @@
 }
   
 app-chat {
-    @apply fixed bottom-16 right-4 w-max bg-white border rounded-md shadow-lg overflow-hidden w-[600px];
+    @apply fixed bottom-16 right-4 w-max bg-white border rounded-md shadow-lg w-[600px] max-h-[700px] overflow-y-auto;
 }
