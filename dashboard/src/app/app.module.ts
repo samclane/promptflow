@@ -5,7 +5,6 @@ import { HttpClientModule } from '@angular/common/http';
 import { AppComponent } from './app.component';
 import { FlowchartListComponent } from './flowchart-list.component';
 import { JobListComponent } from './job-list.component';
-import { NodeTypeListComponent } from './node-type-list.component';
 import { FlowchartDetailComponent } from './flowchart-detail.component';
 import { JobDetailComponent } from './job-detail.component';
 
@@ -40,7 +39,6 @@ const routes: Routes = [
     AppComponent,
     FlowchartListComponent,
     JobListComponent,
-    NodeTypeListComponent,
     FlowchartDetailComponent,
     JobDetailComponent,
     JobLogsComponent,
