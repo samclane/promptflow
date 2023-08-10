@@ -35,7 +35,9 @@ export class FlowchartDetailComponent {
       switchMap(() => this.flowchartService.stopFlowchart(this.id ?? ''))
     )
   ).pipe(
-    tap(() => this.jobListComponent?.getJobs()),
+    tap(() => {
+      this.jobListComponent?.getJobs()
+    }),
     startWith(null)
   );
 

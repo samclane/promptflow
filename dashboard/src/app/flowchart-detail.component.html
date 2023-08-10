@@ -1,18 +1,30 @@
-<div class="info-container max-w-[80%] m-2 mx-auto" *ngIf="vm$ | async as vm">
+<div class="info-container max-lg:max-w-[95%] lg:max-w-[80%] m-4 mx-auto" *ngIf="vm$ | async as vm">
   <h2 class="text-4xl font-semibold mb-4">Flowchart Info</h2>
-  <div class="max-w-max bg-blue-100 info-container">
-    <p class="font-semibold text-lg mb-2"><strong>Name:</strong> {{ vm.flowchart.label }}</p>
-    <p class="font-semibold text-lg mb-2"><strong>ID:</strong> {{ vm.flowchart.uid }}</p>
-    <button class="px-4 py-2 mr-2 font-semibold text-white bg-blue-500 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50" (click)="runFlowchart()">Run Flowchart</button>
-    <button class="px-4 py-2 font-semibold text-gray-700 bg-gray-200 rounded hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50" (click)="stopFlowchart()">Stop Flowchart</button>
-  </div>
-  <div class="mt-6 mx-auto w-full grid grid-cols-2 max-sm:grid-cols-1 space-x-1">
-    <app-flowchart-display></app-flowchart-display>
-    <app-flowchart-import-json [flowchartJson]="vm.flowchart | json"></app-flowchart-import-json>
-  </div>
-  
-  <div class="mt-6">
-    <h3 class="text-2xl font-semibold mb-2">Jobs:</h3>
-    <app-job-list [graphId]="vm.flowchart.uid" ></app-job-list>
+
+  <div class="grid grid-cols-3 gap-4">
+    <div class="col-span-1 max-h-[250px] max-w-max bg-blue-100 info-container flex flex-col items-start justify-between">
+      <div>
+        <p class="font-semibold text-lg mb-2"><strong>Name:</strong> {{ vm.flowchart.label }}</p>
+        <p class="font-semibold text-lg mb-2"><strong>ID:</strong> {{ vm.flowchart.uid }}</p>
+      </div>
+
+      <div class="[&>*]:my-1">
+        <button class="px-4 py-2 mr-2 font-semibold text-white bg-blue-500 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50" (click)="runFlowchart()">Run Flowchart</button>
+        <button class="px-4 py-2 font-semibold text-gray-700 bg-gray-200 rounded hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50" (click)="stopFlowchart()">Stop Flowchart</button>
+      </div>
+    </div>
+
+    <div class="info-container col-span-2">
+      <app-flowchart-display></app-flowchart-display>
+    </div>
+
+    <div class="info-container col-span-3">
+      <h3 class="text-2xl font-semibold mb-2">Jobs</h3>
+      <app-job-list [graphId]="vm.flowchart.uid" ></app-job-list>
+    </div>
+
+    <div class="mx-auto w-full max-sm:grid-cols-1 space-x-1 col-span-3">
+      <app-flowchart-import-json [flowchartJson]="vm.flowchart | json"></app-flowchart-import-json>
+    </div>  
   </div>
 </div>
