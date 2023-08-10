@@ -85,3 +85,8 @@ Then, navigate to `docs/build/html/index.html` in your browser.
 Want to contribute to PromptFlow? Get started by [building a node](https://www.promptflow.org/en/latest/development.html#starting-point-adding-a-node).
 
 Stumbled upon a bug? Don't hesitate to create an issue, open a PR, or let us know on [Discord](https://discord.gg/5MmV3FNCtN).
+
+## Feedback
+
+We're interested in your feedback! If you've used PromptFlow, please fill out [this questionnaire](https://forms.gle/oaB71zRmZmD8Lc8M6).
+
