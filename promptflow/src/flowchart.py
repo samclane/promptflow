@@ -430,7 +430,7 @@ class Flowchart:
         for node in self.nodes:
             uid = sanitize_identifier(node.uid)
             label = sanitize_label(node.label)
-            flowchart_str += f"{uid}=>operation: {label}\n"
+            flowchart_str += f"{uid}=>{node.js_shape.value}: {label}\n"
         for connector in self.connectors:
             prev_uid = sanitize_identifier(connector.prev.uid)
             next_uid = sanitize_identifier(connector.next.uid)

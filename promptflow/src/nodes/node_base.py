@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from promptflow.src.flowchart import Flowchart
 
 
-class NodeShape(Enum):
+class NxNodeShape(Enum):
     """Options for the shape of the node"""
 
     SQUARE = "s"
@@ -30,13 +30,24 @@ class NodeShape(Enum):
     OCTAGON = "8"
 
 
+class FlowchartJSTypes(Enum):
+    start = "start"
+    end = "end"
+    operation = "operation"
+    inputoutput = "inputoutput"
+    subroutine = "subroutine"
+    condition = "condition"
+    parallel = "parallel"
+
+
 class NodeBase(Serializable, ABC):
     """
     Represents a node in the flowchart, which could be a prompt, an llm, traditional code, etc.
     """
 
     node_color = monokai.WHITE
-    node_shape = NodeShape.SQUARE
+    nx_shape = NxNodeShape.SQUARE
+    js_shape = FlowchartJSTypes.operation
     prev_color = node_color
 
     def __init__(
