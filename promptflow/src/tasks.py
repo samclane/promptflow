@@ -8,7 +8,7 @@ import networkx as nx
 
 from promptflow.src.celery_app import celery_app
 from promptflow.src.flowchart import Flowchart
-from promptflow.src.nodes.node_base import NodeShape
+from promptflow.src.nodes.node_base import NxNodeShape
 from promptflow.src.postgres_interface import (
     DatabaseConfig,
     DBInterface,
@@ -91,12 +91,12 @@ def render_flowchart(self, flowchart_uid: str, db_config_init: dict):
     plt.box(False)
     plt.margins(0.2)
     node_size = max(list(map(lambda x: len(x.label) * 350, flowchart.nodes)))
-    for shape in NodeShape:
-        nodes = filter(lambda x: x.node_shape == shape, flowchart.nodes)
+    for shape in NxNodeShape:
+        nodes = filter(lambda x: x.nx_shape == shape, flowchart.nodes)
         nx.draw_networkx_nodes(
             flowchart.graph.subgraph(nodes),
             pos=pos,
-            node_shape=shape.value,
+            nx_shape=shape.value,
             node_color=list(map(lambda x: x.node_color, nodes)),
             node_size=node_size,
         )

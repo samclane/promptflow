@@ -4,13 +4,15 @@ Nodes that get run time input from the user
 import json
 from typing import Any
 
-from promptflow.src.nodes.node_base import NodeBase
+from promptflow.src.nodes.node_base import FlowchartJSTypes, NodeBase
 
 
 class InputNode(NodeBase):
     """
     Node that prompts the user for input
     """
+
+    js_shape = FlowchartJSTypes.inputoutput
 
     def before(self, state):
         return {"input": ""}

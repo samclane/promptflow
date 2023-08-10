@@ -420,17 +420,23 @@ class Flowchart:
         Convert the flowchart to a flowchart.js string.
         """
 
+        def strip_symbols(text: str) -> str:
+            sequences_to_remove = ["=>", "->", ":>", "|", "@>", ":$"]
+            for seq in sequences_to_remove:
+                text = text.replace(seq, "")
+            return text
+
         def sanitize_identifier(identifier: str) -> str:
-            return identifier.replace(" ", "_").replace("'", "")
+            return strip_symbols(identifier.replace(" ", "_").replace("'", ""))
 
         def sanitize_label(label: str) -> str:
-            return label.replace("'", "")
+            return strip_symbols(label.replace("'", ""))
 
         flowchart_str = "st=>start: Start\n"
         for node in self.nodes:
             uid = sanitize_identifier(node.uid)
             label = sanitize_label(node.label)
-            flowchart_str += f"{uid}=>operation: {label}\n"
+            flowchart_str += f"{uid}=>{node.js_shape.value}: {label}\n"
         for connector in self.connectors:
             prev_uid = sanitize_identifier(connector.prev.uid)
             next_uid = sanitize_identifier(connector.next.uid)

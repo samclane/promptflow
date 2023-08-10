@@ -5,10 +5,14 @@ Nodes that output data to the user, such as text or files
 import json
 from typing import Any
 
-from promptflow.src.nodes.node_base import NodeBase
+from promptflow.src.nodes.node_base import FlowchartJSTypes, NodeBase
 
 
-class FileOutput(NodeBase):
+class OutputNode(NodeBase):
+    js_shape = FlowchartJSTypes.inputoutput
+
+
+class FileOutput(OutputNode):
     """
     Outputs data to a file
     """
@@ -34,7 +38,7 @@ class FileOutput(NodeBase):
         return NodeBase.get_option_keys() + ["filename", "mode"]
 
 
-class JSONFileOutput(NodeBase):
+class JSONFileOutput(OutputNode):
     """
     Outputs data to a file location parsed from the state.result
     """
