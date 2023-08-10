@@ -4,6 +4,7 @@ import { Observable, map, ReplaySubject, Subject, switchMap, shareReplay, filter
 import { Flowchart, FlowchartConfirmation } from './flowchart';
 import {environment} from 'src/environments/environment';
 import { blob } from 'd3';
+import * as flowchart from 'flowchart.js';
 
 @Injectable({
   providedIn: 'root'
@@ -75,6 +76,10 @@ export class FlowchartService {
   getFlowchartPng(flowchartId: string): Observable<string> {
     // I think this cast is lying
     return this.http.get(`${this.apiUrl}/flowcharts/${flowchartId}/png`, { responseType: 'text' }) as Observable<string>;
+  }
+
+  getFlowchartJsString(flowchartId: string): Observable<string> {
+    return this.http.get(`${this.apiUrl}/flowcharts/${flowchartId}/flowchartjs`, { responseType: 'text' }) as Observable<string>;
   }
   
 }

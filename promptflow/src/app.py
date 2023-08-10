@@ -27,7 +27,7 @@ from typing import Any, List, Optional
 
 from fastapi import FastAPI, File, HTTPException, Response, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.responses import JSONResponse, PlainTextResponse, StreamingResponse
 from pydantic import BaseModel  # pylint: disable=no-name-in-module
 
 from promptflow.src.flowchart import Flowchart, FlowchartJson
@@ -213,6 +213,16 @@ def render_flowchart_png(flowchart_id: str) -> StreamingResponse:
     ).get()
     interface.store_b64_image(png_image, flowchart_id)
     return StreamingResponse(io.BytesIO(png_image), media_type="image/png")
+
+
+@app.get("/flowcharts/{flowchart_id}/flowchartjs", response_class=PlainTextResponse)
+def get_flowchart_js(flowchart_id: str) -> str:
+    """
+    Returns a flowchart.js representation of the flowchart
+    """
+    flowchart = Flowchart.get_flowchart_by_uid(flowchart_id, interface)
+    js = flowchart.to_flowchart_js()
+    return js
 
 
 @app.get("/jobs")

@@ -415,6 +415,29 @@ class Flowchart:
 
         return mermaid_str
 
+    def to_flowchart_js(self) -> str:
+        """
+        Convert the flowchart to a flowchart.js string.
+        """
+
+        def sanitize_identifier(identifier: str) -> str:
+            return identifier.replace(" ", "_").replace("'", "")
+
+        def sanitize_label(label: str) -> str:
+            return label.replace("'", "")
+
+        flowchart_str = "st=>start: Start\n"
+        for node in self.nodes:
+            uid = sanitize_identifier(node.uid)
+            label = sanitize_label(node.label)
+            flowchart_str += f"{uid}=>operation: {label}\n"
+        for connector in self.connectors:
+            prev_uid = sanitize_identifier(connector.prev.uid)
+            next_uid = sanitize_identifier(connector.next.uid)
+            flowchart_str += f"{prev_uid}->{next_uid}\n"
+        flowchart_str += "st->" + sanitize_identifier(self.nodes[0].uid) + "\n"
+        return flowchart_str
+
     def to_graph_ml(self) -> str:
         """
         Convert the flowchart to graphml
@@ -448,9 +471,3 @@ class Flowchart:
             kwargs["nodes"] = self.graph.nodes
         pos = algorithm(self.graph, scale=50, **kwargs)
         return pos
-
-    def get_nodes_by_shape(self, shape: str) -> list[NodeBase]:
-        """
-        Return a list of nodes with the given shape.
-        """
-        return [node for node in self.nodes if node.node_shape == shape]

@@ -16,7 +16,6 @@ import { HomeComponent } from './home.component';
 import { FlowchartListContainerComponent } from './flowchart-list-container.component';
 import { FlowchartDisplayComponent } from './flowchart-display.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { AddNodeComponent } from './add-node.component';
 import {FlowchartImportJson} from './flowchart-import-json.component';
 import { JobListContainerComponent } from './job-list-container.component';
 import { NodeListComponent } from './node-type-display.component';
@@ -50,7 +49,6 @@ const routes: Routes = [
     FlowchartListContainerComponent,
     FlowchartDisplayComponent,
     FlowchartImportJson,
-    AddNodeComponent,
     JobListContainerComponent,
     NodeListComponent,
     ChatComponent,
