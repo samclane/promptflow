@@ -7,7 +7,7 @@ import { ActivatedRoute } from '@angular/router';
 @Component({
   selector: 'app-flowchart-display',
   templateUrl: './flowchart-display.component.html',
-  styleUrls: ['./flowchart-display.component.css']
+  styleUrls: ['./flowchart-display.component.scss']
 })
 export class FlowchartDisplayComponent implements AfterViewInit {
 
