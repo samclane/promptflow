@@ -1,19 +1,19 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
-import {BehaviorSubject, combineLatest, map, scan, share, shareReplay, startWith, Subject, switchMap, tap, withLatestFrom} from 'rxjs';
+import {BehaviorSubject, combineLatest, scan, startWith, Subject, switchMap, tap, withLatestFrom} from 'rxjs';
 import {FormBuilder} from '@angular/forms';
 
 interface Message {
   sender: 'AI' | 'USER';
   text: string;
   timestamp: string;
-};
+}
 
 interface ChatResponse {
   ai_message: Message;
   user_message: Message;
-};
+}
 
 @Component({
   selector: 'app-chat',

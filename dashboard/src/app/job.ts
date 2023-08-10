@@ -4,7 +4,7 @@ export interface Job {
     status: string;
     created: string;
     updated: string; 
-    metadata: Object;
+    metadata: object;
     graph_id: number;
     graph_uid: string;
 }
