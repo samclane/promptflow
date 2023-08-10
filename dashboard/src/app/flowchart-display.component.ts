@@ -1,6 +1,6 @@
 import { Component, ElementRef, AfterViewInit } from '@angular/core';
 import * as flowchart from 'flowchart.js';
-import { switchMap, map } from 'rxjs/operators';
+import { switchMap, map, take } from 'rxjs/operators';
 import { FlowchartService } from './flowchart.service';
 import { ActivatedRoute } from '@angular/router';
 
@@ -23,10 +23,13 @@ export class FlowchartDisplayComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
     this.flowchartId$.pipe(
+      take(1),
       switchMap((id) => this.flowchartService.getFlowchartJsString(id)),
-      map((x) => flowchart.parse(x))
+      map((x) => flowchart.parse(x)),
     ).subscribe(
-      (c) => c.drawSVG(this.el.nativeElement.querySelector("#diagram"))
+      (c) => c.drawSVG(
+        this.el.nativeElement.querySelector("#diagram"),
+      )
     )
   }
 }
