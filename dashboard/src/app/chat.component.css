@@ -15,7 +15,7 @@
 }
 
 .text {
-  @apply flex-grow;
+  @apply flex-grow px-1 whitespace-pre-wrap;
 }
 
 .timestamp {
