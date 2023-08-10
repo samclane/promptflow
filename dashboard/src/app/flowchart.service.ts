@@ -1,10 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map, ReplaySubject, Subject, switchMap, shareReplay, filter, tap, startWith, catchError, of } from 'rxjs';
+import { Observable, map, Subject, switchMap, shareReplay, filter, tap, startWith, catchError, of } from 'rxjs';
 import { Flowchart, FlowchartConfirmation } from './flowchart';
 import {environment} from 'src/environments/environment';
-import { blob } from 'd3';
-import * as flowchart from 'flowchart.js';
 
 @Injectable({
   providedIn: 'root'

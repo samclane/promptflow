@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, Input, OnChanges, SimpleChanges } from "@angular/core";
 import { catchError, combineLatest, filter, map, merge, of, startWith, Subject, take } from "rxjs";
 import { FlowchartService } from "./flowchart.service";
-import { AbstractControl, FormBuilder, FormControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, ValidationErrors, Validators } from '@angular/forms';
 import {Flowchart} from "./flowchart";
 
 @Component({
@@ -85,6 +85,6 @@ export class FlowchartImportJson implements OnChanges {
     }
 
     return null;
-  };
+  }
 
 }

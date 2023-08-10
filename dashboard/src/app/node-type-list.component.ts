@@ -27,4 +27,5 @@ export class NodeTypeListComponent implements OnInit {
     this.nodeTypeSelected.emit(this.currentNodeType);
   }
 
+
 }

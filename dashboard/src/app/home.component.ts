@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { FlowchartService } from './flowchart.service';
 import { JobsService } from './jobs.service';
-import { map, catchError, tap } from 'rxjs/operators';
+import { map, catchError} from 'rxjs/operators';
 import {combineLatest, of} from 'rxjs';
 
 @Component({
