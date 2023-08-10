@@ -432,7 +432,7 @@ class Flowchart:
         def sanitize_label(label: str) -> str:
             return strip_symbols(label.replace("'", ""))
 
-        flowchart_str = "st=>start: Start\n"
+        flowchart_str = ""
         for node in self.nodes:
             uid = sanitize_identifier(node.uid)
             label = sanitize_label(node.label)
@@ -441,7 +441,6 @@ class Flowchart:
             prev_uid = sanitize_identifier(connector.prev.uid)
             next_uid = sanitize_identifier(connector.next.uid)
             flowchart_str += f"{prev_uid}->{next_uid}\n"
-        flowchart_str += "st->" + sanitize_identifier(self.nodes[0].uid) + "\n"
         return flowchart_str
 
     def to_graph_ml(self) -> str:
