@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import {BehaviorSubject, combineLatest, map, scan, share, shareReplay, startWith, Subject, switchMap, tap, withLatestFrom} from 'rxjs';
@@ -18,7 +18,8 @@ interface ChatResponse {
 @Component({
   selector: 'app-chat',
   templateUrl: './chat.component.html',
-  styleUrls: ['./chat.component.css']
+  styleUrls: ['./chat.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ChatComponent {
   constructor(
