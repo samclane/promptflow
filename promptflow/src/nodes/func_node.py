@@ -5,7 +5,7 @@ Node to run arbitrary Python code.
 from abc import ABC
 from typing import TYPE_CHECKING, Any, Optional
 
-from promptflow.src.nodes.node_base import NodeBase
+from promptflow.src.nodes.node_base import FlowchartJSTypes, NodeBase
 from promptflow.src.text_data import TextData
 from promptflow.src.themes import monokai
 
@@ -25,6 +25,7 @@ class FuncNode(NodeBase, ABC):
 
     node_color = monokai.YELLOW
     func: Optional[TextData] = None
+    js_shape = FlowchartJSTypes.subroutine
 
     def __init__(
         self,
