@@ -1,15 +1,15 @@
-<div class="chat-box">
-  <div class="messages" *ngFor="let message of allMessages">
+<div *ngIf="vm$ | async as vm" class="chat-box">
+  <div class="messages" *ngFor="let message of vm.messages">
     <div class="message" [ngClass]="{'ai-message': message.sender === 'AI'}">
-      <span class="sender">{{message.sender}}: &nbsp;</span>
-      <span class="text">{{message.text}}</span>
-      <span class="timestamp">{{message.timestamp}}</span>
+      <span class="sender">{{ message.sender === 'USER' ? 'You' : 'AI' }}: &nbsp;</span>
+      <span class="text">{{ message.text }}</span>
+      <span class="timestamp">{{ message.timestamp }}</span>
     </div>
   </div>
-  <div class="loading" *ngIf="isLoading">Loading...</div>
-  <form (ngSubmit)="sendMessage('User')">
+  <div class="loading" *ngIf="vm.loading">Loading...</div>
+  <form (ngSubmit)="sendMessage()">
     <div class="input-container">
-      <input autocomplete="off" type="text" [(ngModel)]="messageInput" class="message-input" placeholder="Type a message..." name="messageInput">
+      <input autocomplete="off" type="text" [formControl]="messageControl" class="message-input" placeholder="Type a message...">
       <button type="submit" class="send-button">Send</button>
     </div>
   </form>
