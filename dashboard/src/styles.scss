@@ -3,5 +3,5 @@
 @import 'tailwindcss/utilities';
 
 .info-container {
-  @apply border p-4 md:p-8 rounded-lg shadow-lg;
+  @apply border p-4 md:p-8 rounded-lg shadow-lg relative;
 }
