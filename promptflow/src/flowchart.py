@@ -477,13 +477,19 @@ class Flowchart:
         pos = algorithm(self.graph, scale=50, **kwargs)
         return pos
 
-
     def sorted_connectors(self) -> List[Connector]:
         """
         Return a list of connectors sorted by their distance from the start node.
         """
         connectors = []
         for connector in self.connectors:
-            connectors.append((connector, dict(nx.all_pairs_shortest_path(self.graph))[self.start_node][connector.prev]))
+            connectors.append(
+                (
+                    connector,
+                    dict(nx.all_pairs_shortest_path(self.graph))[self.start_node][
+                        connector.prev
+                    ],
+                )
+            )
         connectors.sort(key=lambda x: x[1])
         return [connector[0] for connector in connectors]
