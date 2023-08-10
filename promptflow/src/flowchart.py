@@ -448,3 +448,9 @@ class Flowchart:
             kwargs["nodes"] = self.graph.nodes
         pos = algorithm(self.graph, scale=50, **kwargs)
         return pos
+
+    def get_nodes_by_shape(self, shape: str) -> list[NodeBase]:
+        """
+        Return a list of nodes with the given shape.
+        """
+        return [node for node in self.nodes if node.node_shape == shape]

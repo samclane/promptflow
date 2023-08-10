@@ -3,6 +3,7 @@ Base class for all nodes
 """
 import logging
 from abc import ABC, abstractmethod
+from enum import Enum
 from typing import TYPE_CHECKING, Any
 
 from promptflow.src.serializable import Serializable
@@ -14,12 +15,28 @@ if TYPE_CHECKING:
     from promptflow.src.flowchart import Flowchart
 
 
+class NodeShape(Enum):
+    """Options for the shape of the node"""
+
+    SQUARE = "s"
+    CIRCLE = "o"
+    UP_ARROW = "^"
+    RIGHT_ARROW = ">"
+    DOWN_ARROW = "v"
+    LEFT_ARROW = "<"
+    DIAMOND = "d"
+    PENTAGON = "p"
+    HEXAGON = "h"
+    OCTAGON = "8"
+
+
 class NodeBase(Serializable, ABC):
     """
     Represents a node in the flowchart, which could be a prompt, an llm, traditional code, etc.
     """
 
     node_color = monokai.WHITE
+    node_shape = NodeShape.SQUARE
     prev_color = node_color
 
     def __init__(

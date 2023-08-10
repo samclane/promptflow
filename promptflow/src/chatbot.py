@@ -4,7 +4,7 @@ from pydantic import BaseModel  # pylint: disable=no-name-in-module
 import requests
 import json
 import os
-from  promptflow.src.node_map import node_map
+from promptflow.src.node_map import node_map
 
 
 class Message(BaseModel):
@@ -74,9 +74,7 @@ functions = [
                             },
                             "node_type": {
                                 "type": "string",
-                                "enum": list(
-                                    node_map.keys()
-                                ),
+                                "enum": list(node_map.keys()),
                                 "description": "This is the name of the node type as it appears in the database. This value can be acquired from the get_list_of_node_types function.",
                             },
                         },

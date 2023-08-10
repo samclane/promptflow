@@ -4,7 +4,7 @@ Also signals the start of the flowchart
 """
 from typing import TYPE_CHECKING, Any
 
-from promptflow.src.nodes.node_base import NodeBase
+from promptflow.src.nodes.node_base import NodeBase, NodeShape
 from promptflow.src.themes import monokai
 
 if TYPE_CHECKING:
@@ -17,6 +17,7 @@ class StartNode(NodeBase):
     """
 
     node_color = monokai.BLUE
+    node_shape = NodeShape.CIRCLE
 
     def __init__(
         self,
@@ -43,6 +44,7 @@ class InitNode(NodeBase):
     """
 
     node_color = monokai.ORANGE
+    node_shape = NodeShape.CIRCLE
 
     def __init__(
         self,

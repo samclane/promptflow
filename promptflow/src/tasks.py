@@ -8,6 +8,7 @@ import networkx as nx
 
 from promptflow.src.celery_app import celery_app
 from promptflow.src.flowchart import Flowchart
+from promptflow.src.nodes.node_base import NodeShape
 from promptflow.src.postgres_interface import (
     DatabaseConfig,
     DBInterface,
@@ -87,8 +88,22 @@ def render_flowchart(self, flowchart_uid: str, db_config_init: dict):
     )
 
     fig = plt.figure()
+    plt.box(False)
     plt.margins(0.2)
-    nx.draw(flowchart.graph, pos=pos, with_labels=False)
+    for shape in NodeShape:
+        nx.draw_networkx_nodes(
+            flowchart.graph.subgraph(
+                filter(lambda x: x.node_shape == shape, flowchart.nodes)
+            ),
+            pos=pos,
+            node_shape=shape.value,
+            node_color=list(
+                map(
+                    lambda x: x.node_color,
+                    filter(lambda x: x.node_shape == shape, flowchart.nodes),
+                )
+            ),
+        )
     nx.draw_networkx_edge_labels(
         flowchart.graph,
         pos=pos,
@@ -96,6 +111,7 @@ def render_flowchart(self, flowchart_uid: str, db_config_init: dict):
             e: c.label for e, c in zip(flowchart.graph.edges, flowchart.connectors)
         },
     )
+    nx.draw_networkx_edges(flowchart.graph, pos=pos, edgelist=flowchart.graph.edges)
 
     label_pos = {
         k: [v[0], v[1] - 5] for k, v in pos.items()
@@ -109,7 +125,7 @@ def render_flowchart(self, flowchart_uid: str, db_config_init: dict):
     plt.tight_layout()
 
     png_image = io.BytesIO()
-    plt.savefig(png_image, format="png")
+    plt.savefig(png_image, format="png", dpi=300, bbox_inches="tight")
     png_image.seek(0)
 
     # convert bytes to base64 string
