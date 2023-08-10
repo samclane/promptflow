@@ -9,7 +9,7 @@ import os
 import threading
 import time
 from queue import Queue
-from typing import TYPE_CHECKING, Any, Callable, Optional
+from typing import TYPE_CHECKING, Any, Callable, List, Optional
 
 import networkx as nx
 import redis
@@ -437,7 +437,7 @@ class Flowchart:
             uid = sanitize_identifier(node.uid)
             label = sanitize_label(node.label)
             flowchart_str += f"{uid}=>{node.js_shape.value}: {label}\n"
-        for connector in self.connectors:
+        for connector in self.sorted_connectors():
             prev_uid = sanitize_identifier(connector.prev.uid)
             next_uid = sanitize_identifier(connector.next.uid)
             flowchart_str += f"{prev_uid}->{next_uid}\n"
@@ -476,3 +476,14 @@ class Flowchart:
             kwargs["nodes"] = self.graph.nodes
         pos = algorithm(self.graph, scale=50, **kwargs)
         return pos
+
+
+    def sorted_connectors(self) -> List[Connector]:
+        """
+        Return a list of connectors sorted by their distance from the start node.
+        """
+        connectors = []
+        for connector in self.connectors:
+            connectors.append((connector, dict(nx.all_pairs_shortest_path(self.graph))[self.start_node][connector.prev]))
+        connectors.sort(key=lambda x: x[1])
+        return [connector[0] for connector in connectors]
