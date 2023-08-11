@@ -438,13 +438,13 @@ def update_node_options(
 
 
 @app.post("/chat")
-def post_message(messages: List[chatbot.Message]) -> chatbot.ChatResponse:
+def post_message(messages: List[chatbot.ChatMessage]) -> chatbot.ChatResponse:
     # Simulate an AI response (GPT-4 or similar)
-
-    ai_response = chatbot.chat(messages)
+    bot = chatbot.Chatbot()
+    ai_response = bot.chat(messages)
     return chatbot.ChatResponse(
         user_message=messages[-1],
-        ai_message=chatbot.Message(
+        ai_message=chatbot.ChatMessage(
             text=ai_response,
             sender="AI",
             timestamp=datetime.datetime.now().strftime("%H:%M:%S"),
