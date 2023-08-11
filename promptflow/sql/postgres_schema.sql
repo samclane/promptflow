@@ -317,5 +317,5 @@ INSERT INTO node_types (name) VALUES
      ('JSONImageFile'),
      ('SaveImageNode'),
      ('StartNode'),
-     ('InputNode')
+     ('UserInputNode')
 ON CONFLICT (name) DO UPDATE SET name = EXCLUDED.name;

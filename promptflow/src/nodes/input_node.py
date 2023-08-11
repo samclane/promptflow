@@ -1,18 +1,23 @@
 """
 Nodes that get run time input from the user
 """
+from abc import ABC
 import json
 from typing import Any
 
 from promptflow.src.nodes.node_base import FlowchartJSTypes, NodeBase
+from promptflow.src.themes import monokai
 
 
-class InputNode(NodeBase):
+class InputNode(NodeBase, ABC):
+    js_shape = FlowchartJSTypes.inputoutput
+    color = monokai.YELLOW
+
+
+class UserInputNode(InputNode):
     """
     Node that prompts the user for input
     """
-
-    js_shape = FlowchartJSTypes.inputoutput
 
     def before(self, state):
         return {"input": ""}
@@ -23,7 +28,7 @@ class InputNode(NodeBase):
         return before_result["input"]
 
 
-class FileInput(NodeBase):
+class FileInput(InputNode):
     """
     Reads a file and returns its contents
     """
@@ -46,7 +51,7 @@ class FileInput(NodeBase):
         return NodeBase.get_option_keys() + ["filename"]
 
 
-class JSONFileInput(NodeBase):
+class JSONFileInput(InputNode):
     """
     Parses a specific input from the state.result and reads a file and returns its contents
     """

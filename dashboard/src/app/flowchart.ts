@@ -18,4 +18,5 @@ export interface FlowchartConfirmation {
 
 export interface FlowchartJSResponse {
     flowchart_js: string;
+    color_map: { [key: string]: string };
 }

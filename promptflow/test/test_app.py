@@ -86,7 +86,7 @@ def create_test_flowchart(request):
                         "id": "3",
                         "uid": "3",
                         "label": "Input from User",
-                        "node_type": "InputNode",
+                        "node_type": "UserInputNode",
                         "metadata": {},
                     },
                     {
@@ -253,7 +253,7 @@ def test_get_node_types():
 )
 def test_add_node(create_test_flowchart):
     data = {
-        "node_type": "InputNode",
+        "node_type": "UserInputNode",
         "id": "1",
         "uid": "test_add_node",
         "label": "Start",
@@ -268,7 +268,7 @@ def test_add_node(create_test_flowchart):
 )
 def test_remove_node(create_test_flowchart):
     # First add a node
-    node_data = {"node_type": "InputNode", "id": "1", "uid": "1", "label": "Start"}
+    node_data = {"node_type": "UserInputNode", "id": "1", "uid": "1", "label": "Start"}
     add_node_response = client.post(
         f"/flowcharts/{create_test_flowchart}/nodes", json=node_data
     )
@@ -285,13 +285,13 @@ def test_remove_node(create_test_flowchart):
 )
 def test_connect_nodes(create_test_flowchart):
     # Add two nodes first
-    node1_data = {"node_type": "InputNode"}
+    node1_data = {"node_type": "UserInputNode"}
     add_node1_response = client.post(
         f"/flowcharts/{create_test_flowchart}/nodes", json=node1_data
     )
     node1_id = add_node1_response.json()["node"]["id"]
 
-    node2_data = {"node_type": "InputNode"}
+    node2_data = {"node_type": "UserInputNode"}
     add_node2_response = client.post(
         f"/flowcharts/{create_test_flowchart}/nodes", json=node2_data
     )
@@ -312,7 +312,7 @@ def test_connect_nodes(create_test_flowchart):
 )
 def test_get_node_options(create_test_flowchart):
     # Add a node first
-    node_data = {"node_type": "InputNode", "id": "1", "uid": "1", "label": "Start"}
+    node_data = {"node_type": "UserInputNode", "id": "1", "uid": "1", "label": "Start"}
     add_node_response = client.post(
         f"/flowcharts/{create_test_flowchart}/nodes", json=node_data
     )

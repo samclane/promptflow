@@ -436,12 +436,15 @@ class Flowchart:
         for node in self.nodes:
             uid = sanitize_identifier(node.uid)
             label = sanitize_label(node.label)
-            flowchart_str += f"{uid}=>{node.js_shape.value}: {label}\n"
+            flowchart_str += f"{uid}=>{node.js_shape.value}: {label}|{node.uid}\n"
         for connector in self.sorted_connectors():
             prev_uid = sanitize_identifier(connector.prev.uid)
             next_uid = sanitize_identifier(connector.next.uid)
             flowchart_str += f"{prev_uid}->{next_uid}\n"
         return flowchart_str
+
+    def get_color_map(self) -> dict[str, str]:
+        return {node.uid: node.color for node in self.nodes}
 
     def to_graph_ml(self) -> str:
         """

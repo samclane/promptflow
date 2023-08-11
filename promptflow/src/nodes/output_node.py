@@ -6,10 +6,12 @@ import json
 from typing import Any
 
 from promptflow.src.nodes.node_base import FlowchartJSTypes, NodeBase
+from promptflow.src.themes import monokai
 
 
 class OutputNode(NodeBase):
     js_shape = FlowchartJSTypes.inputoutput
+    color = monokai.BLUE
 
 
 class FileOutput(OutputNode):

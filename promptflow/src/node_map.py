@@ -30,7 +30,7 @@ from promptflow.src.nodes.image_node import (
     OpenImageFile,
     SaveImageNode,
 )
-from promptflow.src.nodes.input_node import FileInput, InputNode, JSONFileInput
+from promptflow.src.nodes.input_node import FileInput, UserInputNode, JSONFileInput
 from promptflow.src.nodes.llm_node import ClaudeNode, GoogleVertexNode, OpenAINode
 from promptflow.src.nodes.memory_node import PineconeInsertNode, PineconeQueryNode
 from promptflow.src.nodes.node_base import NodeBase
@@ -45,7 +45,7 @@ from promptflow.src.nodes.websearch_node import GoogleSearchNode, SerpApiNode
 node_map: Dict[str, Type[NodeBase]] = {
     "InitNode": InitNode,
     "StartNode": StartNode,
-    "InputNode": InputNode,
+    "UserInputNode": UserInputNode,
     "FileInput": FileInput,
     "JSONFileInput": JSONFileInput,
     "FuncNode": FuncNode,

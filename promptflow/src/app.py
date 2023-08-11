@@ -219,6 +219,7 @@ class FlowchartJSResponse(BaseModel):
     """A response for a flowchart.js representation of a flowchart"""
 
     flowchart_js: str
+    color_map: dict[str, str]
 
 
 @app.get("/flowcharts/{flowchart_id}/flowchartjs")
@@ -228,7 +229,8 @@ def get_flowchart_js(flowchart_id: str) -> FlowchartJSResponse:
     """
     flowchart = Flowchart.get_flowchart_by_uid(flowchart_id, interface)
     fc_js = flowchart.to_flowchart_js()
-    return FlowchartJSResponse(flowchart_js=fc_js)
+    color_map = flowchart.get_color_map()
+    return FlowchartJSResponse(flowchart_js=fc_js, color_map=color_map)
 
 
 @app.get("/jobs")
