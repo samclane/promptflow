@@ -45,10 +45,10 @@ class NodeBase(Serializable, ABC):
     Represents a node in the flowchart, which could be a prompt, an llm, traditional code, etc.
     """
 
-    node_color = monokai.WHITE
+    color = monokai.WHITE
     nx_shape = NxNodeShape.SQUARE
     js_shape = FlowchartJSTypes.operation
-    prev_color = node_color
+    prev_color = color
 
     def __init__(
         self,

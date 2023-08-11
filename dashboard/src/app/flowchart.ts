@@ -15,3 +15,7 @@ export interface FlowchartConfirmation {
     message: string;
     task_id: string;
 }
+
+export interface FlowchartJSResponse {
+    flowchart_js: string;
+}

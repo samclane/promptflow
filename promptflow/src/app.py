@@ -215,14 +215,20 @@ def render_flowchart_png(flowchart_id: str) -> StreamingResponse:
     return StreamingResponse(io.BytesIO(png_image), media_type="image/png")
 
 
-@app.get("/flowcharts/{flowchart_id}/flowchartjs", response_class=PlainTextResponse)
-def get_flowchart_js(flowchart_id: str) -> str:
+class FlowchartJSResponse(BaseModel):
+    """A response for a flowchart.js representation of a flowchart"""
+
+    flowchart_js: str
+
+
+@app.get("/flowcharts/{flowchart_id}/flowchartjs")
+def get_flowchart_js(flowchart_id: str) -> FlowchartJSResponse:
     """
     Returns a flowchart.js representation of the flowchart
     """
     flowchart = Flowchart.get_flowchart_by_uid(flowchart_id, interface)
-    js = flowchart.to_flowchart_js()
-    return js
+    fc_js = flowchart.to_flowchart_js()
+    return FlowchartJSResponse(flowchart_js=fc_js)
 
 
 @app.get("/jobs")

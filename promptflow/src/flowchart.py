@@ -18,7 +18,7 @@ from pydantic import BaseModel  # pylint: disable=no-name-in-module
 from promptflow.src.connectors.connector import Connector
 from promptflow.src.connectors.partial_connector import PartialConnector
 from promptflow.src.node_map import node_map
-from promptflow.src.nodes.node_base import NodeBase
+from promptflow.src.nodes.node_base import FlowchartJSTypes, NodeBase
 from promptflow.src.nodes.start_node import InitNode, StartNode
 
 if TYPE_CHECKING:

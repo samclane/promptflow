@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map, Subject, switchMap, shareReplay, filter, tap, startWith, catchError, of } from 'rxjs';
-import { Flowchart, FlowchartConfirmation } from './flowchart';
+import { Flowchart, FlowchartConfirmation, FlowchartJSResponse } from './flowchart';
 import {environment} from 'src/environments/environment';
 
 @Injectable({
@@ -76,8 +76,8 @@ export class FlowchartService {
     return this.http.get(`${this.apiUrl}/flowcharts/${flowchartId}/png`, { responseType: 'text' }) as Observable<string>;
   }
 
-  getFlowchartJsString(flowchartId: string): Observable<string> {
-    return this.http.get(`${this.apiUrl}/flowcharts/${flowchartId}/flowchartjs`, { responseType: 'text' }) as Observable<string>;
+  getFlowchartJsString(flowchartId: string): Observable<FlowchartJSResponse> {
+    return this.http.get<FlowchartJSResponse>(`${this.apiUrl}/flowcharts/${flowchartId}/flowchartjs`);
   }
   
 }

@@ -97,7 +97,7 @@ def render_flowchart(self, flowchart_uid: str, db_config_init: dict):
             flowchart.graph.subgraph(nodes),
             pos=pos,
             nx_shape=shape.value,
-            node_color=list(map(lambda x: x.node_color, nodes)),
+            node_color=list(map(lambda x: x.color, nodes)),
             node_size=node_size,
         )
     nx.draw_networkx_edges(

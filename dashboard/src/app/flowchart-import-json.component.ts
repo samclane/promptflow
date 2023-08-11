@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, Input, OnChanges, SimpleChanges } f
 import { catchError, combineLatest, filter, map, merge, of, startWith, Subject, take } from "rxjs";
 import { FlowchartService } from "./flowchart.service";
 import { AbstractControl, FormBuilder, ValidationErrors, Validators } from '@angular/forms';
-import {Flowchart} from "./flowchart";
+import { Flowchart } from "./flowchart";
 
 @Component({
   selector: 'app-flowchart-import-json',
