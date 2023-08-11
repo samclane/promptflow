@@ -10,6 +10,9 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 
 
 class ChatMessage(BaseModel):
+    """
+    Class representing a message in a chat with the AI
+    """
     sender: str
     text: str
     timestamp: str
@@ -23,11 +26,16 @@ class ChatMessage(BaseModel):
 
 
 class ChatResponse(BaseModel):
+    """ A response from the chatbot """
     user_message: ChatMessage
     ai_message: ChatMessage
 
 
 class Chatbot:
+    """
+    Holds the state of the chatbot and handles interactions with the OpenAI API
+    including function calls and message generation
+    """
     def __init__(self, model: str = "gpt-4") -> None:
         self.model = model
 
@@ -187,7 +195,6 @@ class Chatbot:
         """
         try:
             payload = list(map(lambda x: x.convert_to_openai(), user_convo))
-            # combine payload and `messages` into one list
             messages_to_send = self.messages + payload
 
             r = openai.ChatCompletion.create(
