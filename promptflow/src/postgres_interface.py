@@ -688,6 +688,7 @@ class PostgresInterface(DBInterface):
                     query += """ AND"""
                 if status:
                     query += """ status=%s""" % status
+            query += """ ORDER BY id DESC"""
             if limit:
                 query += """ LIMIT %s""" % str(limit)
             cursor.execute(
