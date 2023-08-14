@@ -13,6 +13,7 @@ class ChatMessage(BaseModel):
     """
     Class representing a message in a chat with the AI
     """
+
     sender: str
     text: str
     timestamp: str
@@ -26,7 +27,8 @@ class ChatMessage(BaseModel):
 
 
 class ChatResponse(BaseModel):
-    """ A response from the chatbot """
+    """A response from the chatbot"""
+
     user_message: ChatMessage
     ai_message: ChatMessage
 
@@ -36,6 +38,7 @@ class Chatbot:
     Holds the state of the chatbot and handles interactions with the OpenAI API
     including function calls and message generation
     """
+
     def __init__(self, model: str = "gpt-4") -> None:
         self.model = model
 

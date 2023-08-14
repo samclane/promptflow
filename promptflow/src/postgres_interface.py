@@ -21,17 +21,7 @@ from promptflow.src.text_data import TextData
 
 
 class JobView(BaseModel):
-    """
-    Model representing a job in the database
-
-    Attributes:
-        job_id (int): The unique ID of the job.
-        job_status (str): The status of the job (PENDING'), ('RUNNING'), ('FAILED)
-        created (datetime): The date and time the job was created.
-        updated (datetime): The date and time the job was updated.
-        metadata (Optional[Dict[str, Any]]): The metadata for the job.
-        graph_id (Optional[int]): The ID of the graph associated with the job.
-    """
+    """Model representing a job in the database"""
 
     job_id: conint(gt=0)
     job_status: constr(min_length=1)
@@ -66,18 +56,6 @@ class JobView(BaseModel):
 class GraphView(BaseModel):
     """
     Model representing a view of a graph.
-
-    Attributes:
-        graph_id (int): The unique ID of the graph.
-        created (datetime): The date and time the graph was created.
-        graph_name (str): The name of the graph.
-        node_label (str): The label of a node in the graph.
-        node_type_metadata (Optional[Dict[str, Any]]): The metadata for the type of node.
-        node_type_name (str): The name of the node type.
-        next_node (Optional[int]): The ID of the next node in the graph.
-        current_node (int): The ID of the current node in the graph.
-        conditional (Optional[str]): A conditional statement for node execution.
-        has_conditional (bool): Indicates whether the node has a conditional statement.
     """
 
     graph_id: conint(gt=0)
@@ -125,6 +103,8 @@ class GraphView(BaseModel):
 
 
 class JobResult(BaseModel):
+    """Output of a job"""
+
     job_id: conint(gt=0)
     output_type: constr(min_length=1)
     output: Optional[str]
@@ -148,7 +128,7 @@ class JobResult(BaseModel):
 
 
 class JobLog(BaseModel):
-    """ """
+    """Log of a job during execution"""
 
     log: Optional[Dict[str, Any]]
     job_id: conint(gt=0)
@@ -169,15 +149,7 @@ class JobLog(BaseModel):
 
 
 class DatabaseConfig(BaseModel):
-    """
-    Model representing the configuration for connecting to a database.
-
-    Attributes:
-        host (str): The host address of the database.
-        database (str): The name of the database.
-        user (str): The username for the database.
-        password (str): The password for the database.
-    """
+    """Model representing the configuration for connecting to a database."""
 
     host: str
     database: str
@@ -219,10 +191,6 @@ class DatabaseConfig(BaseModel):
 class GraphNamesAndIds(BaseModel):
     """
     Model representing the names and IDs of graphs.
-
-    Attributes:
-        id (int): The unique ID of the graph.
-        name (str): The name of the graph.
     """
 
     uid: str
@@ -570,7 +538,6 @@ class PostgresInterface(DBInterface):
         return node
 
     def add_connector_to_flowchart(self, flowchart: Flowchart, row: GraphView):
-        # check if the connector is already in the flowchart
         if not row.branch_id:
             return
         if row.branch_id in map(lambda x: x.uid, flowchart.connectors):

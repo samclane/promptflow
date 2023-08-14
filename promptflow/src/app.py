@@ -178,6 +178,8 @@ def run_flowchart_endpoint(flowchart_uid: str) -> RunSuccessResponse:
 
 
 class UserInput(BaseModel):
+    """Wrapper for user input"""
+
     input: str
 
 
@@ -447,7 +449,7 @@ def update_node_options(
 
 @app.post("/chat")
 def post_message(messages: List[chatbot.ChatMessage]) -> chatbot.ChatResponse:
-    # Simulate an AI response (GPT-4 or similar)
+    """Post a message to the chatbot (currently only GPT4)"""
     bot = chatbot.Chatbot()
     ai_response = bot.chat(messages)
     return chatbot.ChatResponse(
