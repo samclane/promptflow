@@ -197,6 +197,18 @@ class Chatbot:
                     },
                 },
             },
+            {
+                "name": "get_job_output",
+                "description": "Gets the output for a job given the job id",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "job_id": {
+                            "type": "string",
+                        }
+                    },
+                },
+            },
         ]
 
     def run_function(self, func_call: dict) -> dict:
@@ -229,6 +241,10 @@ class Chatbot:
             elif name == "get_job_logs_by_id":
                 return requests.get(
                     base + "/jobs/" + args["job_id"] + "/logs", json=args
+                ).json()
+            elif name == "get_job_output":
+                return requests.get(
+                    base + "/jobs/" + args["job_id"] + "/output", json=args
                 ).json()
             else:
                 raise ValueError(f"Unknown function name: {name}")
