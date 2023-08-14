@@ -148,12 +148,22 @@ class Chatbot:
                     "properties": {"action": {"type": "string"}},
                 },
             },
-        ]
-        """
             {
                 "name": "run_flow_chart_by_id",
-                "description": "Runs a flow chart given an ID"
+                "description": "Runs a flow chart given an ID",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "flowchart_id": {
+                            "type": "string",
+                            "description": "The flow chart id you'd like to run.",
+                        }
+                    },
+                },
             },
+        ]
+        """
+
             {
                 "name": "get_all_jobs",
                 "description": "Gets list of all jobs"
@@ -187,6 +197,10 @@ class Chatbot:
                 return requests.post(base + "/flowcharts/", json=args).json()
             elif name == "get_list_of_node_types":
                 return requests.get(base + "/nodes/types").json()
+            elif name == "run_flow_chart_by_id":
+                return requests.get(
+                    base + "/flowcharts/" + args["flowchart_id"] + "/run", json=args
+                ).json()
             else:
                 raise ValueError(f"Unknown function name: {name}")
         except Exception as exc:
