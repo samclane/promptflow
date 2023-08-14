@@ -161,22 +161,43 @@ class Chatbot:
                     },
                 },
             },
-        ]
-        """
-
             {
                 "name": "get_all_jobs",
-                "description": "Gets list of all jobs"
+                "description": "Gets list of all jobs",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "graph_uid": {"type": "string"},
+                        "status": {"type": "string"},
+                        "limit": {"type": "integer"},
+                    },
+                },
             },
             {
                 "name": "get_job_by_id",
-                "description": "Gets a job by the job ID"
+                "description": "Gets a job by the job ID",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "job_id": {
+                            "type": "string",
+                        }
+                    },
+                },
             },
             {
                 "name": "get_job_logs_by_id",
-                "description": "Gets the logs for a job given the job id"
+                "description": "Gets the logs for a job given the job id",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "job_id": {
+                            "type": "string",
+                        }
+                    },
+                },
             },
-        """
+        ]
 
     def run_function(self, func_call: dict) -> dict:
         """Calls an endpoint given an OpenAI function_call"""
@@ -200,6 +221,14 @@ class Chatbot:
             elif name == "run_flow_chart_by_id":
                 return requests.get(
                     base + "/flowcharts/" + args["flowchart_id"] + "/run", json=args
+                ).json()
+            elif name == "get_all_jobs":
+                return requests.get(base + "/jobs", json=args).json()
+            elif name == "get_job_by_id":
+                return requests.get(base + "/jobs/" + args["job_id"], json=args).json()
+            elif name == "get_job_logs_by_id":
+                return requests.get(
+                    base + "/jobs/" + args["job_id"] + "/logs", json=args
                 ).json()
             else:
                 raise ValueError(f"Unknown function name: {name}")
