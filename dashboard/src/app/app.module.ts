@@ -21,6 +21,7 @@ import { NodeListComponent } from './node-type-display.component';
 import { ChatComponent } from './chat.component';
 import { ChatButtonComponent } from './chat-button.component';
 import { ChatContainerComponent } from './chat-container.component';
+import { PopoverComponent } from './popover.component';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -51,7 +52,8 @@ const routes: Routes = [
     NodeListComponent,
     ChatComponent,
     ChatButtonComponent,
-    ChatContainerComponent
+    ChatContainerComponent,
+    PopoverComponent
   ],
   imports: [
     BrowserModule,

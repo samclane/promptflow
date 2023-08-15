@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ViewChild } from '@angular/core';
 import { FlowchartService } from './flowchart.service';
-import {combineLatest} from 'rxjs';
-import {Router} from '@angular/router';
+import { Router } from '@angular/router';
+import { PopoverComponent } from './popover.component';
+import { BehaviorSubject, combineLatest } from 'rxjs';
 
 @Component({
   selector: 'app-flowchart-list',
@@ -17,6 +18,10 @@ export class FlowchartListComponent {
 
   private readonly flowcharts$ = this.flowchartService.flowcharts$;
 
+  @ViewChild('popover') popover?: PopoverComponent;
+  private deleteUid$ = new BehaviorSubject<string | null>(null);
+  deleteMessage$ = new BehaviorSubject<string>('');
+
   public readonly vm$ = combineLatest({
     flowcharts: this.flowcharts$
   });
@@ -29,4 +34,19 @@ export class FlowchartListComponent {
     this.flowchartService.deleteFlowchart(id)
   }
 
+  openDeleteConfirmation(uid: string) {
+    this.deleteUid$.next(uid);
+    this.deleteMessage$.next(`Are you sure you want to delete the flowchart with ID ${uid}?`);
+    this.popover?.openPopover();
+  }
+  
+  handleDeleteConfirmation(result: boolean) {
+    if (result) {
+      const deleteUid = this.deleteUid$.getValue();
+      if (deleteUid) {
+        this.deleteFlowchart(deleteUid);
+      }
+    }
+    this.deleteUid$.next(null);
+  }
 }

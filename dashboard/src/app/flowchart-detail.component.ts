@@ -59,4 +59,11 @@ export class FlowchartDetailComponent {
     this.flowchartService.deleteFlowchart(this.id ?? '');
     this.router.navigate(['/flowcharts']);
   }
+
+  handleConfirmation(result: boolean) {
+    if (result) {
+      this.deleteFlowchart();
+    }
+    // else, user cancelled, do nothing
+  }
 }

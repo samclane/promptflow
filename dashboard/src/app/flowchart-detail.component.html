@@ -1,8 +1,19 @@
 <div class="info-container max-lg:max-w-[95%] lg:max-w-[80%] m-4 mx-auto relative" *ngIf="vm$ | async as vm">
   <div class="flex justify-between items-center">
     <h2 class="text-4xl font-semibold mb-4">Flowchart Info</h2>
-    <button class="px-4 py-2 font-semibold text-white bg-gray-500 rounded hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50" (click)="deleteFlowchart()">Delete Flowchart</button>
+    <button class="px-4 py-2 font-semibold text-white bg-gray-500 rounded hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50" (click)="popover.openPopover()">Delete Flowchart</button>
   </div>
+
+  <!-- Popover component -->
+  <app-popover
+    #popover
+    [title]="'Confirm Deletion'"
+    [message]="'Are you sure you want to delete the flowchart?'"
+    [confirmText]="'Delete'"
+    [cancelText]="'Cancel'"
+    (confirmation)="handleConfirmation($event)">
+  </app-popover>
+
 
   <div class="grid grid-cols-3 gap-4">
     <div class="col-span-1 max-h-[250px] max-w-max bg-blue-100 info-container flex flex-col items-start justify-between">

@@ -9,7 +9,7 @@
           <a [routerLink]="['/flowcharts', flowchart.uid]" class="text-xl">
             {{ flowchart.label }}
           </a>
-          <button (click)="deleteFlowchart(flowchart.uid); $event.stopPropagation();"
+          <button (click)="openDeleteConfirmation(flowchart.uid); $event.stopPropagation();"
             class="p-2 bg-red-500 transition duration-200 ease-in-out text-white rounded self-center mr-4 hover:bg-red-700">Delete</button>
         </div>
       </ng-container>
@@ -18,4 +18,14 @@
       </ng-container>
     </div>
   </div>
+
+  <!-- Popover component -->
+  <app-popover
+    #popover
+    [title]="'Confirm Deletion'"
+    [message]="deleteMessage$ | async"
+    [confirmText]="'Delete'"
+    [cancelText]="'Cancel'"
+    (confirmation)="handleDeleteConfirmation($event)">
+  </app-popover>
 </ng-container>
