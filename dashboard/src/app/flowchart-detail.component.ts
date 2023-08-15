@@ -1,5 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FlowchartService } from './flowchart.service';
 import { filter, share, startWith, switchMap, tap } from 'rxjs/operators';
 import {JobListComponent} from './job-list.component';
@@ -15,7 +15,8 @@ export class FlowchartDetailComponent {
 
   constructor(
     private route: ActivatedRoute,
-    private flowchartService: FlowchartService
+    private flowchartService: FlowchartService,
+    private router: Router
   ) {
    }
 
@@ -52,5 +53,10 @@ export class FlowchartDetailComponent {
 
   stopFlowchart(): void {
     this.flowChartActionSource.next('STOP');
+  }
+
+  deleteFlowchart(): void {
+    this.flowchartService.deleteFlowchart(this.id ?? '');
+    this.router.navigate(['/flowcharts']);
   }
 }
