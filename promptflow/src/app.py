@@ -30,6 +30,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, PlainTextResponse, StreamingResponse
 from pydantic import BaseModel  # pylint: disable=no-name-in-module
 
+from promptflow.src.celery_app import celery_app
 from promptflow.src.flowchart import Flowchart, FlowchartJson
 from promptflow.src.node_map import node_map
 from promptflow.src.nodes.embedding_node import EmbeddingsIngestNode
@@ -288,8 +289,15 @@ def stop_flowchart(flowchart_id: str) -> FlowchartUpdateResponse:
     """Stop the flowchart."""
     promptflow.logger.info("Stopping flowchart")
     flowchart = Flowchart.get_flowchart_by_uid(flowchart_id, interface)
-    flowchart.is_running = False
-    flowchart.is_dirty = True
+    for job in interface.get_all_jobs(flowchart_id):
+        if not job.metadata or "celery_id" not in job.metadata:
+            raise HTTPException(
+                status_code=500,
+                detail="Celery ID not found for job",
+            )
+        # actually terminate the job in celery
+        celery_app.control.revoke(job.metadata["celery_id"], terminate=True)
+        interface.update_job_status(job.job_id, "DONE")
     return FlowchartUpdateResponse(
         message="Flowchart stopped", flowchart=flowchart.serialize()
     )
