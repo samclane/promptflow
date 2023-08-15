@@ -150,7 +150,7 @@ class Chatbot:
             },
             {
                 "name": "run_flow_chart_by_id",
-                "description": "Runs a flow chart given an ID",
+                "description": "Runs a flow chart given a flow chart ID",
                 "parameters": {
                     "type": "object",
                     "properties": {
@@ -231,21 +231,29 @@ class Chatbot:
             elif name == "get_list_of_node_types":
                 return requests.get(base + "/nodes/types").json()
             elif name == "run_flow_chart_by_id":
+                id = args.get("flowchart_id", "")
+                if not id:
+                    raise ValueError("flowchart_id is required")
                 return requests.get(
-                    base + "/flowcharts/" + args["flowchart_id"] + "/run", json=args
+                    base + "/flowcharts/" + id + "/run", json=args
                 ).json()
             elif name == "get_all_jobs":
                 return requests.get(base + "/jobs", json=args).json()
             elif name == "get_job_by_id":
-                return requests.get(base + "/jobs/" + args["job_id"], json=args).json()
+                id = args.get("job_id", "")
+                if not id:
+                    raise ValueError("job_id is required")
+                return requests.get(base + "/jobs/" + id, json=args).json()
             elif name == "get_job_logs_by_id":
-                return requests.get(
-                    base + "/jobs/" + args["job_id"] + "/logs", json=args
-                ).json()
+                id = args.get("job_id", "")
+                if not id:
+                    raise ValueError("job_id is required")
+                return requests.get(base + "/jobs/" + id + "/logs", json=args).json()
             elif name == "get_job_output":
-                return requests.get(
-                    base + "/jobs/" + args["job_id"] + "/output", json=args
-                ).json()
+                id = args.get("job_id", "")
+                if not id:
+                    raise ValueError("job_id is required")
+                return requests.get(base + "/jobs/" + id + "/output", json=args).json()
             else:
                 raise ValueError(f"Unknown function name: {name}")
         except Exception as exc:
