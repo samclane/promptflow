@@ -14,9 +14,11 @@ export class ChatService {
 
   messages$ = this.messagesSource.pipe(
     scan((a, b) => {
-      return [...a, b];
-    }, <Message[]>[]),
-    startWith(<Message[]>[])
+      const newMessages = [...a, b];
+      localStorage.setItem('chat_messages', JSON.stringify(newMessages));
+      return newMessages;
+    }, JSON.parse(localStorage.getItem('chat_messages') || '[]') as Message[]),
+    startWith(JSON.parse(localStorage.getItem('chat_messages') || '[]') as Message[])
   );
 
   sendMessage$ = this.sendMessageSource.pipe(
