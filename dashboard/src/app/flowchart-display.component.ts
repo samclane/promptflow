@@ -1,8 +1,9 @@
 import { Component, ElementRef, AfterViewInit } from '@angular/core';
-import * as flowchart from 'flowchart.js';
 import { switchMap, map, take } from 'rxjs/operators';
 import { FlowchartService } from './flowchart.service';
 import { ActivatedRoute } from '@angular/router';
+import * as mermaid from 'mermaid';
+import { of } from 'rxjs';
 
 @Component({
   selector: 'app-flowchart-display',
@@ -24,28 +25,36 @@ export class FlowchartDisplayComponent implements AfterViewInit {
   ngAfterViewInit(): void {
     this.flowchartId$.pipe(
       take(1),
-      switchMap((id) => this.flowchartService.getFlowchartJsString(id)),
-      map((x) => {
-        console.log(x);
-        const parsedFlowchart = flowchart.parse(x.flowchart_js);
-        const transformedColorMap = Object.keys(x.color_map).reduce((acc: Record<string, Record<string, string>>, key) => {
-          acc[key] = {
-            'fill': x.color_map[key]
-          };
-          return acc;
-        }, {});
-        return { parsedFlowchart, colorMap: transformedColorMap }; // Return both values as an object
-      }),
+      switchMap((id) => this.flowchartService.getMermaidString(id)),
+      switchMap((mermaidString) => {
+        mermaid.default.initialize({ startOnLoad: false });
+        let element = document.querySelector('#diagram');
+        if (element) {
+          console.log(mermaidString);
+          return mermaid.default.render('graphDiv', mermaidString, element);
+        }
+        return of(null);
+      })
     ).subscribe(
       (result) => {
-        result.parsedFlowchart.drawSVG(
-          this.el.nativeElement.querySelector("#diagram"),
-          {
-            "flowstate": result.colorMap 
+        if (result) {
+          const { svg, bindFunctions } = result;
+          let element = document.querySelector('#diagram');
+          if (element) {
+            const container = document.createElement('div');
+            container.innerHTML = svg;
+            const svgElement = container.querySelector('svg');
+            if (svgElement) {
+              svgElement.style.margin = 'auto';
+            }
+            element.innerHTML = container.innerHTML;
+            bindFunctions?.(element);
           }
-        )
+        }
       }
-    )
+    );
   }
+  
+  
   
 }

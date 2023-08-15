@@ -79,5 +79,9 @@ export class FlowchartService {
   getFlowchartJsString(flowchartId: string): Observable<FlowchartJSResponse> {
     return this.http.get<FlowchartJSResponse>(`${this.apiUrl}/flowcharts/${flowchartId}/flowchartjs`);
   }
+
+  getMermaidString(flowchartId: string): Observable<string> {
+    return this.http.get(`${this.apiUrl}/flowcharts/${flowchartId}/mermaid`, { responseType: 'text' }) as Observable<string>;
+  }
   
 }

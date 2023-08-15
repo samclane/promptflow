@@ -235,6 +235,15 @@ def get_flowchart_js(flowchart_id: str) -> FlowchartJSResponse:
     return FlowchartJSResponse(flowchart_js=fc_js, color_map=color_map)
 
 
+@app.get("/flowcharts/{flowchart_id}/mermaid", response_class=PlainTextResponse)
+def get_flowchart_mermaid(flowchart_id: str) -> str:
+    """
+    Returns a mermaid representation of the flowchart
+    """
+    flowchart = Flowchart.get_flowchart_by_uid(flowchart_id, interface)
+    return flowchart.to_mermaid()
+
+
 @app.get("/jobs")
 def get_all_jobs(
     graph_uid: Optional[str] = None,

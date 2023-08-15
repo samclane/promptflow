@@ -404,14 +404,18 @@ class Flowchart:
         """
         Return a mermaid string representation of the flowchart.
         """
-        mermaid_str = "graph TD\n"
+
+        def sanitize_uid(uid):
+            return uid.replace(" ", "_")
+
+        mermaid_str = "flowchart TD\n"
         for node in self.nodes:
-            mermaid_str += f"{node.uid}({node.label})\n"
+            mermaid_str += f"\t{sanitize_uid(node.uid)}[{node.label}]\n"
         for connector in self.connectors:
             if connector.condition_label:
-                mermaid_str += f"{connector.prev.uid} -->|{connector.condition_label}| {connector.next.uid}\n"
+                mermaid_str += f"\t{sanitize_uid(connector.prev.uid)} -->|{connector.condition_label}| {sanitize_uid(connector.next.uid)}\n"
             else:
-                mermaid_str += f"{connector.prev.uid} --> {connector.next.uid}\n"
+                mermaid_str += f"\t{sanitize_uid(connector.prev.uid)} --> {sanitize_uid(connector.next.uid)}\n"
 
         return mermaid_str
 
