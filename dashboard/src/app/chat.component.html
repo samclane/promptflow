@@ -11,6 +11,7 @@
     <div class="input-container">
       <input autocomplete="off" type="text" [formControl]="messageControl" class="message-input" placeholder="Type a message...">
       <button type="submit" class="send-button">Send</button>
+      <button (click)="clearMessages()" class="clear-button">Clear All</button>
     </div>
   </form>
 </div>

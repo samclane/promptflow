@@ -9,12 +9,12 @@ import { environment } from 'src/environments/environment';
 })
 export class ChatService {
   public readonly loadingSource = new BehaviorSubject<boolean>(false);
-  private readonly messagesSource = new Subject<Message>();
+  private readonly messagesSource = new Subject<Message | null>();
   private readonly sendMessageSource = new Subject<Message>();
 
   messages$ = this.messagesSource.pipe(
     scan((a, b) => {
-      const newMessages = [...a, b];
+      const newMessages = b === null ? [] : [...a, b];
       localStorage.setItem('chat_messages', JSON.stringify(newMessages));
       return newMessages;
     }, JSON.parse(localStorage.getItem('chat_messages') || '[]') as Message[]),
@@ -47,5 +47,10 @@ export class ChatService {
 
   public sendMessage(message: Message) {
     this.sendMessageSource.next(message);
+  }
+
+  public clearMessages() {
+    localStorage.removeItem('chat_messages');
+    this.messagesSource.next(null);
   }
 }

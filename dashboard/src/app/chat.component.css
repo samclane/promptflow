@@ -34,6 +34,10 @@
   @apply px-4 py-2 bg-blue-500 text-white rounded-md;
 }
 
+.clear-button {
+  @apply px-4 py-2 text-gray-700 rounded-md bg-blue-200 ml-2;
+}
+
 .ai-message {
   @apply bg-gray-100;
 }

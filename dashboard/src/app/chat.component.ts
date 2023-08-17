@@ -46,4 +46,8 @@ export class ChatComponent {
 
     this.messageControl.reset();
   }
+
+  clearMessages() {
+    this.chatService.clearMessages();
+  }
 }
