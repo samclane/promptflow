@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 import openai
 from pydantic import BaseModel  # pylint: disable=no-name-in-module
 import requests
@@ -33,15 +33,27 @@ class ChatResponse(BaseModel):
     ai_message: ChatMessage
 
 
+class ChatbotOptions(BaseModel):
+    """
+    Options for the chatbot
+    """
+
+    model: str = "gpt-4"
+    temperature: float = 1
+    top_p: float = 1
+    n: int = 1
+    max_tokens: Optional[int] = None
+    presence_penalty: float = 0.0
+    frequency_penalty: float = 0.0
+
+
 class Chatbot:
     """
     Holds the state of the chatbot and handles interactions with the OpenAI API
     including function calls and message generation
     """
 
-    def __init__(self, model: str = "gpt-4") -> None:
-        self.model = model
-
+    def __init__(self) -> None:
         self.messages = [
             {
                 "role": "system",
@@ -259,7 +271,9 @@ class Chatbot:
         except Exception as exc:
             return {"error": str(exc)}
 
-    def chat(self, user_convo: List[ChatMessage]) -> str:
+    def chat(
+        self, user_convo: List[ChatMessage], options: Optional[ChatbotOptions]
+    ) -> str:
         """
         This function takes in a list of messages and returns a response from the model.
         """
@@ -268,7 +282,9 @@ class Chatbot:
             messages_to_send = self.messages + payload
 
             r = openai.ChatCompletion.create(
-                model=self.model, messages=messages_to_send, functions=self.functions
+                messages=messages_to_send,
+                functions=self.functions,
+                **options.dict() if options else {},
             )
             if "choices" not in r:
                 raise ValueError(f"Unexpected response from OpenAI: {r}")
@@ -283,7 +299,9 @@ class Chatbot:
                     }
                 )
                 r = openai.ChatCompletion.create(
-                    model=self.model, messages=self.messages, functions=self.functions
+                    messages=self.messages,
+                    functions=self.functions,
+                    **options.dict() if options else {},
                 )
                 message = r["choices"][0]["message"]
             return message["content"]

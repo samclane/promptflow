@@ -465,10 +465,13 @@ def update_node_options(
 
 
 @app.post("/chat")
-def post_message(messages: List[chatbot.ChatMessage]) -> chatbot.ChatResponse:
+def post_message(
+    messages: List[chatbot.ChatMessage],
+    options: Optional[chatbot.ChatbotOptions] = None,
+) -> chatbot.ChatResponse:
     """Post a message to the chatbot (currently only GPT4)"""
     bot = chatbot.Chatbot()
-    ai_response = bot.chat(messages)
+    ai_response = bot.chat(messages, options)
     return chatbot.ChatResponse(
         user_message=messages[-1],
         ai_message=chatbot.ChatMessage(

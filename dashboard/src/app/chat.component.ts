@@ -3,17 +3,6 @@ import {combineLatest} from 'rxjs';
 import {FormBuilder} from '@angular/forms';
 import { ChatService } from './chat.service';
 
-export interface Message {
-  sender: 'AI' | 'USER';
-  text: string;
-  timestamp: string;
-}
-
-export interface ChatResponse {
-  ai_message: Message;
-  user_message: Message;
-}
-
 @Component({
   selector: 'app-chat',
   templateUrl: './chat.component.html',
