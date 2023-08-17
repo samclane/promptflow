@@ -1,9 +1,11 @@
-from typing import List, Optional
-import openai
-from pydantic import BaseModel  # pylint: disable=no-name-in-module
-import requests
 import json
 import os
+from typing import List, Optional
+
+import openai
+import requests
+from pydantic import BaseModel  # pylint: disable=no-name-in-module
+
 from promptflow.src.node_map import node_map
 
 openai.api_key = os.getenv("OPENAI_API_KEY")

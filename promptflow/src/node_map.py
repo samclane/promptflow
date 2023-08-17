@@ -30,7 +30,7 @@ from promptflow.src.nodes.image_node import (
     OpenImageFile,
     SaveImageNode,
 )
-from promptflow.src.nodes.input_node import FileInput, UserInputNode, JSONFileInput
+from promptflow.src.nodes.input_node import FileInput, JSONFileInput, UserInputNode
 from promptflow.src.nodes.llm_node import ClaudeNode, GoogleVertexNode, OpenAINode
 from promptflow.src.nodes.memory_node import PineconeInsertNode, PineconeQueryNode
 from promptflow.src.nodes.node_base import NodeBase

@@ -1,8 +1,8 @@
 """
 Nodes that get run time input from the user
 """
-from abc import ABC
 import json
+from abc import ABC
 from typing import Any
 
 from promptflow.src.nodes.node_base import FlowchartJSTypes, NodeBase

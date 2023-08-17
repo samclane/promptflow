@@ -8,10 +8,10 @@ import psycopg2
 import psycopg2.extensions
 from pydantic import (
     BaseModel,
-    conint,
+    conint,  # pylint: disable=no-name-in-module
     constr,
     validator,
-)  # pylint: disable=no-name-in-module
+)
 
 from promptflow.src.connectors.connector import Connector
 from promptflow.src.flowchart import Flowchart
