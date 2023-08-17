@@ -103,7 +103,9 @@ class Flowchart:
             connector = Connector(
                 prev,
                 next,
-                connector_data.get("conditional", ""),
+                TextData(
+                    connector_data["label"], connector_data["conditional"], flowchart
+                ),
                 uid=connector_data["uid"],
             )
             flowchart.add_connector(connector)

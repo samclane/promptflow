@@ -76,7 +76,7 @@ class Chatbot:
             },
             {
                 "name": "upsert_flow_chart_by_id",
-                "description": "Updates or inserts a flowchart given a name. This endpoint is stateless. It should include all of the information to create the new version of the flowchart. If someone wants to add or update a node, you must also include all of the other nodes and branches in your request otherwise they will get removed unintentionally.",
+                "description": "Updates or inserts a flowchart or any of its components, given a flowchart id. This endpoint is stateless. It should include all of the information to create the new version of the flowchart. If someone wants to add or update a node, you must also include all of the other nodes and branches in your request otherwise they will get removed unintentionally.",
                 "parameters": {
                     "type": "object",
                     "properties": {
@@ -123,6 +123,10 @@ class Chatbot:
                                     "label": {
                                         "type": "string",
                                         "description": "The user generated identifier for this branch.",
+                                    },
+                                    "conditional": {
+                                        "type": "string",
+                                        "description": "This is the condition that must be met in order for this branch to be taken. This is a python expression that will be evaluated in the context of the flowchart.",
                                     },
                                     "prev": {
                                         "type": "string",
