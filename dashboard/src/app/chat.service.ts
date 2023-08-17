@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Subject, scan, startWith, switchMap, tap, withLatestFrom } from 'rxjs';
-import { Message, ChatResponse, ChatOptions } from './chat';
+import { Message, ChatResponse, ChatOptions, DEFAULT_OPTIONS } from './chat';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
@@ -27,7 +27,11 @@ export class ChatService {
       this.loadingSource.next(true);
     }),
     withLatestFrom(this.messages$),
-    switchMap(([_, messages]) => this.http.post<ChatResponse>(this.buildUrl('/chat'), {messages, options: <ChatOptions>{}})),
+    switchMap(([_, messages]) => {
+      const optionsFromStorage = localStorage.getItem('chatOptions');
+      const options: ChatOptions = optionsFromStorage ? JSON.parse(optionsFromStorage) : DEFAULT_OPTIONS;
+      return this.http.post<ChatResponse>(this.buildUrl('/chat'), {messages, options});
+    }),
     tap((m) => {
       this.messagesSource.next({
         sender: 'AI',

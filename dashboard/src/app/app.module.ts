@@ -22,6 +22,7 @@ import { ChatComponent } from './chat.component';
 import { ChatButtonComponent } from './chat-button.component';
 import { ChatContainerComponent } from './chat-container.component';
 import { PopoverComponent } from './popover.component';
+import { ChatOptionsComponent } from './chat-options.component';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -30,7 +31,8 @@ const routes: Routes = [
   { path: 'jobs', component: JobListContainerComponent },
   { path: 'jobs/:id', component: JobDetailComponent },
   { path: 'nodes', component: NodeListComponent },
-  { path: 'chat', component: ChatContainerComponent }
+  { path: 'chat', component: ChatContainerComponent },
+  { path: 'chat-options', component: ChatOptionsComponent }
 ];
 
 
@@ -53,7 +55,8 @@ const routes: Routes = [
     ChatComponent,
     ChatButtonComponent,
     ChatContainerComponent,
-    PopoverComponent
+    PopoverComponent,
+    ChatOptionsComponent
   ],
   imports: [
     BrowserModule,

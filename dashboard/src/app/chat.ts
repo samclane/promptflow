@@ -18,3 +18,14 @@ export interface ChatOptions {
     presence_penalty?: number;
     frequency_penalty?: number;
 }
+
+export const DEFAULT_OPTIONS: ChatOptions = {
+    model: 'gpt-4',
+    temperature: 1,
+    top_p: 1,
+    n: 1,
+    max_tokens: '',
+    presence_penalty: 0,
+    frequency_penalty: 0
+};
+  
