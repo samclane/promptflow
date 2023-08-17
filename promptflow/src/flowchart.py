@@ -250,7 +250,7 @@ class Flowchart:
                         if msg and msg["type"] == "message":
                             data = msg.get("data")
                             if data:
-                                before_result["input"] = data
+                                before_result["input"] = data.decode()
                                 input_received = True
                                 break
             try:
