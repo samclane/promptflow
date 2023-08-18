@@ -23,43 +23,11 @@ When run your flowchart, PromptFlow executes each node in the sequence defined b
 
 ## 🛠️ Initial Setup 
 
-You can install PromptFlow via pip with
-
-```bash
-pip install promptflow-gui
-```
-
-If you want to install PromptFlow from source, clone this repository and install the dependencies with
-
-```bash
-python -m pip install -r requirements.txt
-```
-
-Encountered a hiccup? Try this instead:
-
-```bash
-python -m pip install -r requirements-no-nvidia.txt
-```
+## TODO
 
 ## 🚀 Launching
 
-If you installed from `pip`, you can launch PromptFlow with
-
-```bash
-promptflow
-```
-
-Otherwise, run PromptFlow with Python from the command line:
-
-```bash
-python run.py 
-```
-
-If you're hitting a roadblock, ensure your `PYTHONPATH` is set correctly:
-
-```bash
-export PYTHONPATH=$PYTHONPATH:.
-```
+## TODO
 
 ## 📚 Documentation
 
