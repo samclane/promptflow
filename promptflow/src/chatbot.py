@@ -1,6 +1,6 @@
 import json
 import os
-from typing import List, Optional
+from typing import Any, Generator, List, Optional
 
 import openai
 import requests
@@ -312,7 +312,12 @@ class Chatbot:
 
     def create_chat_completion(
         self, messages_to_send: list, options: Optional[ChatbotOptions]
-    ) -> dict:
+    ) -> (
+        Generator[Any | list[Any] | dict[Any, Any], None, None]
+        | Any
+        | list[Any]
+        | dict[Any, Any]
+    ):
         return openai.ChatCompletion.create(
             messages=messages_to_send,
             functions=self.functions,
@@ -321,7 +326,12 @@ class Chatbot:
 
     def process_function_call(
         self, message: dict, options: Optional[ChatbotOptions]
-    ) -> dict:
+    ) -> (
+        Generator[Any | list[Any] | dict[Any, Any], None, None]
+        | Any
+        | list[Any]
+        | dict[Any, Any]
+    ):
         resp = self.run_function(message["function_call"])
         self.messages.append(
             {

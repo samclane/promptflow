@@ -6,12 +6,8 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import psycopg2
 import psycopg2.extensions
-from pydantic import (
-    BaseModel,
-    conint,  # pylint: disable=no-name-in-module
-    constr,
-    validator,
-)
+from pydantic import conint  # pylint: disable=no-name-in-module
+from pydantic import BaseModel, constr, validator
 
 from promptflow.src.connectors.connector import Connector
 from promptflow.src.flowchart import Flowchart
