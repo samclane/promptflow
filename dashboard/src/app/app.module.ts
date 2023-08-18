@@ -23,6 +23,7 @@ import { ChatButtonComponent } from './chat-button.component';
 import { ChatContainerComponent } from './chat-container.component';
 import { PopoverComponent } from './popover.component';
 import { ChatOptionsComponent } from './chat-options.component';
+import { ChatOptionsPopoverComponent } from './chat-options-popover.component';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -56,7 +57,8 @@ const routes: Routes = [
     ChatButtonComponent,
     ChatContainerComponent,
     PopoverComponent,
-    ChatOptionsComponent
+    ChatOptionsComponent,
+    ChatOptionsPopoverComponent
   ],
   imports: [
     BrowserModule,

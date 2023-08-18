@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import {combineLatest} from 'rxjs';
-import {FormBuilder} from '@angular/forms';
+import { combineLatest, BehaviorSubject } from 'rxjs';
+import { FormBuilder } from '@angular/forms';
 import { ChatService } from './chat.service';
 
 @Component({
@@ -16,11 +16,13 @@ export class ChatComponent {
   ) {}
 
   public readonly messageControl = this.form.nonNullable.control('');
+  public showOptions$ = new BehaviorSubject<boolean>(false);
 
   public readonly vm$ = combineLatest({
     messages: this.chatService.messages$,
     sendMessage: this.chatService.sendMessage$,
-    loading: this.chatService.loadingSource.asObservable()
+    loading: this.chatService.loadingSource.asObservable(),
+    showOptions: this.showOptions$.asObservable()
   });
 
   // Method to send a message and receive AI response
@@ -38,5 +40,9 @@ export class ChatComponent {
 
   clearMessages() {
     this.chatService.clearMessages();
+  }
+
+  toggleOptions() {
+    this.showOptions$.next(!this.showOptions$.value);
   }
 }

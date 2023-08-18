@@ -12,6 +12,7 @@
       <input autocomplete="off" type="text" [formControl]="messageControl" class="message-input" placeholder="Type a message...">
       <button type="submit" class="send-button">Send</button>
       <button (click)="clearMessages()" class="clear-button">Clear All</button>
-    </div>
+      <button (click)="toggleOptions()" class="options-button">Options</button>    </div>
   </form>
 </div>
+<app-chat-options-popover *ngIf="showOptions$.value" (close)="toggleOptions()"></app-chat-options-popover>
