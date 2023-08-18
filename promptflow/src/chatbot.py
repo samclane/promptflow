@@ -59,8 +59,8 @@ class Chatbot:
         self.messages = [
             {
                 "role": "system",
-                "content": """You are an AI assistant for the PromptFlow LLM creation and management tool. PromptFlow allows users to create flowcharts that string together Python functions and LLM tools. These flow charts can then be executed and monitored remotely from a web client, mobile client, etc.
-        Your job is to interface with the PromptFlow API in order to fulfill the user's requests. He may want to update an existing flow chart, create a new one, view running jobs, etc. You are a serious no bullshit chatbot. Act like one.
+                "content": """You are an AI assistant for the PromptFlow LLM creation and management tool. PromptFlow allows users to create flowcharts that string together Python functions and LLM tools. These flowcharts can then be executed and monitored remotely from a web client, mobile client, etc.
+        Your job is to interface with the PromptFlow API in order to fulfill the user's requests. He may want to update an existing flowchart, create a new one, view running jobs, etc. You are a serious no bullshit chatbot. Act like one.
 
         Try not to guess the user's intent if you can avoid it. If anything is unclear ask the user. Don't make up values.
         """,
@@ -84,11 +84,11 @@ class Chatbot:
                     "properties": {
                         "label": {
                             "type": "string",
-                            "description": "This is the user generated displayable name for this flow chart. Does not have to be unique",
+                            "description": "This is the user generated displayable name for this flowchart. Does not have to be unique",
                         },
                         "uid": {
                             "type": "string",
-                            "description": "The user generated unique identifier of the flow chart.",
+                            "description": "The user generated unique identifier of the flowchart.",
                         },
                         "nodes": {
                             "type": "array",
@@ -147,13 +147,13 @@ class Chatbot:
             },
             {
                 "name": "get_flowchart_by_id",
-                "description": "Get an individual flow chart by ID",
+                "description": "Get an individual flowchart by ID",
                 "parameters": {
                     "type": "object",
                     "properties": {
                         "flowchart_id": {
                             "type": "string",
-                            "description": "The flow chart id you'd like to lookup.",
+                            "description": "The flowchart id you'd like to lookup.",
                         }
                     },
                 },
@@ -168,13 +168,13 @@ class Chatbot:
             },
             {
                 "name": "run_flow_chart_by_id",
-                "description": "Runs a flow chart given a flow chart ID",
+                "description": "Runs a flowchart given a flowchart ID",
                 "parameters": {
                     "type": "object",
                     "properties": {
                         "flowchart_id": {
                             "type": "string",
-                            "description": "The flow chart id you'd like to run.",
+                            "description": "The flowchart id you'd like to run.",
                         }
                     },
                 },
@@ -229,53 +229,87 @@ class Chatbot:
             },
         ]
 
+    @staticmethod
+    def get_flowcharts(base: str) -> dict:
+        return requests.get(base + "/flowcharts").json()
+
+    @staticmethod
+    def get_flowchart_by_id(base: str, args: dict) -> dict:
+        id = args.get("flowchart_id", "")
+        if not id:
+            raise ValueError("flowchart_id is required")
+        return requests.get(base + "/flowcharts/" + id).json()
+    
+    @staticmethod
+    def upsert_flow_chart_by_id(base: str, args: dict) -> dict:
+        return requests.post(base + "/flowcharts/", json=args).json()
+
+    @staticmethod
+    def get_list_of_node_types(base: str) -> dict:
+        return requests.get(base + "/nodes/types").json()
+
+    @staticmethod
+    def run_flow_chart_by_id(base: str, args: dict) -> dict:
+        id = args.get("flowchart_id", "")
+        if not id:
+            raise ValueError("flowchart_id is required")
+        return requests.get(base + "/flowcharts/" + id + "/run", json=args).json()
+    
+    @staticmethod
+    def get_all_jobs(base: str, args: dict) -> dict:
+        return requests.get(base + "/jobs", json=args).json()
+
+    @staticmethod   
+    def get_job_by_id(base: str, args: dict) -> dict:
+        id = args.get("job_id", "")
+        if not id:
+            raise ValueError("job_id is required")
+        return requests.get(base + "/jobs/" + id, json=args).json()
+
+    @staticmethod
+    def get_job_logs_by_id(base: str, args: dict) -> dict:
+        id = args.get("job_id", "")
+        if not id:
+            raise ValueError("job_id is required")
+        return requests.get(base + "/jobs/" + id + "/logs", json=args).json()
+
+    @staticmethod
+    def get_job_output(base: str, args: dict) -> dict:
+        id = args.get("job_id", "")
+        if not id:
+            raise ValueError("job_id is required")
+        return requests.get(base + "/jobs/" + id + "/output", json=args).json()
+
     def run_function(self, func_call: dict) -> dict:
-        """Calls an endpoint given an OpenAI function_call"""
         try:
             name = func_call.get("name")
             args_json = func_call.get("arguments", "{}")
             args = json.loads(args_json)
-
             base = "http://localhost:8000"  # TODO: change this to the real base url
+
             if name == "get_flowcharts":
-                return requests.get(base + "/flowcharts").json()
+                return self.get_flowcharts(base)
             elif name == "get_flowchart_by_id":
-                id = args.get("flowchart_id", "")
-                if not id:
-                    raise ValueError("flowchart_id is required")
-                return requests.get(base + "/flowcharts/" + id).json()
+                return self.get_flowchart_by_id(base, args)
             elif name == "upsert_flow_chart_by_id":
-                return requests.post(base + "/flowcharts/", json=args).json()
+                return self.upsert_flow_chart_by_id(base, args)
             elif name == "get_list_of_node_types":
-                return requests.get(base + "/nodes/types").json()
+                return self.get_list_of_node_types(base)
             elif name == "run_flow_chart_by_id":
-                id = args.get("flowchart_id", "")
-                if not id:
-                    raise ValueError("flowchart_id is required")
-                return requests.get(
-                    base + "/flowcharts/" + id + "/run", json=args
-                ).json()
+                return self.run_flow_chart_by_id(base, args)
             elif name == "get_all_jobs":
-                return requests.get(base + "/jobs", json=args).json()
+                return self.get_all_jobs(base, args)
             elif name == "get_job_by_id":
-                id = args.get("job_id", "")
-                if not id:
-                    raise ValueError("job_id is required")
-                return requests.get(base + "/jobs/" + id, json=args).json()
+                return self.get_job_by_id(base, args)
             elif name == "get_job_logs_by_id":
-                id = args.get("job_id", "")
-                if not id:
-                    raise ValueError("job_id is required")
-                return requests.get(base + "/jobs/" + id + "/logs", json=args).json()
+                return self.get_job_logs_by_id(base, args)
             elif name == "get_job_output":
-                id = args.get("job_id", "")
-                if not id:
-                    raise ValueError("job_id is required")
-                return requests.get(base + "/jobs/" + id + "/output", json=args).json()
+                return self.get_job_output(base, args)
             else:
                 raise ValueError(f"Unknown function name: {name}")
         except Exception as exc:
             return {"error": str(exc)}
+
 
     def chat(
         self, user_convo: List[ChatMessage], options: Optional[ChatbotOptions]
