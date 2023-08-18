@@ -239,7 +239,7 @@ class Chatbot:
         if not id:
             raise ValueError("flowchart_id is required")
         return requests.get(base + "/flowcharts/" + id).json()
-    
+
     @staticmethod
     def upsert_flow_chart_by_id(base: str, args: dict) -> dict:
         return requests.post(base + "/flowcharts/", json=args).json()
@@ -254,12 +254,12 @@ class Chatbot:
         if not id:
             raise ValueError("flowchart_id is required")
         return requests.get(base + "/flowcharts/" + id + "/run", json=args).json()
-    
+
     @staticmethod
     def get_all_jobs(base: str, args: dict) -> dict:
         return requests.get(base + "/jobs", json=args).json()
 
-    @staticmethod   
+    @staticmethod
     def get_job_by_id(base: str, args: dict) -> dict:
         id = args.get("job_id", "")
         if not id:
@@ -310,6 +310,41 @@ class Chatbot:
         except Exception as exc:
             return {"error": str(exc)}
 
+    def create_chat_completion(
+        self, messages_to_send: list, options: Optional[ChatbotOptions]
+    ) -> dict:
+        return openai.ChatCompletion.create(
+            messages=messages_to_send,
+            functions=self.functions,
+            **options.dict() if options else {},
+        )
+
+    def process_function_call(
+        self, message: dict, options: Optional[ChatbotOptions]
+    ) -> dict:
+        resp = self.run_function(message["function_call"])
+        self.messages.append(
+            {
+                "role": "function",
+                "name": message["function_call"]["name"],
+                "content": json.dumps(resp),
+            }
+        )
+        return self.create_chat_completion(self.messages, options)
+
+    def get_message_content(
+        self, user_convo: List[ChatMessage], options: Optional[ChatbotOptions]
+    ) -> str:
+        payload = list(map(lambda x: x.convert_to_openai(), user_convo))
+        messages_to_send = self.messages + payload
+        r = self.create_chat_completion(messages_to_send, options)
+        if "choices" not in r:
+            raise ValueError(f"Unexpected response from OpenAI: {r}")
+        message = r["choices"][0]["message"]
+        while message.get("function_call"):
+            r = self.process_function_call(message, options)
+            message = r["choices"][0]["message"]
+        return message["content"]
 
     def chat(
         self, user_convo: List[ChatMessage], options: Optional[ChatbotOptions]
@@ -318,32 +353,6 @@ class Chatbot:
         This function takes in a list of messages and returns a response from the model.
         """
         try:
-            payload = list(map(lambda x: x.convert_to_openai(), user_convo))
-            messages_to_send = self.messages + payload
-
-            r = openai.ChatCompletion.create(
-                messages=messages_to_send,
-                functions=self.functions,
-                **options.dict() if options else {},
-            )
-            if "choices" not in r:
-                raise ValueError(f"Unexpected response from OpenAI: {r}")
-            message = r["choices"][0]["message"]
-            while message.get("function_call"):
-                resp = self.run_function(message["function_call"])
-                self.messages.append(
-                    {
-                        "role": "function",
-                        "name": message["function_call"]["name"],
-                        "content": json.dumps(resp),
-                    }
-                )
-                r = openai.ChatCompletion.create(
-                    messages=self.messages,
-                    functions=self.functions,
-                    **options.dict() if options else {},
-                )
-                message = r["choices"][0]["message"]
-            return message["content"]
+            return self.get_message_content(user_convo, options)
         except Exception as e:
             return str(e)
