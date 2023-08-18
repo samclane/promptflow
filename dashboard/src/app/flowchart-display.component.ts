@@ -27,7 +27,17 @@ export class FlowchartDisplayComponent implements AfterViewInit {
       take(1),
       switchMap((id) => this.flowchartService.getMermaidString(id)),
       switchMap((mermaidString) => {
-        mermaid.default.initialize({ startOnLoad: false });
+        mermaid.default.initialize({
+          startOnLoad: false,
+          theme: 'base',
+          themeVariables: {
+            primaryColor: '#3b82f6',
+            primaryTextColor: '#fff',
+            secondaryColor: '#fff',
+            edgeBorderColor: '#3b82f6',
+            nodeTextColor: '#000',
+          }
+        });
         let element = document.querySelector('#diagram');
         if (element) {
           console.log(mermaidString);
