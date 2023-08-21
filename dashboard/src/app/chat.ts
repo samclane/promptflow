@@ -14,7 +14,7 @@ export interface ChatOptions {
     temperature?: number;
     top_p?: number;
     n?: number;
-    max_tokens?: number | string;
+    max_tokens?: number | null;
     presence_penalty?: number;
     frequency_penalty?: number;
 }
@@ -24,7 +24,7 @@ export const DEFAULT_OPTIONS: ChatOptions = {
     temperature: 1,
     top_p: 1,
     n: 1,
-    max_tokens: '',
+    max_tokens: null,
     presence_penalty: 0,
     frequency_penalty: 0
 };

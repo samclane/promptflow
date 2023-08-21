@@ -30,6 +30,7 @@ export class ChatService {
     switchMap(([_, messages]) => {
       const optionsFromStorage = localStorage.getItem('chatOptions');
       const options: ChatOptions = optionsFromStorage ? JSON.parse(optionsFromStorage) : DEFAULT_OPTIONS;
+      options['max_tokens'] = options['max_tokens'] || null; // null if not set
       return this.http.post<ChatResponse>(this.buildUrl('/chat'), {messages, options});
     }),
     tap((m) => {
