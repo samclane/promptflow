@@ -469,7 +469,7 @@ def post_message(
     messages: List[chatbot.ChatMessage],
     options: Optional[chatbot.ChatbotOptions] = None,
 ) -> chatbot.ChatResponse:
-    """Post a message to the chatbot (currently only GPT4)"""
+    """Post a message to the chatbot"""
     bot = chatbot.Chatbot()
     ai_response = bot.chat(messages, options)
     return chatbot.ChatResponse(
