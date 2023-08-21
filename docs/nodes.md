@@ -66,9 +66,7 @@ Parses a filename and a data key from `state.result` and writes the data to the 
 
 ## History
 
-Saves the output of the previous node to a running history. Useful for chatbots or interactive programs. Follows OpenAI's history scheme, with 3 roles: `assistant`, `user`, and `system`. 
-
-For a simple example of History Node usage, see [Usage](working-with-llms).
+Saves the output of the previous node to a running history. Useful for chatbots or interactive programs. Follows OpenAI's history scheme, with 3 roles: `assistant`, `user`, and `system`.
 
 ### ManualHistory
 
@@ -109,8 +107,6 @@ Queries a Pinecone vector store.
 
 Outputs an f-string style formatted string.
 
-For a simple example of Prompt Node usage, see [Usage](working-with-llms).
-
 ### Usage
 
 To inject the result of the previous node, use `{state.result}`. For example:
@@ -125,8 +121,7 @@ Connecting the following flowchart would allow the user to program any "personal
 
 ## LLMs
 
-Call to a Large Language Model. 
-
+Call to a Large Language Model.
 
 ### OpenAI
 
@@ -280,7 +275,7 @@ Validate JSON against a user-provided schema.
 
 Converts a string to JSON.
 
-(Search)=
+(SearchNode)=
 ## Search
 
 Nodes that search the web
