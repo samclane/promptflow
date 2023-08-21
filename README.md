@@ -23,11 +23,20 @@ When run your flowchart, PromptFlow executes each node in the sequence defined b
 
 ## 🛠️ Initial Setup 
 
-## TODO
+Before starting, make sure to populate the `.env` file with the appropriate values. The `.env` file should be located in the root directory of the project.
 
 ## 🚀 Launching
 
-## TODO
+## Docker Compose
+
+The easiest way to run PromptFlow is with Docker Compose. To do so, run the following command:
+
+```bash
+docker compose up --build
+```
+
+This will run the DB, Redis, API (Backend), Celery Worker, and Frontend containers. The API will run on port `8069` by default, with the frontend
+on port `4200`.
 
 ## 📚 Documentation
 
