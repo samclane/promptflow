@@ -99,6 +99,10 @@ After saving, you should see the new nodes and branches in the flowchart view.
 
 ![Flowchart View 2](../screenshots/docs/flowchartview2.png)
 
+To run this flowchart, click the `Run Flowchart` button again. This will create a new job, which can be viewed from the `Jobs` tab.
+
+![Flowchart Job 2](../screenshots/docs/flowchartrandomoutput.png)
+
 (Jobs)=
 # Jobs
 
