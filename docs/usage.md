@@ -58,7 +58,6 @@ While this flowchart doesn't do much, let's run it anyway. Click the `Run Flowch
 
 Let's try making this more interesting. In the flowchart view, go to the `Import Flowchart JSON` card, and edit the JSON as so:
 
-
 ```json
 {
   "label": "Documentation Example",
