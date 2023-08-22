@@ -39,14 +39,8 @@ As an example, paste in this code:
   "nodes": [
     {
       "uid": "start_node_1",
-      "label": "StartNode",
-      "node_type": "StartNode",
-      "graph_id": "doc_example_1",
-      "metadata": {
-        "options": {
-          "label": "StartNode"
-        }
-      }
+      "label": "Start",
+      "node_type": "StartNode"
     }
   ],
   "branches": []
@@ -89,5 +83,4 @@ For a more advanced, and applicable flowchart, try the following Prompt:
 Create a flowchart named "Documentation Example 2" with a StartNode, an InputNode, and an OpenAINode, all linked together in a circle.
 ```
 
-This will create a simple, memory-less chatbot. It can be run the same way as the previous flowchart. Input can be given to the Job as shown above, via the 
-`Job Input` form.
+This will create a simple, memory-less chatbot. It can be run the same way as the previous flowchart. Input can be given to the Job as shown above, via the `Job Input` form.
