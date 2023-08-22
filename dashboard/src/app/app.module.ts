@@ -25,6 +25,7 @@ import { PopoverComponent } from './popover.component';
 import { ChatOptionsComponent } from './chat-options.component';
 import { ChatOptionsPopoverComponent } from './chat-options-popover.component';
 import { ToggleButtonComponent } from './toggle-button.component';
+import { ToggleSliderComponent } from './toggle-slider.component';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -34,8 +35,7 @@ const routes: Routes = [
   { path: 'jobs/:id', component: JobDetailComponent },
   { path: 'nodes', component: NodeListComponent },
   { path: 'chat', component: ChatContainerComponent },
-  { path: 'chat-options', component: ChatOptionsComponent },
-  { path: 'toggle', component: ToggleButtonComponent }
+  { path: 'chat-options', component: ChatOptionsComponent }
 ];
 
 
@@ -61,7 +61,8 @@ const routes: Routes = [
     PopoverComponent,
     ChatOptionsComponent,
     ChatOptionsPopoverComponent,
-    ToggleButtonComponent
+    ToggleButtonComponent,
+    ToggleSliderComponent
   ],
   imports: [
     BrowserModule,
