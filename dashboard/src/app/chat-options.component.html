@@ -1,32 +1,31 @@
 <form [formGroup]="optionsForm" class="p-4">
-    <div class="mb-4">
-      <label class="block text-gray-700 text-sm font-bold mb-2" for="model">Model:</label>
-      <input type="text" formControlName="model" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-    </div>
-    <div class="mb-4">
-      <label class="block text-gray-700 text-sm font-bold mb-2" for="temperature">Temperature:</label>
-      <input type="number" formControlName="temperature" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-    </div>
-    <div class="mb-4">
-      <label class="block text-gray-700 text-sm font-bold mb-2" for="top_p">Top P:</label>
-      <input type="number" formControlName="top_p" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-    </div>
-    <div class="mb-4">
-      <label class="block text-gray-700 text-sm font-bold mb-2" for="n">N:</label>
-      <input type="number" formControlName="n" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-    </div>
-    <div class="mb-4">
-      <label class="block text-gray-700 text-sm font-bold mb-2" for="max_tokens">Max Tokens:</label>
-      <input type="text" formControlName="max_tokens" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-    </div>
-    <div class="mb-4">
-      <label class="block text-gray-700 text-sm font-bold mb-2" for="presence_penalty">Presence Penalty:</label>
-      <input type="number" formControlName="presence_penalty" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-    </div>
-    <div class="mb-4">
-      <label class="block text-gray-700 text-sm font-bold mb-2" for="frequency_penalty">Frequency Penalty:</label>
-      <input type="number" formControlName="frequency_penalty" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-    </div>
-    <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Save</button>
-  </form>
-  
+  <div class="mb-4">
+    <label class="block text-gray-700 text-sm font-bold mb-2" for="model">Model:</label>
+    <input type="text" formControlName="model" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+  </div>
+  <div class="mb-4">
+    <label class="block text-gray-700 text-sm font-bold mb-2" for="temperature">Temperature:</label>
+    <app-slider [min]="0" [max]="1" [start]="0.5" [stepSize]="0.1" formControlName="temperature"></app-slider>
+  </div>
+  <div class="mb-4">
+    <label class="block text-gray-700 text-sm font-bold mb-2" for="top_p">Top P:</label>
+    <app-slider [min]="0" [max]="1" [start]="0.5" [stepSize]="0.1" formControlName="top_p"></app-slider>
+  </div>
+  <div class="mb-4">
+    <label class="block text-gray-700 text-sm font-bold mb-2" for="n">N:</label>
+    <input type="number" formControlName="n" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+  </div>
+  <div class="mb-4">
+    <label class="block text-gray-700 text-sm font-bold mb-2" for="max_tokens">Max Tokens:</label>
+    <input type="text" formControlName="max_tokens" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+  </div>
+  <div class="mb-4">
+    <label class="block text-gray-700 text-sm font-bold mb-2" for="presence_penalty">Presence Penalty:</label>
+    <app-slider [min]="-1" [max]="1" [start]="0" [stepSize]="0.1" formControlName="presence_penalty"></app-slider>
+  </div>
+  <div class="mb-4">
+    <label class="block text-gray-700 text-sm font-bold mb-2" for="frequency_penalty">Frequency Penalty:</label>
+    <app-slider [min]="-1" [max]="1" [start]="0" [stepSize]="0.1" formControlName="frequency_penalty"></app-slider>
+  </div>
+  <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Save</button>
+</form>
