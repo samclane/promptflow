@@ -54,6 +54,50 @@ Scroll up and click on the `Documentation Example` flowchart to view it.
 
 While this flowchart doesn't do much, let's run it anyway. Click the `Run Flowchart` button in the top left corner. This should create a new Job under the `Jobs` tab. On the far-right of the new job, click the `View Details` button to view the job.
 
+![Flowchart Job](../screenshots/docs/flowchartjoboutput.png)
+
+Let's try making this more interesting. In the flowchart view, go to the `Import Flowchart JSON` card, and edit the JSON as so:
+
+
+```json
+{
+  "label": "Documentation Example",
+  "uid": "doc_example_1",
+  "nodes": [
+    {
+      "uid": "start_node_1",
+      "label": "Start",
+      "node_type": "StartNode"
+    },
+    {
+        "uid": "random_node_1",
+        "label": "Random",
+        "node_type": "RandomNode"
+    },
+    {
+        "uid": "random_node_2",
+        "label": "Random2",
+        "node_type": "RandomNode"
+    }
+  ],
+  "branches": [
+    {
+        "uid": "branch_1",
+        "prev": "start_node_1",
+        "next": "random_node_1",
+    },
+    {
+        "uid": "branch_2",
+        "prev": "random_node_1",
+        "next": "random_node_2",
+    }
+  ]
+}
+```
+
+After saving, you should see the new nodes and branches in the flowchart view.
+
+![Flowchart View 2](../screenshots/docs/flowchartview2.png)
 
 (Jobs)=
 # Jobs

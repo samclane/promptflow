@@ -15,7 +15,11 @@ import networkx as nx
 import redis
 from pydantic import BaseModel  # pylint: disable=no-name-in-module
 
-from promptflow.src.connectors.connector import Connector
+from promptflow.src.connectors.connector import (
+    Connector,
+    DEFAULT_COND_NAME,
+    DEFAULT_COND_TEMPLATE,
+)
 from promptflow.src.connectors.partial_connector import PartialConnector
 from promptflow.src.node_map import node_map
 from promptflow.src.nodes.node_base import NodeBase
@@ -104,7 +108,9 @@ class Flowchart:
                 prev,
                 next,
                 TextData(
-                    connector_data["label"], connector_data["conditional"], flowchart
+                    connector_data.get("label", DEFAULT_COND_NAME),
+                    connector_data.get("conditional", DEFAULT_COND_TEMPLATE),
+                    flowchart,
                 ),
                 uid=connector_data["uid"],
             )
