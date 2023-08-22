@@ -38,7 +38,7 @@
     </div>
 
     <div class="mx-auto w-full max-sm:grid-cols-1 space-x-1 col-span-3">
-      <app-flowchart-import-json [flowchartJson]="vm.flowchart | json"></app-flowchart-import-json>
+      <app-flowchart-import-json [flowchartJson]="vm.flowchart | json" (jsonImported)="onJsonImported()"></app-flowchart-import-json>
     </div>  
   </div>
 </div>

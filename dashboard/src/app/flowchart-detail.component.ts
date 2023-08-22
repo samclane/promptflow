@@ -49,10 +49,16 @@ export class FlowchartDetailComponent {
 
   runFlowchart(): void {
     this.flowChartActionSource.next('RUN');
+    this.router.routeReuseStrategy.shouldReuseRoute = () => false;
+    this.router.onSameUrlNavigation = 'reload';
+    this.router.navigate([this.router.url]);
   }
 
   stopFlowchart(): void {
     this.flowChartActionSource.next('STOP');
+    this.router.routeReuseStrategy.shouldReuseRoute = () => false;
+    this.router.onSameUrlNavigation = 'reload';
+    this.router.navigate([this.router.url]);
   }
 
   deleteFlowchart(): void {
@@ -65,5 +71,11 @@ export class FlowchartDetailComponent {
       this.deleteFlowchart();
     }
     // else, user cancelled, do nothing
+  }
+
+  onJsonImported(): void {
+    this.router.routeReuseStrategy.shouldReuseRoute = () => false;
+    this.router.onSameUrlNavigation = 'reload';
+    this.router.navigate([this.router.url]);
   }
 }

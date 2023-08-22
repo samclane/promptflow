@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, OnChanges, SimpleChanges } from "@angular/core";
+import { ChangeDetectionStrategy, Component, Input, OnChanges, SimpleChanges, EventEmitter, Output } from "@angular/core";
 import { catchError, combineLatest, filter, map, merge, of, startWith, Subject, take } from "rxjs";
 import { FlowchartService } from "./flowchart.service";
 import { AbstractControl, FormBuilder, ValidationErrors, Validators } from '@angular/forms';
@@ -10,6 +10,8 @@ import { Flowchart } from "./flowchart";
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class FlowchartImportJson implements OnChanges {
+  @Output() jsonImported = new EventEmitter<void>(); // Define the Output
+
   constructor(
     private readonly flowchartService: FlowchartService,
     private readonly formBuilder: FormBuilder
@@ -74,6 +76,7 @@ export class FlowchartImportJson implements OnChanges {
       filter((x): x is Flowchart => !('error' in x))
     ).subscribe(() => {
       this.flowchartService.getFlowcharts();
+      this.jsonImported.emit();
     });
   }
 
