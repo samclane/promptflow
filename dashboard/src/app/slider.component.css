@@ -1,0 +1,17 @@
+.slider {
+    @apply appearance-none w-full h-4 rounded-full bg-gray-300 outline-none transition-opacity duration-200;
+    opacity: 0.7;
+  }
+  
+  .slider:hover {
+    @apply opacity-100;
+  }
+  
+  .slider::-webkit-slider-thumb {
+    @apply appearance-none w-6 h-6 rounded-full bg-blue-500 cursor-pointer;
+  }
+  
+  .slider::-moz-range-thumb {
+    @apply w-6 h-6 rounded-full bg-blue-500 cursor-pointer;
+  }
+  
