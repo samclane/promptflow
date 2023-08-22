@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { BehaviorSubject } from 'rxjs';
 import { ChatOptions, DEFAULT_OPTIONS } from './chat';
@@ -11,6 +11,7 @@ import { ChatOptions, DEFAULT_OPTIONS } from './chat';
 export class ChatOptionsComponent implements OnInit {
   optionsForm: FormGroup;
   options$ = new BehaviorSubject<ChatOptions>(this.loadOptions());
+  @Output() saveOptions = new EventEmitter<ChatOptions>();
 
   constructor(private fb: FormBuilder) {
     this.optionsForm = this.fb.group({
@@ -36,5 +37,9 @@ export class ChatOptionsComponent implements OnInit {
   private loadOptions(): ChatOptions {
     const options = localStorage.getItem('chatOptions');
     return options ? JSON.parse(options) : {};
+  }
+
+  onSave() {
+    this.saveOptions.emit(this.optionsForm.value);
   }
 }

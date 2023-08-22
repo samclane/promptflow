@@ -27,5 +27,5 @@
     <label class="block text-gray-700 text-sm font-bold mb-2" for="frequency_penalty">Frequency Penalty:</label>
     <app-slider [min]="-1" [max]="1" [start]="0" [stepSize]="0.1" formControlName="frequency_penalty"></app-slider>
   </div>
-  <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Save</button>
+  <button (click)="onSave()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Save</button>
 </form>
