@@ -89,5 +89,22 @@ export class FlowchartImportJson implements OnChanges {
 
     return null;
   }
-
+  
+  public importJsonFile(event: Event): void {
+    const input = event.target as HTMLInputElement;
+  
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+      const reader = new FileReader();
+  
+      reader.onload = (e) => {
+        const contents = e.target?.result as string;
+        this.flowchartForm.setValue(contents);
+        this.importJson();
+      };
+  
+      reader.readAsText(file);
+    }
+  }
+  
 }
