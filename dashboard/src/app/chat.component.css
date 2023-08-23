@@ -47,5 +47,5 @@
 }
 
 .loading {
-  @apply text-center text-gray-500 italic;
+  @apply text-center text-gray-500 italic animate-pulse;
 }

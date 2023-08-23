@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { trigger, transition, style, animate } from '@angular/animations';
 import { combineLatest, BehaviorSubject } from 'rxjs';
 import { FormBuilder } from '@angular/forms';
 import { ChatService } from './chat.service';
@@ -7,7 +8,15 @@ import { ChatService } from './chat.service';
   selector: 'app-chat',
   templateUrl: './chat.component.html',
   styleUrls: ['./chat.component.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [
+    trigger('messageState', [
+      transition(':enter', [
+        style({ opacity: 0 }),
+        animate('300ms ease-out', style({ opacity: 1 }))
+      ])
+    ])
+  ]
 })
 export class ChatComponent {
   constructor(
