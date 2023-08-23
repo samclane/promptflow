@@ -1,3 +1,5 @@
-<button (click)="toggleChat()" class="chat-button">{{ showChat ? 'Close' : 'Chat' }}</button>
-
-<app-chat [hidden]="!showChat"></app-chat>
+<div class="chat-container">
+    <button (click)="toggleChat()" class="chat-button">{{ (showChat$ | async) ? 'Close' : 'Chat' }}</button>
+    <app-chat [@chatState]="chatState"></app-chat>
+  </div>
+  
