@@ -29,15 +29,17 @@ export class FlowchartDetailComponent {
   private readonly flowChartActionProcess$ = merge(
     this.flowChartAction$.pipe(
       filter((x) => x === 'RUN'),
-      switchMap(() => this.flowchartService.runFlowchart(this.id ?? ''))
+      switchMap(() => this.flowchartService.runFlowchart(this.id ?? '')),
+      tap(() => this.reloadPage())
     ),
     this.flowChartAction$.pipe(
       filter((x) => x === 'STOP'),
-      switchMap(() => this.flowchartService.stopFlowchart(this.id ?? ''))
+      switchMap(() => this.flowchartService.stopFlowchart(this.id ?? '')),
+      tap(() => this.reloadPage())
     )
   ).pipe(
     tap(() => {
-      this.jobListComponent?.getJobs()
+      this.jobListComponent?.getJobs();
     }),
     startWith(null)
   );
@@ -47,18 +49,18 @@ export class FlowchartDetailComponent {
     flowchart: this.flowchart$
   }); 
 
-  runFlowchart(): void {
-    this.flowChartActionSource.next('RUN');
+  private reloadPage(): void {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.router.onSameUrlNavigation = 'reload';
     this.router.navigate([this.router.url]);
   }
 
+  runFlowchart(): void {
+    this.flowChartActionSource.next('RUN');
+  }
+
   stopFlowchart(): void {
     this.flowChartActionSource.next('STOP');
-    this.router.routeReuseStrategy.shouldReuseRoute = () => false;
-    this.router.onSameUrlNavigation = 'reload';
-    this.router.navigate([this.router.url]);
   }
 
   deleteFlowchart(): void {
