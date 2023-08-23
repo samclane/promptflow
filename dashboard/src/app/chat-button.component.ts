@@ -18,7 +18,8 @@ import { BehaviorSubject } from 'rxjs';
         overflow: 'hidden',
         opacity: 1
       })),
-      transition('hidden <=> visible', animate('200ms'))
+      transition('hidden => visible', animate('400ms ease-in-out')),
+      transition('visible => hidden', animate('400ms ease-in-out'))
     ])
   ]
 })
