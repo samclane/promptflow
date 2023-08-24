@@ -128,7 +128,7 @@ class Chatbot:
                                     },
                                     "conditional": {
                                         "type": "string",
-                                        "description": "This is the condition that must be met in order for this branch to be taken. This is a python expression that will be evaluated in the context of the flowchart.",
+                                        "description": "This is the condition that must be met in order for this branch to be taken. This is a python expression that will be evaluated in the context of the flowchart. The previous node's output can be accessed with `state.result`.",
                                     },
                                     "prev": {
                                         "type": "string",

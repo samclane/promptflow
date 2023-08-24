@@ -58,15 +58,15 @@ class MermaidConverter:
         self.flowchart = flowchart
         self.orientation = orientation
 
-    def sanitize_uid(self, uid):
+    def sanitize_uid(self, uid) -> str:
         """Mermaid does not allow spaces in node names, so we replace them with underscores"""
         return uid.replace(" ", "_")
 
-    def convert_node(self, node: "NodeBase"):
+    def convert_node(self, node: "NodeBase") -> str:
         """Converts a node to mermaid syntax"""
         return f"\t{node.mermaid_shape.value.substitute(uid=self.sanitize_uid(node.uid), label=node.label)}\n"
 
-    def convert_connector(self, connector: "Connector"):
+    def convert_connector(self, connector: "Connector") -> str:
         """Converts a connector to mermaid syntax"""
         if connector.condition_label:
             return f"\t{connector.mermaid_shape.value.substitute(uid=self.sanitize_uid(connector.prev.uid), label=connector.condition_label, uid2=self.sanitize_uid(connector.next.uid))}\n"
