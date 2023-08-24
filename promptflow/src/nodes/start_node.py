@@ -4,6 +4,7 @@ Also signals the start of the flowchart
 """
 from typing import TYPE_CHECKING, Any
 
+from promptflow.src.mermaid_converter import MermaidNodeShape
 from promptflow.src.nodes.node_base import FlowchartJSTypes, NodeBase, NxNodeShape
 from promptflow.src.themes import monokai
 
@@ -19,6 +20,7 @@ class StartNode(NodeBase):
     node_color = monokai.BLUE
     nx_shape = NxNodeShape.CIRCLE
     js_shape = FlowchartJSTypes.start
+    mermaid_shape = MermaidNodeShape.STADIUM
 
     def __init__(
         self,

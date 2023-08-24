@@ -6,6 +6,7 @@ from abc import ABC, abstractmethod
 from enum import Enum
 from typing import TYPE_CHECKING, Any
 
+from promptflow.src.mermaid_converter import MermaidNodeShape
 from promptflow.src.serializable import Serializable
 from promptflow.src.state import State
 from promptflow.src.themes import monokai
@@ -48,6 +49,7 @@ class NodeBase(Serializable, ABC):
     color = monokai.WHITE
     nx_shape = NxNodeShape.SQUARE
     js_shape = FlowchartJSTypes.operation
+    mermaid_shape = MermaidNodeShape.ROUND_RECT
     prev_color = color
 
     def __init__(

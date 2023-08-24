@@ -5,6 +5,7 @@ between two nodes in the flowchart.
 import logging
 from typing import Optional
 
+from promptflow.src.mermaid_converter import MermaidConnectorShape
 from promptflow.src.nodes.node_base import NodeBase
 from promptflow.src.serializable import Serializable
 from promptflow.src.text_data import TextData
@@ -20,6 +21,8 @@ class Connector(Serializable):
     """
     A connection between two nodes in the flowchart.
     """
+
+    mermaid_shape = MermaidConnectorShape.ARROW
 
     def __init__(
         self,
@@ -52,6 +55,8 @@ class Connector(Serializable):
         self.condition_label: Optional[str] = (
             None if is_condition_default(condition) else condition.label
         )
+        if self.condition_label:
+            self.mermaid_shape = MermaidConnectorShape.ARROW_TEXT
 
     @property
     def label(self) -> str:
