@@ -285,7 +285,7 @@ class Chatbot:
             name = func_call.get("name")
             args_json = func_call.get("arguments", "{}")
             args = json.loads(args_json)
-            base = "http://localhost:8000"  # TODO: change this to the real base url
+            base = "http://localhost:" + os.environ["API_PORT"]
 
             if name == "get_flowcharts":
                 return self.get_flowcharts(base)

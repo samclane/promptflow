@@ -4,8 +4,8 @@
 
 export const environment = {
   production: false,
-  promptflowApiBaseUrl: 'http://127.0.0.1:8069',
-  promptflowWsBaseUrl: 'ws://127.0.0.1:8069'
+  promptflowApiBaseUrl: 'http://127.0.0.1:' + (process.env['API_PORT'] || 8000),
+  promptflowWsBaseUrl: 'ws://127.0.0.1:' + (process.env['API_PORT'] || 8000),
 };
 
 /*
