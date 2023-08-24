@@ -130,4 +130,10 @@ For a more advanced, and applicable flowchart, try the following Prompt:
 Create a flowchart named "Documentation Example 2" with a StartNode, an InputNode, and an OpenAINode, all linked together in a circle.
 ```
 
-This will create a simple, memory-less chatbot. It can be run the same way as the previous flowchart. Input can be given to the Job as shown above, via the `Job Input` form.
+This will create a simple, memory-less chatbot. 
+
+![Chatbot Flowchart](../screenshots/docs/chatcircle.png)
+
+It can be run the same way as the previous flowchart. Input can be given to the Job as shown above, via the `Job Input` form.
+
+![Chat Input](../screenshots/docs/chatinput.png)
