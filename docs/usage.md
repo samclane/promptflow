@@ -83,12 +83,12 @@ Let's try making this more interesting. In the flowchart view, go to the `Import
     {
         "uid": "branch_1",
         "prev": "start_node_1",
-        "next": "random_node_1",
+        "next": "random_node_1"
     },
     {
         "uid": "branch_2",
         "prev": "random_node_1",
-        "next": "random_node_2",
+        "next": "random_node_2"
     }
   ]
 }
