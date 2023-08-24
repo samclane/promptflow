@@ -16,11 +16,12 @@ import redis
 from pydantic import BaseModel  # pylint: disable=no-name-in-module
 
 from promptflow.src.connectors.connector import (
-    Connector,
     DEFAULT_COND_NAME,
     DEFAULT_COND_TEMPLATE,
+    Connector,
 )
 from promptflow.src.connectors.partial_connector import PartialConnector
+from promptflow.src.mermaid_converter import MermaidConverter
 from promptflow.src.node_map import node_map
 from promptflow.src.nodes.node_base import NodeBase
 from promptflow.src.nodes.start_node import InitNode, StartNode
@@ -412,20 +413,8 @@ class Flowchart:
         """
         Return a mermaid string representation of the flowchart.
         """
-
-        def sanitize_uid(uid):
-            return uid.replace(" ", "_")
-
-        mermaid_str = "flowchart TD\n"
-        for node in self.nodes:
-            mermaid_str += f"\t{sanitize_uid(node.uid)}[{node.label}]\n"
-        for connector in self.connectors:
-            if connector.condition_label:
-                mermaid_str += f"\t{sanitize_uid(connector.prev.uid)} -->|{connector.condition_label}| {sanitize_uid(connector.next.uid)}\n"
-            else:
-                mermaid_str += f"\t{sanitize_uid(connector.prev.uid)} --> {sanitize_uid(connector.next.uid)}\n"
-
-        return mermaid_str
+        converter = MermaidConverter(self)
+        return converter.to_mermaid()
 
     def to_flowchart_js(self) -> str:
         """
