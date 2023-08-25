@@ -278,7 +278,7 @@ class Flowchart:
                 self.logger.error(
                     f"Error running node {cur_node.label}: {node_err}", exc_info=True
                 )
-                return state
+                raise node_err
             self.logger.info(f"Node {cur_node.label} output: {output}")
 
             if output is None:
