@@ -15,7 +15,6 @@ import { BehaviorSubject } from 'rxjs';
       })),
       state('visible', style({
         height: '*', // Will expand to content height
-        overflow: 'hidden',
         opacity: 1
       })),
       transition('hidden => visible', animate('400ms ease-in-out')),
