@@ -24,6 +24,7 @@ class State(Serializable):
         self.result: str = kwargs.get("result", "")
         self.data: Any = kwargs.get("data", {})
         self.logger = logging.getLogger(__name__)
+        self.exception: bool = False
 
     def reset(self) -> None:
         """

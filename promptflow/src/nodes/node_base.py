@@ -127,7 +127,11 @@ class NodeBase(Serializable, ABC):
         Handles setting the snapshot and returning the output.
         """
         state.snapshot[self.label] = state.snapshot.get(self.label, "")
-        output: str = self.run_subclass(before_result, state)
+        try:
+            output: str = self.run_subclass(before_result, state)
+        except Exception as node_exception:
+            state.exception = True
+            output = f"Error in node: {node_exception}"
         state.snapshot[self.label] = output
         state.result = output
         return output

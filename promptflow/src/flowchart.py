@@ -287,6 +287,12 @@ class Flowchart:
                 )
                 return state
 
+            if state.exception:
+                self.logger.info(
+                    f"Node {cur_node.label} raised exception, stopping execution"
+                )
+                return state
+
             for connector in cur_node.output_connectors:
                 if connector.condition.text.strip():
                     # evaluate condition and only add node2 to queue if condition is true
