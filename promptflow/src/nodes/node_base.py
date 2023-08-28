@@ -198,7 +198,11 @@ class NodeBase(Serializable, ABC):
         """
         Return the options for the node.
         """
-        options = {key: getattr(self, key) for key in self.get_option_keys()}
-        return {
-            "options": options,
-        }
+        options = {}
+        for key in self.get_option_keys():
+            options[key] = getattr(self, key)
+            if isinstance(options[key], Serializable):
+                options[key] = options[key].serialize()
+            else:
+                options[key] = options[key]
+        return options
