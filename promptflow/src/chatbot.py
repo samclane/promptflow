@@ -109,6 +109,10 @@ class Chatbot:
                                         "enum": list(node_map.keys()),
                                         "description": "This is the name of the node type as it appears in the database. This value can be acquired from the get_list_of_node_types function.",
                                     },
+                                    "metadata": {
+                                        "type": "object",
+                                        "description": "This is a dictionary of the node's metadata. The keys and values are specific to the node type.",
+                                    },
                                 },
                             },
                         },
