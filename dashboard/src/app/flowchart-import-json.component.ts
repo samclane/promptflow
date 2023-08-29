@@ -10,7 +10,7 @@ import { Flowchart } from "./flowchart";
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class FlowchartImportJson implements OnChanges {
-  @Output() jsonImported = new EventEmitter<void>(); // Define the Output
+  @Output() jsonImported = new EventEmitter<void>();
 
   constructor(
     private readonly flowchartService: FlowchartService,
@@ -104,6 +104,22 @@ export class FlowchartImportJson implements OnChanges {
       };
   
       reader.readAsText(file);
+    }
+  }
+
+  formatJson(): void {
+    try {
+      const json = JSON.parse(this.flowchartForm.value);
+      const formattedJson = JSON.stringify(json, null, 2);
+      this.flowchartForm.setValue(formattedJson);
+    } catch (e) {
+      this.vm$.pipe(
+        take(1),
+        map((x) => x.errorMessage),
+        filter((x) => x === ''),
+      ).subscribe(() => {
+        this.responseErrors.next('JSON object is invalid');
+      });
     }
   }
   

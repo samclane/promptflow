@@ -3,9 +3,10 @@
   <form (ngSubmit)="importJson()">
     <textarea [formControl]="flowchartForm" class="w-full text-gray-500 min-h-[600px] shadow-lg border rounded-lg p-2" placeholder="JSON"></textarea>
     <div class="flex mt-2">
-      <button type="submit" class="w-1/2 bg-blue-500 text-white shadow-lg rounded-lg py-2 hover:bg-blue-700 cursor-pointer mr-2">Submit</button>
+      <button type="submit" class="w-1/3 bg-blue-500 text-white shadow-lg rounded-lg py-2 hover:bg-blue-700 cursor-pointer mr-2">Submit</button>
+      <button class="w-1/3 bg-gray-500 text-white shadow-lg rounded-lg py-2 hover:bg-gray-700 cursor-pointer mr-2" (click)="formatJson(); $event.preventDefault()">Format</button>
       <input type="file" accept=".json" (change)="importJsonFile($event)" style="display:none" #jsonFile>
-      <button (click)="jsonFile.click()" class="w-1/2 bg-green-500 text-white shadow-lg rounded-lg py-2 hover:bg-green-700 cursor-pointer">Import JSON File</button>
+      <button (click)="jsonFile.click()" class="w-1/3 bg-green-500 text-white shadow-lg rounded-lg py-2 hover:bg-green-700 cursor-pointer">Import JSON File</button>
     </div>
             
     <div *ngIf="vm.errorMessage && vm.userHasTyped" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mt-4" role="alert">
