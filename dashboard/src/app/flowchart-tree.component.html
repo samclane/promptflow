@@ -5,11 +5,25 @@
         <span *ngIf="vm.expanded">[-]</span>
         <span *ngIf="!vm.expanded">[+]</span>
       </div>
+      <div *ngIf="vm.expanded" class="node-info">
+        <div class="card" *ngFor="let key of objectKeys(vm)">
+          <div class="card-header">{{ key }}</div>
+          <div class="card-body">{{ vm[key] }}</div>
+        </div>
+      </div>
       <div class="children" *ngIf="vm.expanded && vm.nodes">
-        <div class="child" *ngFor="let node of vm.nodes" (click)="node.expanded = !node.expanded">
-          {{ node.label }}
-          <span *ngIf="node.expanded">[-]</span>
-          <span *ngIf="!node.expanded">[+]</span>
+        <div *ngFor="let node of vm.nodes">
+          <div class="child" (click)="node.expanded = !node.expanded">
+            {{ node.label }}
+            <span *ngIf="node.expanded">[-]</span>
+            <span *ngIf="!node.expanded">[+]</span>
+          </div>
+          <div *ngIf="node.expanded" class="node-info">
+            <div class="card" *ngFor="let key of objectKeys(node)">
+              <div class="card-header">{{ key }}</div>
+              <div class="card-body">{{ node[key] | json }}</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

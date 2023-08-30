@@ -26,6 +26,10 @@ export class FlowchartTreeComponent implements OnInit, OnChanges {
       this.cdr.markForCheck();  // <-- Manually mark for check
     }
   }
+  objectKeys(obj: any): string[] {
+    return Object.keys(obj);
+  }
+  
 }
 
 

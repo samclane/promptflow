@@ -1,16 +1,28 @@
 .tree {
     @apply p-4;
-  }
-  
-  .node {
+}
+
+.node {
     @apply bg-blue-500 text-white rounded p-2;
-  }
-  
-  .children {
+}
+
+.children {
     @apply ml-4;
+}
+
+.child {
+    @apply bg-green-500 text-white rounded p-2 mt-2;
+}
+
+.card {
+    @apply bg-white rounded-lg shadow-lg p-2 mb-2 inline-block;
   }
   
-  .child {
-    @apply bg-green-500 text-white rounded p-2 mt-2;
+  .card-header {
+    @apply font-bold text-sm;
+  }
+  
+  .card-body {
+    @apply text-sm;
   }
   
