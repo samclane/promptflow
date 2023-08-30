@@ -8,7 +8,11 @@
       <input type="file" accept=".json" (change)="importJsonFile($event)" style="display:none" #jsonFile>
       <button (click)="jsonFile.click()" class="w-1/3 bg-green-500 text-white shadow-lg rounded-lg py-2 hover:bg-green-700 cursor-pointer">Import JSON File</button>
     </div>
-            
+    <div class="mt-2">
+      <app-flowchart-tree [treeData]="flowchartForm.getRawValue()"></app-flowchart-tree>
+    </div>
+    
+      
     <div *ngIf="vm.errorMessage && vm.userHasTyped" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mt-4" role="alert">
       {{ vm.errorMessage }}
     </div>

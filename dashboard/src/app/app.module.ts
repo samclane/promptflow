@@ -28,6 +28,7 @@ import { ChatOptionsPopoverComponent } from './chat-options-popover.component';
 import { ToggleButtonComponent } from './toggle-button.component';
 import { ToggleSliderComponent } from './toggle-slider.component';
 import { SliderComponent } from './slider.component';
+import { FlowchartTreeComponent } from './flowchart-tree.component';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -66,7 +67,8 @@ const routes: Routes = [
     ChatOptionsPopoverComponent,
     ToggleButtonComponent,
     ToggleSliderComponent,
-    SliderComponent
+    SliderComponent,
+    FlowchartTreeComponent
   ],
   imports: [
     BrowserModule,

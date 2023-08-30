@@ -1,0 +1,17 @@
+<div class="tree">
+    <div *ngIf="vm$ | async as vm">
+      <div class="node" (click)="vm.expanded = !vm.expanded">
+        {{ vm.label }}
+        <span *ngIf="vm.expanded">[-]</span>
+        <span *ngIf="!vm.expanded">[+]</span>
+      </div>
+      <div class="children" *ngIf="vm.expanded && vm.nodes">
+        <div class="child" *ngFor="let node of vm.nodes" (click)="node.expanded = !node.expanded">
+          {{ node.label }}
+          <span *ngIf="node.expanded">[-]</span>
+          <span *ngIf="!node.expanded">[+]</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  

@@ -1,0 +1,16 @@
+.tree {
+    @apply p-4;
+  }
+  
+  .node {
+    @apply bg-blue-500 text-white rounded p-2;
+  }
+  
+  .children {
+    @apply ml-4;
+  }
+  
+  .child {
+    @apply bg-green-500 text-white rounded p-2 mt-2;
+  }
+  
