@@ -9,7 +9,7 @@
       <button (click)="jsonFile.click()" class="w-1/3 bg-green-500 text-white shadow-lg rounded-lg py-2 hover:bg-green-700 cursor-pointer">Import JSON File</button>
     </div>
     <div class="mt-2">
-      <app-flowchart-tree [treeData]="flowchartForm.getRawValue()"></app-flowchart-tree>
+      <app-flowchart-tree [treeData]="flowchartForm.getRawValue()" (updatedJson)="handleUpdatedJson($event)"></app-flowchart-tree>
     </div>
     
       

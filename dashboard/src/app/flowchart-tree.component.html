@@ -7,9 +7,9 @@
       </div>
       <div *ngIf="vm.expanded" class="node-info">
         <div class="card" *ngFor="let key of objectKeys(vm)">
-          <div class="card-header">{{ key }}</div>
-          <div class="card-body">{{ vm[key] }}</div>
-        </div>
+            <div class="card-header">{{ key }}</div>
+            <input class="card-body" [(ngModel)]="vm[key]" (ngModelChange)="emitChange()" />
+        </div>          
       </div>
       <div class="children" *ngIf="vm.expanded && vm.nodes">
         <div *ngFor="let node of vm.nodes">
@@ -19,10 +19,12 @@
             <span *ngIf="!node.expanded">[+]</span>
           </div>
           <div *ngIf="node.expanded" class="node-info">
-            <div class="card" *ngFor="let key of objectKeys(node)">
-              <div class="card-header">{{ key }}</div>
-              <div class="card-body">{{ node[key] | json }}</div>
-            </div>
+            <div *ngIf="node.expanded" class="node-info">
+                <div class="card" *ngFor="let key of objectKeys(node)">
+                  <div class="card-header">{{ key }}</div>
+                  <input class="card-body" [(ngModel)]="node[key]" (ngModelChange)="emitChange()" />
+                </div>
+              </div>
           </div>
         </div>
       </div>
@@ -36,7 +38,7 @@
           <div *ngIf="branch.expanded" class="branch-info">
             <div class="card" *ngFor="let key of objectKeys(branch)">
               <div class="card-header">{{ key }}</div>
-              <div class="card-body">{{ branch[key] | json }}</div>
+              <input class="card-body" [(ngModel)]="branch[key]" (ngModelChange)="emitChange()" />
             </div>
           </div>
         </div>

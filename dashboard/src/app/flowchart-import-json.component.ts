@@ -122,5 +122,11 @@ export class FlowchartImportJson implements OnChanges {
       });
     }
   }
-  
+  handleUpdatedJson(updatedJson: string) {
+    let updatedJsonJson = JSON.parse(updatedJson);
+
+    this.flowchartJson = JSON.stringify(updatedJsonJson['source']['_value']);
+
+    this.formatJson();
+  }
 }
