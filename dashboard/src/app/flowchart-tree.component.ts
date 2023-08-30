@@ -43,6 +43,17 @@ export class FlowchartTreeComponent implements OnInit, OnChanges {
   emitChange() {
     this.updatedJson.emit(this.safeStringify(this.vm$) as string);
   }
+  isObject(value: any): boolean {
+    return typeof value === 'object';
+  }
+  
+  parseJson(value: string): any {
+    try {
+      return JSON.parse(value);
+    } catch (e) {
+      return null; // or some default value
+    }
+  }
 }
 
 

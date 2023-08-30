@@ -1,48 +1,53 @@
 <div class="tree">
     <div *ngIf="vm$ | async as vm">
-      <div class="node" (click)="vm.expanded = !vm.expanded">
-        {{ vm.label }}
-        <span *ngIf="vm.expanded">[-]</span>
-        <span *ngIf="!vm.expanded">[+]</span>
-      </div>
-      <div *ngIf="vm.expanded" class="node-info">
-        <div class="card" *ngFor="let key of objectKeys(vm)">
-            <div class="card-header">{{ key }}</div>
-            <input class="card-body" [(ngModel)]="vm[key]" (ngModelChange)="emitChange()" />
-        </div>          
-      </div>
-      <div class="children" *ngIf="vm.expanded && vm.nodes">
-        <div *ngFor="let node of vm.nodes">
-          <div class="child" (click)="node.expanded = !node.expanded">
-            {{ node.label }}
-            <span *ngIf="node.expanded">[-]</span>
-            <span *ngIf="!node.expanded">[+]</span>
-          </div>
-          <div *ngIf="node.expanded" class="node-info">
-            <div *ngIf="node.expanded" class="node-info">
-                <div class="card" *ngFor="let key of objectKeys(node)">
-                  <div class="card-header">{{ key }}</div>
-                  <input class="card-body" [(ngModel)]="node[key]" (ngModelChange)="emitChange()" />
-                </div>
-              </div>
-          </div>
+        <div class="node" (click)="vm.expanded = !vm.expanded">
+            {{ vm.label }}
+            <span *ngIf="vm.expanded">[-]</span>
+            <span *ngIf="!vm.expanded">[+]</span>
         </div>
-      </div>
-      <div class="branches" *ngIf="vm.expanded && vm.branches">
-        <div *ngFor="let branch of vm.branches">
-          <div class="branch" (click)="branch.expanded = !branch.expanded">
-            {{ branch.label }}
-            <span *ngIf="branch.expanded">[-]</span>
-            <span *ngIf="!branch.expanded">[+]</span>
-          </div>
-          <div *ngIf="branch.expanded" class="branch-info">
-            <div class="card" *ngFor="let key of objectKeys(branch)">
-              <div class="card-header">{{ key }}</div>
-              <input class="card-body" [(ngModel)]="branch[key]" (ngModelChange)="emitChange()" />
+        <div *ngIf="vm.expanded" class="node-info">
+            <div class="card" *ngFor="let key of objectKeys(vm)">
+                <div class="card-header">{{ key }}</div>
+                <input class="card-body" [(ngModel)]="vm[key]" (ngModelChange)="emitChange()" />
             </div>
-          </div>
         </div>
-      </div>
+        <div class="children" *ngIf="vm.expanded && vm.nodes">
+            <div *ngFor="let node of vm.nodes">
+                <div class="child" (click)="node.expanded = !node.expanded">
+                    {{ node.label }}
+                    <span *ngIf="node.expanded">[-]</span>
+                    <span *ngIf="!node.expanded">[+]</span>
+                </div>
+                <div *ngIf="node.expanded" class="node-info">
+                    <div *ngIf="node.expanded" class="node-info">
+                        <div class="card" *ngFor="let key of objectKeys(node)">
+                            <div class="card-header">{{ key }}</div>
+                            <input class="card-body" *ngIf="isObject(node[key])" [ngModel]="node[key] | json"
+                                (ngModelChange)="node[key] = parseJson($event)" />
+                            <input class="card-body" *ngIf="!isObject(node[key])" [(ngModel)]="node[key]"
+                                (ngModelChange)="emitChange()" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="branches" *ngIf="vm.expanded && vm.branches">
+            <div *ngFor="let branch of vm.branches">
+                <div class="branch" (click)="branch.expanded = !branch.expanded">
+                    {{ branch.label }}
+                    <span *ngIf="branch.expanded">[-]</span>
+                    <span *ngIf="!branch.expanded">[+]</span>
+                </div>
+                <div *ngIf="branch.expanded" class="branch-info">
+                    <div class="card" *ngFor="let key of objectKeys(branch)">
+                        <div class="card-header">{{ key }}</div>
+                        <input class="card-body" *ngIf="isObject(branch[key])" [ngModel]="branch[key] | json"
+                            (ngModelChange)="branch[key] = parseJson($event)" />
+                        <input class="card-body" *ngIf="!isObject(branch[key])" [(ngModel)]="branch[key]"
+                            (ngModelChange)="emitChange()" />
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
-  
