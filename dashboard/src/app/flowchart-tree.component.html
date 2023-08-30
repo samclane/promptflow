@@ -1,6 +1,6 @@
 <div class="tree">
     <div *ngIf="vm$ | async as vm">
-        <div class="node flex justify-between items-center" (click)="vm.expanded = !vm.expanded">
+        <div class="node bg-blue-500 flex justify-between items-center hover:bg-blue-600" (click)="vm.expanded = !vm.expanded">
             <div>
               {{ vm.label }}
               <span *ngIf="vm.expanded">[-]</span>
@@ -11,14 +11,14 @@
             </div>
           </div>
         <div *ngIf="vm.expanded" class="node-info">
-            <div class="card" *ngFor="let key of objectKeys(vm)">
+            <div class="card shadow-lg hover:shadow-xl" *ngFor="let key of objectKeys(vm)">
                 <div class="card-header">{{ key }}</div>
                 <input class="card-body" [(ngModel)]="vm[key]" (ngModelChange)="emitChange()" />
             </div>
         </div>
         <div class="children" *ngIf="vm.expanded && vm.nodes">
             <div *ngFor="let node of vm.nodes">
-                <div class="child flex justify-between items-center" (click)="node.expanded = !node.expanded">
+                <div class="child bg-green-500 flex justify-between items-center hover:bg-green-600" (click)="node.expanded = !node.expanded">
                     <div>
                         {{ node.label }}
                         <span *ngIf="node.expanded">[-]</span>
@@ -30,7 +30,7 @@
                 </div>
                 <div *ngIf="node.expanded" class="node-info">
                     <div *ngIf="node.expanded" class="node-info">
-                        <div class="card" *ngFor="let key of objectKeys(node)">
+                        <div class="card shadow-lg hover:shadow-xl" *ngFor="let key of objectKeys(node)">
                             <div class="card-header">{{ key }}</div>
                             <input class="card-body" *ngIf="isObject(node[key])" [ngModel]="node[key] | json"
                                 (ngModelChange)="node[key] = parseJson($event)" />
@@ -41,9 +41,9 @@
                 </div>
             </div>
         </div>
-        <div class="branches" *ngIf="vm.expanded && vm.branches">
+        <div class="branches " *ngIf="vm.expanded && vm.branches">
             <div *ngFor="let branch of vm.branches">
-                <div class="branch flex justify-between items-center" (click)="branch.expanded = !branch.expanded">
+                <div class="branch bg-blue-500 flex justify-between items-center hover:bg-blue-600" (click)="branch.expanded = !branch.expanded">
                     <div>
                         {{ branch.label }}
                         <span *ngIf="branch.expanded">[-]</span>
@@ -54,7 +54,7 @@
                     </div>
                 </div>
                 <div *ngIf="branch.expanded" class="branch-info">
-                    <div class="card" *ngFor="let key of objectKeys(branch)">
+                    <div class="card shadow-lg hover:shadow-xl" *ngFor="let key of objectKeys(branch)">
                         <div class="card-header">{{ key }}</div>
                         <input class="card-body" *ngIf="isObject(branch[key])" [ngModel]="branch[key] | json"
                             (ngModelChange)="branch[key] = parseJson($event)" />

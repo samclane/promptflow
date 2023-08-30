@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, Input, OnChanges, SimpleChanges, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, ChangeDetectionStrategy, Input, OnChanges, SimpleChanges, Output, EventEmitter } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
 @Component({
@@ -7,53 +7,50 @@ import { BehaviorSubject } from 'rxjs';
     styleUrls: ['./flowchart-tree.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class FlowchartTreeComponent implements OnInit, OnChanges {
-  @Input() treeData: string | undefined | null;
-  @Output() updatedJson = new EventEmitter<string>();
-  parsedJson: any;
-  constructor() {}
-  private _vm$ = new BehaviorSubject<any>(null);
-  public readonly vm$ = this._vm$.asObservable();
+export class FlowchartTreeComponent implements OnChanges {
+    @Input() treeData: string | undefined | null;
+    @Output() updatedJson = new EventEmitter<string>();
+    parsedJson: any;
+    constructor() { }
+    private _vm$ = new BehaviorSubject<any>(null);
+    public readonly vm$ = this._vm$.asObservable();
 
-  ngOnInit() {
-    console.log('Component initialized');
-  }
-  ngOnChanges(changes: SimpleChanges): void {
-    console.log('Component changed');
-    if (changes['treeData'] && changes['treeData'].currentValue) {
-      this.parsedJson = JSON.parse(this.treeData as string);
-      this._vm$.next(this.parsedJson);
-    }
-  }
-  objectKeys(obj: any): string[] {
-    return Object.keys(obj);
-  }
-  safeStringify(obj: any, cache = new Set()): string | null {
-    return JSON.stringify(obj, (key, value) => {
-      if (typeof value === 'object' && value !== null) {
-        if (cache.has(value)) {
-          // Remove cyclic reference
-          return;
+    ngOnChanges(changes: SimpleChanges): void {
+        console.log('Component changed');
+        if (changes['treeData'] && changes['treeData'].currentValue) {
+            this.parsedJson = JSON.parse(this.treeData as string);
+            this._vm$.next(this.parsedJson);
         }
-        cache.add(value);
-      }
-      return value;
-    });
-  }  
-  emitChange() {
-    this.updatedJson.emit(this.safeStringify(this.vm$) as string);
-  }
-  isObject(value: any): boolean {
-    return typeof value === 'object';
-  }
-  
-  parseJson(value: string): any {
-    try {
-      return JSON.parse(value);
-    } catch (e) {
-      return null; // or some default value
     }
-  }
+    objectKeys(obj: any): string[] {
+        return Object.keys(obj);
+    }
+    safeStringify(obj: any, cache = new Set()): string | null {
+        return JSON.stringify(obj, (key, value) => {
+            if (typeof value === 'object' && value !== null) {
+                if (cache.has(value)) {
+                    // Remove cyclic reference
+                    return;
+                }
+                cache.add(value);
+            }
+            return value;
+        });
+    }
+    emitChange() {
+        this.updatedJson.emit(this.safeStringify(this.vm$) as string);
+    }
+    isObject(value: any): boolean {
+        return typeof value === 'object';
+    }
+
+    parseJson(value: string): any {
+        try {
+            return JSON.parse(value);
+        } catch (e) {
+            return '';
+        }
+    }
 }
 
 

@@ -4,7 +4,7 @@
 
 .node,
 .branch {
-    @apply bg-blue-500 text-white rounded p-2;
+    @apply  text-white rounded p-2;
 }
 
 .children,
@@ -13,7 +13,7 @@
 }
 
 .child {
-    @apply bg-green-500 text-white rounded p-2 mt-2;
+    @apply  text-white rounded p-2 mt-2;
 }
 
 .branch {
@@ -21,7 +21,7 @@
 }
 
 .card {
-    @apply bg-white rounded-lg shadow-lg p-2 mb-2 inline-block mx-1;
+    @apply bg-white rounded-lg  p-2 mb-2 inline-block mx-1;
 }
 
 .card-header {
