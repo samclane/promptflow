@@ -1,10 +1,15 @@
 <div class="tree">
     <div *ngIf="vm$ | async as vm">
-        <div class="node" (click)="vm.expanded = !vm.expanded">
-            {{ vm.label }}
-            <span *ngIf="vm.expanded">[-]</span>
-            <span *ngIf="!vm.expanded">[+]</span>
-        </div>
+        <div class="node flex justify-between items-center" (click)="vm.expanded = !vm.expanded">
+            <div>
+              {{ vm.label }}
+              <span *ngIf="vm.expanded">[-]</span>
+              <span *ngIf="!vm.expanded">[+]</span>
+            </div>
+            <div class="text-gray-200 italic">
+                ({{ vm.nodes.length }} Nodes, {{ vm.branches.length }} Branches)
+            </div>
+          </div>
         <div *ngIf="vm.expanded" class="node-info">
             <div class="card" *ngFor="let key of objectKeys(vm)">
                 <div class="card-header">{{ key }}</div>
@@ -13,10 +18,15 @@
         </div>
         <div class="children" *ngIf="vm.expanded && vm.nodes">
             <div *ngFor="let node of vm.nodes">
-                <div class="child" (click)="node.expanded = !node.expanded">
-                    {{ node.label }}
-                    <span *ngIf="node.expanded">[-]</span>
-                    <span *ngIf="!node.expanded">[+]</span>
+                <div class="child flex justify-between items-center" (click)="node.expanded = !node.expanded">
+                    <div>
+                        {{ node.label }}
+                        <span *ngIf="node.expanded">[-]</span>
+                        <span *ngIf="!node.expanded">[+]</span>
+                    </div>
+                    <div class="text-gray-200 italic">
+                        ({{ objectKeys(node).length }} Properties)
+                    </div>
                 </div>
                 <div *ngIf="node.expanded" class="node-info">
                     <div *ngIf="node.expanded" class="node-info">
@@ -33,10 +43,15 @@
         </div>
         <div class="branches" *ngIf="vm.expanded && vm.branches">
             <div *ngFor="let branch of vm.branches">
-                <div class="branch" (click)="branch.expanded = !branch.expanded">
-                    {{ branch.label }}
-                    <span *ngIf="branch.expanded">[-]</span>
-                    <span *ngIf="!branch.expanded">[+]</span>
+                <div class="branch flex justify-between items-center" (click)="branch.expanded = !branch.expanded">
+                    <div>
+                        {{ branch.label }}
+                        <span *ngIf="branch.expanded">[-]</span>
+                        <span *ngIf="!branch.expanded">[+]</span>
+                    </div>
+                    <div class="text-gray-200 italic">
+                        ({{ objectKeys(branch).length }} Properties)
+                    </div>
                 </div>
                 <div *ngIf="branch.expanded" class="branch-info">
                     <div class="card" *ngFor="let key of objectKeys(branch)">
