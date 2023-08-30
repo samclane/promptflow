@@ -21,7 +21,7 @@
 }
 
 .card {
-    @apply bg-white rounded-lg shadow-lg p-2 mb-2 inline-block;
+    @apply bg-white rounded-lg shadow-lg p-2 mb-2 inline-block mx-1;
 }
 
 .card-header {
