@@ -1,10 +1,25 @@
 import { Component, ChangeDetectionStrategy, Input, OnChanges, SimpleChanges, Output, EventEmitter } from '@angular/core';
+import { trigger, transition, style, animate, state } from '@angular/animations';
 import { BehaviorSubject } from 'rxjs';
 
 @Component({
     selector: 'app-flowchart-tree',
     templateUrl: './flowchart-tree.component.html',
     styleUrls: ['./flowchart-tree.component.css'],
+    animations: [
+        trigger('slideInOut', [
+            state('in', style({ height: '*', opacity: 1, overflow: 'hidden' })),
+            transition(':enter', [
+              style({ height: '0', opacity: 0, overflow: 'hidden' }),
+              animate('200ms ease-in', style({ height: '*', opacity: 1, overflow: 'hidden' }))
+            ]),
+            transition(':leave', [
+              style({ height: '*', opacity: 1, overflow: 'hidden' }),
+              animate('200ms ease-in', style({ height: '0', opacity: 0, overflow: 'hidden' }))
+            ])
+          ])
+          
+    ],   
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class FlowchartTreeComponent implements OnChanges {

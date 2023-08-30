@@ -10,7 +10,7 @@
                 ({{ vm.nodes.length }} Nodes, {{ vm.branches.length }} Branches)
             </div>
           </div>
-        <div *ngIf="vm.expanded" class="node-info">
+        <div *ngIf="vm.expanded" class="node-info" [@slideInOut]="'in'">
             <div class="card shadow-lg hover:shadow-xl" *ngFor="let key of objectKeys(vm)">
                 <div class="card-header">{{ key }}</div>
                 <input class="card-body" [(ngModel)]="vm[key]" (ngModelChange)="emitChange()" />
@@ -28,15 +28,13 @@
                         ({{ objectKeys(node).length }} Properties)
                     </div>
                 </div>
-                <div *ngIf="node.expanded" class="node-info">
-                    <div *ngIf="node.expanded" class="node-info">
-                        <div class="card shadow-lg hover:shadow-xl" *ngFor="let key of objectKeys(node)">
-                            <div class="card-header">{{ key }}</div>
-                            <input class="card-body" *ngIf="isObject(node[key])" [ngModel]="node[key] | json"
-                                (ngModelChange)="node[key] = parseJson($event)" />
-                            <input class="card-body" *ngIf="!isObject(node[key])" [(ngModel)]="node[key]"
-                                (ngModelChange)="emitChange()" />
-                        </div>
+                <div *ngIf="node.expanded" class="node-info" [@slideInOut]="'in'">
+                    <div class="card shadow-lg hover:shadow-xl" *ngFor="let key of objectKeys(node)">
+                        <div class="card-header">{{ key }}</div>
+                        <input class="card-body" *ngIf="isObject(node[key])" [ngModel]="node[key] | json"
+                            (ngModelChange)="node[key] = parseJson($event)" />
+                        <input class="card-body" *ngIf="!isObject(node[key])" [(ngModel)]="node[key]"
+                            (ngModelChange)="emitChange()" />
                     </div>
                 </div>
             </div>
@@ -53,7 +51,7 @@
                         ({{ objectKeys(branch).length }} Properties)
                     </div>
                 </div>
-                <div *ngIf="branch.expanded" class="branch-info">
+                <div *ngIf="branch.expanded" class="branch-info" [@slideInOut]="'in'">
                     <div class="card shadow-lg hover:shadow-xl" *ngFor="let key of objectKeys(branch)">
                         <div class="card-header">{{ key }}</div>
                         <input class="card-body" *ngIf="isObject(branch[key])" [ngModel]="branch[key] | json"
