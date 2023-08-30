@@ -17,6 +17,7 @@
             </div>
         </div>
         <div class="children" *ngIf="vm.expanded && vm.nodes">
+            <h1 class="text-lg font-semibold text-gray-700 mb-2">Nodes</h1>
             <div *ngFor="let node of vm.nodes">
                 <div class="child bg-green-500 flex justify-between items-center hover:bg-green-600" (click)="node.expanded = !node.expanded">
                     <div>
@@ -40,6 +41,7 @@
             </div>
         </div>
         <div class="branches " *ngIf="vm.expanded && vm.branches">
+            <h1 class="text-lg font-semibold text-gray-700 mb-2">Branches</h1>
             <div *ngFor="let branch of vm.branches">
                 <div class="branch bg-blue-500 flex justify-between items-center hover:bg-blue-600" (click)="branch.expanded = !branch.expanded">
                     <div>
