@@ -21,7 +21,7 @@
 }
 
 .card {
-    @apply bg-white rounded-lg  p-2 mb-2 inline-block mx-1 transition duration-200;
+    @apply bg-white rounded-lg  p-2 mb-2 inline-block mx-1 transition duration-200 w-full;
 }
 
 .card-header {
@@ -34,5 +34,5 @@
 
 .node-info,
 .branch-info {
-    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 justify-items-center;
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 justify-items-center justify-items-stretch;
 }
