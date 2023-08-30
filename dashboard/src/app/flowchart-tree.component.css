@@ -2,11 +2,13 @@
     @apply p-4;
 }
 
-.node {
+.node,
+.branch {
     @apply bg-blue-500 text-white rounded p-2;
 }
 
-.children {
+.children,
+.branches {
     @apply ml-4;
 }
 
@@ -14,15 +16,18 @@
     @apply bg-green-500 text-white rounded p-2 mt-2;
 }
 
+.branch {
+    @apply mt-2;
+}
+
 .card {
     @apply bg-white rounded-lg shadow-lg p-2 mb-2 inline-block;
-  }
-  
-  .card-header {
+}
+
+.card-header {
     @apply font-bold text-sm;
-  }
-  
-  .card-body {
+}
+
+.card-body {
     @apply text-sm;
-  }
-  
+}

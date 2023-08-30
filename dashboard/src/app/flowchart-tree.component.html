@@ -26,6 +26,21 @@
           </div>
         </div>
       </div>
+      <div class="branches" *ngIf="vm.expanded && vm.branches">
+        <div *ngFor="let branch of vm.branches">
+          <div class="branch" (click)="branch.expanded = !branch.expanded">
+            {{ branch.label }}
+            <span *ngIf="branch.expanded">[-]</span>
+            <span *ngIf="!branch.expanded">[+]</span>
+          </div>
+          <div *ngIf="branch.expanded" class="branch-info">
+            <div class="card" *ngFor="let key of objectKeys(branch)">
+              <div class="card-header">{{ key }}</div>
+              <div class="card-body">{{ branch[key] | json }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
+</div>
   
