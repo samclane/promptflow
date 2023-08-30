@@ -40,7 +40,6 @@ export class FlowchartDisplayComponent implements AfterViewInit {
         });
         let element = document.querySelector('#diagram');
         if (element) {
-          console.log(mermaidString);
           return mermaid.default.render('graphDiv', mermaidString, element);
         }
         return of(null);

@@ -31,7 +31,6 @@ export class FlowchartTreeComponent implements OnChanges {
     public readonly vm$ = this._vm$.asObservable();
 
     ngOnChanges(changes: SimpleChanges): void {
-        console.log('Component changed');
         if (changes['treeData'] && changes['treeData'].currentValue) {
             this.parsedJson = JSON.parse(this.treeData as string);
             this._vm$.next(this.parsedJson);
@@ -58,7 +57,6 @@ export class FlowchartTreeComponent implements OnChanges {
     isObject(value: any): boolean {
         return typeof value === 'object';
     }
-
     parseJson(value: string): any {
         try {
             return JSON.parse(value);
