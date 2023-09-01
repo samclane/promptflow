@@ -37,6 +37,9 @@
                         <input class="card-body" *ngIf="!isObject(node[key])" [(ngModel)]="node[key]"
                             (ngModelChange)="emitChange()" />
                     </div>
+                    <div class="card shadow-lg hover:shadow-xl">
+                        <button (click)="addNewProperty(node)" class="bg-blue-500 text-white rounded p-2 w-full hover:bg-blue-600">Add New Property</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -60,6 +63,9 @@
                             (ngModelChange)="branch[key] = parseJson($event)" />
                         <input class="card-body" *ngIf="!isObject(branch[key])" [(ngModel)]="branch[key]"
                             (ngModelChange)="emitChange()" />
+                    </div>
+                    <div class="card shadow-lg hover:shadow-xl">
+                        <button (click)="addNewProperty(branch)" class="bg-blue-500 text-white rounded p-2 w-full hover:bg-blue-600">Add New Property</button>
                     </div>
                 </div>
             </div>

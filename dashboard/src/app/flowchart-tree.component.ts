@@ -64,6 +64,11 @@ export class FlowchartTreeComponent implements OnChanges {
             return '';
         }
     }
+    addNewProperty(obj: any) {
+        const newKey = "new_key";
+        obj[newKey] = "";
+        this.emitChange();
+    }
 }
 
 
