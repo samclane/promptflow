@@ -13,6 +13,8 @@ import { InputResponse } from './input-response';
   styleUrls: ['./job-detail.component.css']
 })
 export class JobDetailComponent {
+  selectedFile: File | null = null;
+
   constructor(
     private route: ActivatedRoute,
     private jobsService: JobsService,
@@ -57,4 +59,27 @@ export class JobDetailComponent {
   public onSubmit(): void {
     this.onSubmit$.subscribe();
   }
+
+  public onFileChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+
+    if (input.files) {
+      this.selectedFile = input.files[0];
+    }
+  }
+
+  public onFileSubmit(): void {
+    if (this.selectedFile) {
+      const formData = new FormData();
+      formData.append('file', this.selectedFile, this.selectedFile.name);
+      
+      this.jobId$.pipe(
+        switchMap(id => 
+          this.http.post(this.buildUrl('/jobs/' + id + '/file_input'), formData)
+        ),
+        tap(() => window.location.reload())
+      ).subscribe();
+    }
+  }
+
 }

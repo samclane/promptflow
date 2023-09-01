@@ -242,13 +242,22 @@ class Flowchart:
             cur_node: NodeBase = queue.get()
             self.logger.info(f"Running node {cur_node.label}")
             before_result = cur_node.before(state)
-            if before_result and "input" in before_result:
-                self.logger.info(f"Node {cur_node.label} requires input")
+            if before_result:
                 redis_url = os.environ.get("REDIS_URL")
                 if not redis_url:
                     raise ValueError("REDIS_URL not set")
                 red = redis.StrictRedis.from_url(redis_url)
-                interface.update_job_status(job_id, "INPUT_REQUIRED")
+                if "input" in before_result:
+                    self.logger.info(f"Node {cur_node.label} requires user input")
+                    interface.update_job_status(job_id, "INPUT_REQUIRED")
+
+                elif "filename" in before_result:
+                    self.logger.info(f"Node {cur_node.label} requires filename input")
+                    interface.update_job_status(job_id, "FILE_INPUT_REQUIRED")
+
+                else:
+                    raise ValueError(f"Unknown before result: {before_result}")
+
                 # wait for input
                 sub = red.pubsub()
                 sub.subscribe(f"{job_id}/input")
@@ -262,6 +271,7 @@ class Flowchart:
                                 before_result["input"] = data.decode()
                                 input_received = True
                                 break
+
             try:
                 thread = threading.Thread(
                     target=cur_node.run_node,

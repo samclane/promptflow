@@ -202,6 +202,25 @@ def post_input(task_id: str, user_input: UserInput) -> UserInputResponse:
     return UserInputResponse(message="Input received", input=user_input.input)
 
 
+class FileInputResponse(BaseModel):
+    """A response for a file input"""
+
+    file: str
+
+
+@app.post("/jobs/{task_id}/file_input")
+def post_file_input(task_id: str, file: UploadFile = File(...)) -> FileInputResponse:
+    """Post input to a running flowchart execution."""
+    redis_url = os.getenv("REDIS_URL")
+    if not redis_url:
+        raise HTTPException(status_code=500, detail="Redis URL not found")
+    red = redis.StrictRedis.from_url(redis_url)
+    red.publish(f"{task_id}/input", file.file.read())
+    if not file.filename:
+        raise HTTPException(status_code=500, detail="File name not found")
+    return FileInputResponse(file=file.filename)
+
+
 @app.get("/jobs/{job_id}/output")
 def get_output(job_id: int) -> JobResult:
     """Get output from a running flowchart execution."""

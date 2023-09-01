@@ -6,6 +6,7 @@ from abc import ABC
 from typing import Any
 
 from promptflow.src.nodes.node_base import FlowchartJSTypes, NodeBase
+from promptflow.src.state import State
 from promptflow.src.themes import monokai
 
 
@@ -39,7 +40,13 @@ class FileInput(InputNode):
         super().__init__(*args, **kwargs)
         self.filename = kwargs.get("filename", "")
 
+    def before(self, state: State) -> Any:
+        if self.filename == "":
+            return {"filename": ""}
+
     def run_subclass(self, before_result: Any, state) -> str:
+        if before_result["input"] != "":
+            return before_result["input"]
         with open(self.filename, "r", encoding="utf-8") as f:
             return f.read()
 
