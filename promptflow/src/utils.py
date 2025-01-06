@@ -2,9 +2,10 @@
 Utility functions for promptflow.
 """
 
-import time
-import random
 import logging
+import random
+import time
+
 import openai
 
 

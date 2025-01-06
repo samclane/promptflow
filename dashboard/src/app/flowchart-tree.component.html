@@ -1,0 +1,74 @@
+<div class="tree">
+    <div *ngIf="vm$ | async as vm">
+        <div class="node bg-blue-500 flex justify-between items-center hover:bg-blue-600" (click)="vm.expanded = !vm.expanded">
+            <div>
+              {{ vm.label }}
+              <span *ngIf="vm.expanded">[-]</span>
+              <span *ngIf="!vm.expanded">[+]</span>
+            </div>
+            <div class="text-gray-200 italic">
+                ({{ vm.nodes.length }} Nodes, {{ vm.branches.length }} Branches)
+            </div>
+          </div>
+        <div *ngIf="vm.expanded" class="node-info" [@slideInOut]="'in'">
+            <div class="card shadow-lg hover:shadow-xl" *ngFor="let key of objectKeys(vm)">
+                <div class="card-header">{{ key }}</div>
+                <input class="card-body" [(ngModel)]="vm[key]" (ngModelChange)="emitChange()" />
+            </div>
+        </div>
+        <div class="children" *ngIf="vm.expanded && vm.nodes">
+            <h1 class="text-lg font-semibold text-gray-700 mb-2">Nodes</h1>
+            <div *ngFor="let node of vm.nodes">
+                <div class="child bg-green-500 flex justify-between items-center hover:bg-green-600" (click)="node.expanded = !node.expanded">
+                    <div>
+                        {{ node.label }}
+                        <span *ngIf="node.expanded">[-]</span>
+                        <span *ngIf="!node.expanded">[+]</span>
+                    </div>
+                    <div class="text-gray-200 italic">
+                        ({{ objectKeys(node).length }} Properties)
+                    </div>
+                </div>
+                <div *ngIf="node.expanded" class="node-info" [@slideInOut]="'in'">
+                    <div class="card shadow-lg hover:shadow-xl" *ngFor="let key of objectKeys(node)">
+                        <div class="card-header">{{ key }}</div>
+                        <input class="card-body" *ngIf="isObject(node[key])" [ngModel]="node[key] | json"
+                            (ngModelChange)="node[key] = parseJson($event)" />
+                        <input class="card-body" *ngIf="!isObject(node[key])" [(ngModel)]="node[key]"
+                            (ngModelChange)="emitChange()" />
+                    </div>
+                    <div class="card shadow-lg hover:shadow-xl">
+                        <button (click)="addNewProperty(node)" class="bg-blue-500 text-white rounded p-2 w-full hover:bg-blue-600">Add New Property</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="branches " *ngIf="vm.expanded && vm.branches">
+            <h1 class="text-lg font-semibold text-gray-700 mb-2">Branches</h1>
+            <div *ngFor="let branch of vm.branches">
+                <div class="branch bg-blue-500 flex justify-between items-center hover:bg-blue-600" (click)="branch.expanded = !branch.expanded">
+                    <div>
+                        {{ branch.label }}
+                        <span *ngIf="branch.expanded">[-]</span>
+                        <span *ngIf="!branch.expanded">[+]</span>
+                    </div>
+                    <div class="text-gray-200 italic">
+                        ({{ objectKeys(branch).length }} Properties)
+                    </div>
+                </div>
+                <div *ngIf="branch.expanded" class="branch-info" [@slideInOut]="'in'">
+                    <div class="card shadow-lg hover:shadow-xl" *ngFor="let key of objectKeys(branch)">
+                        <div class="card-header">{{ key }}</div>
+                        <input class="card-body" *ngIf="isObject(branch[key])" [ngModel]="branch[key] | json"
+                            (ngModelChange)="branch[key] = parseJson($event)" />
+                        <input class="card-body" *ngIf="!isObject(branch[key])" [(ngModel)]="branch[key]"
+                            (ngModelChange)="emitChange()" />
+                    </div>
+                    <div class="card shadow-lg hover:shadow-xl">
+                        <button (click)="addNewProperty(branch)" class="bg-blue-500 text-white rounded p-2 w-full hover:bg-blue-600">Add New Property</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

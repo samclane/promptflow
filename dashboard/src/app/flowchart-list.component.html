@@ -1,0 +1,31 @@
+<ng-container *ngIf="vm$ | async as vm">
+  <div class="info-container">
+    <h1 class="text-4xl font-semibold mb-4">Flowcharts</h1>
+    <div class="max-h-[800px] overflow-y-auto">
+      <ng-container *ngIf="vm.flowcharts.length > 0">
+        <div *ngFor="let flowchart of vm.flowcharts"
+         (click)="navigateToFlowchart(flowchart.uid)"
+          class="cursor-pointer info-container flex flex-row items-center justify-between my-4 hover:text-white hover:bg-blue-500 transition duration-200">
+          <a [routerLink]="['/flowcharts', flowchart.uid]" class="text-xl">
+            {{ flowchart.label }}
+          </a>
+          <button (click)="openDeleteConfirmation(flowchart.uid); $event.stopPropagation();"
+            class="p-2 bg-red-500 transition duration-200 ease-in-out text-white rounded self-center mr-4 hover:bg-red-700">Delete</button>
+        </div>
+      </ng-container>
+      <ng-container *ngIf="vm.flowcharts.length === 0">
+        You have not yet created any flowcharts.
+      </ng-container>
+    </div>
+  </div>
+
+  <!-- Popover component -->
+  <app-popover
+    #popover
+    [title]="'Confirm Deletion'"
+    [message]="deleteMessage$ | async"
+    [confirmText]="'Delete'"
+    [cancelText]="'Cancel'"
+    (confirmation)="handleDeleteConfirmation($event)">
+  </app-popover>
+</ng-container>

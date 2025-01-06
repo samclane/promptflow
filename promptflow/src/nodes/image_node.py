@@ -1,23 +1,19 @@
 """
 Handles image data
 """
-from abc import ABC
 import base64
-from enum import Enum
-from PIL import Image, ImageTk
-import json
 import io
-from typing import Any
-import torch
-from transformers import AutoProcessor, AutoModelForCausalLM
-
-
-import customtkinter
-from promptflow.src.dialogues.image_inspector import ImageInspector
-from promptflow.src.dialogues.node_options import NodeOptions
-from promptflow.src.nodes.node_base import NodeBase
+import json
+from abc import ABC
+from enum import Enum
+from typing import Any, Optional
 
 import openai
+import torch
+from PIL import Image
+from transformers import AutoModelForCausalLM, AutoProcessor
+
+from promptflow.src.nodes.node_base import NodeBase
 
 
 class ImageSize(Enum):
@@ -45,29 +41,15 @@ class OpenImageFile(ImageNode):
 
     filename = ""
 
-    def edit_options(self, event):
-        options_popup = NodeOptions(
-            self.canvas,
-            {
-                "filename": self.filename,
-            },
-            file_options={"filename": self.filename},
-        )
-        self.canvas.wait_window(options_popup)
-        if options_popup.cancelled:
-            return
-        self.filename = options_popup.result["filename"]
-
-    def run_subclass(
-        self, before_result: Any, state, console: customtkinter.CTkTextbox
-    ) -> str:
-        # convert tkphotoimage to PIL image
+    def run_subclass(self, before_result: Any, state) -> str:
         pil_image = Image.open(self.filename)
-        self.image = ImageTk.PhotoImage(pil_image)
-        self.image_inspector = ImageInspector(self.canvas, self.image)
-        self.canvas.wait_window(self.image_inspector)
+        self.image = pil_image
         state.data = self.image
         return state.result
+
+    @staticmethod
+    def get_option_keys() -> list[str]:
+        return NodeBase.get_option_keys() + ["filename"]
 
 
 class JSONImageFile(ImageNode):
@@ -76,7 +58,6 @@ class JSONImageFile(ImageNode):
     """
 
     filename_key: str = "filename"
-    options_popup: NodeOptions
 
     def __init__(
         self,
@@ -86,32 +67,13 @@ class JSONImageFile(ImageNode):
         super().__init__(*args, **kwargs)
         self.filename_key = kwargs.get("filename_key", "")
 
-    def edit_options(self, event):
-        self.options_popup = NodeOptions(
-            self.canvas,
-            {
-                "filename_key": self.filename_key,
-            },
-        )
-        self.canvas.wait_window(self.options_popup)
-        result = self.options_popup.result
-        # check if cancel
-        if self.options_popup.cancelled:
-            return
-        self.filename_key = result["filename_key"]
-
-    def run_subclass(
-        self, before_result: Any, state, console: customtkinter.CTkTextbox
-    ) -> str:
+    def run_subclass(self, before_result: Any, state) -> str:
         try:
             data = json.loads(state.result)
         except json.decoder.JSONDecodeError:
             return "Invalid JSON"
-        # convert tkphotoimage to PIL image
         pil_image = Image.open(data[self.filename_key])
-        self.image = ImageTk.PhotoImage(pil_image)
-        self.image_inspector = ImageInspector(self.canvas, self.image)
-        self.canvas.wait_window(self.image_inspector)
+        self.image = pil_image
         state.data = self.image
         return state.result
 
@@ -119,6 +81,10 @@ class JSONImageFile(ImageNode):
         return super().serialize() | {
             "filename_key": self.filename_key,
         }
+
+    @staticmethod
+    def get_option_keys() -> list[str]:
+        return NodeBase.get_option_keys() + ["filename_key"]
 
 
 class DallENode(ImageNode):
@@ -128,48 +94,33 @@ class DallENode(ImageNode):
 
     n = 1
     size = ImageSize.s256x256.value
-    image = None
+    image: Optional[Image.Image] = None
 
-    def run_subclass(
-        self, before_result: Any, state, console: customtkinter.CTkTextbox
-    ) -> str:
+    def run_subclass(self, before_result: Any, state) -> str:
         response = openai.Image.create(
             prompt=state.result,
             n=int(self.n),
             size=self.size,
             response_format="b64_json",
         )
+        if not isinstance(response, dict):
+            return f"Invalid response: {response}"
         # show the image
         imgdata = base64.b64decode(response["data"][0]["b64_json"])
         pil_image = Image.open(io.BytesIO(imgdata))
-        self.image = ImageTk.PhotoImage(pil_image)
-        self.image_inspector = ImageInspector(self.canvas, self.image)
-        self.canvas.wait_window(self.image_inspector)
+        self.image = pil_image
         state.data = self.image
         return state.result
-
-    def edit_options(self, event):
-        options_popup = NodeOptions(
-            self.canvas,
-            {
-                "n": self.n,
-                "size": self.size,
-            },
-            {
-                "size": [size.value for size in ImageSize],
-            },
-        )
-        self.canvas.wait_window(options_popup)
-        if options_popup.cancelled:
-            return
-        self.n = int(options_popup.result["n"])
-        self.size = options_popup.result["size"]
 
     def serialize(self) -> dict[str, Any]:
         return super().serialize() | {
             "n": self.n,
             "size": self.size,
         }
+
+    @staticmethod
+    def get_option_keys() -> list[str]:
+        return NodeBase.get_option_keys() + ["n", "size"]
 
 
 class CaptionNode(ImageNode):
@@ -179,14 +130,11 @@ class CaptionNode(ImageNode):
 
     max_length = 50
 
-    def run_subclass(
-        self, before_result: Any, state, console: customtkinter.CTkTextbox
-    ) -> str:
+    def run_subclass(self, before_result: Any, state) -> str:
         checkpoint = "microsoft/git-base"
         processor = AutoProcessor.from_pretrained(checkpoint)
         device = "cuda" if torch.cuda.is_available() else "cpu"
-        # convert tkphotoimage to PIL image
-        pil_image = ImageTk.getimage(state.data)
+        pil_image = state.data
         inputs = processor(images=pil_image, return_tensors="pt").to(device)
         pixel_values = inputs.pixel_values
         model = AutoModelForCausalLM.from_pretrained(checkpoint)
@@ -198,22 +146,14 @@ class CaptionNode(ImageNode):
         )[0]
         return generated_caption
 
-    def edit_options(self, event):
-        options_popup = NodeOptions(
-            self.canvas,
-            {
-                "max_length": self.max_length,
-            },
-        )
-        self.canvas.wait_window(options_popup)
-        if options_popup.cancelled:
-            return
-        self.max_length = int(options_popup.result["max_length"])
-
     def serialize(self) -> dict[str, Any]:
         return super().serialize() | {
             "max_length": self.max_length,
         }
+
+    @staticmethod
+    def get_option_keys() -> list[str]:
+        return NodeBase.get_option_keys() + ["max_length"]
 
 
 class SaveImageNode(ImageNode):
@@ -227,24 +167,8 @@ class SaveImageNode(ImageNode):
         super().__init__(*args, **kwargs)
         self.filename = kwargs.get("filename", "")
 
-    def edit_options(self, event):
-        options_popup = NodeOptions(
-            self.canvas,
-            {
-                "filename": self.filename,
-            },
-            file_options={"filename": self.filename},
-        )
-        self.canvas.wait_window(options_popup)
-        if options_popup.cancelled:
-            return
-        self.filename = options_popup.result["filename"]
-
-    def run_subclass(
-        self, before_result: Any, state, console: customtkinter.CTkTextbox
-    ) -> str:
-        # convert tkphotoimage to PIL image
-        pil_image = ImageTk.getimage(state.data)
+    def run_subclass(self, before_result: Any, state) -> str:
+        pil_image = state.data
         pil_image.save(self.filename)
         return state.result
 
@@ -252,3 +176,7 @@ class SaveImageNode(ImageNode):
         return super().serialize() | {
             "filename": self.filename,
         }
+
+    @staticmethod
+    def get_option_keys() -> list[str]:
+        return NodeBase.get_option_keys() + ["filename"]

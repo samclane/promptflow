@@ -1,0 +1,7 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+.info-container {
+  @apply border p-4 md:p-8 rounded-lg shadow-lg relative;
+}

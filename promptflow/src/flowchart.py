@@ -2,56 +2,45 @@
 This module contains the Flowchart class, which manages the nodes and connectors of a flowchart.
 """
 from __future__ import annotations
-import customtkinter
+
+import datetime
 import logging
-import tkinter as tk
-import tkinter.scrolledtext
+import os
 import threading
+import time
 from queue import Queue
-from typing import Any, Optional
+from typing import TYPE_CHECKING, Any, Callable, List, Optional
+
 import networkx as nx
+import redis
+from pydantic import BaseModel  # pylint: disable=no-name-in-module
+
+from promptflow.src.connectors.connector import (
+    DEFAULT_COND_NAME,
+    DEFAULT_COND_TEMPLATE,
+    Connector,
+)
+from promptflow.src.connectors.partial_connector import PartialConnector
+from promptflow.src.mermaid_converter import MermaidConverter
+from promptflow.src.node_map import node_map
 from promptflow.src.nodes.node_base import NodeBase
 from promptflow.src.nodes.start_node import InitNode, StartNode
-from promptflow.src.nodes.input_node import InputNode, FileInput, JSONFileInput
-from promptflow.src.nodes.func_node import FuncNode
-from promptflow.src.nodes.llm_node import OpenAINode, ClaudeNode, GoogleVertexNode
-from promptflow.src.nodes.date_node import DateNode
-from promptflow.src.nodes.random_number import RandomNode
-from promptflow.src.nodes.history_node import (
-    HistoryNode,
-    ManualHistoryNode,
-    HistoryWindow,
-    WindowedHistoryNode,
-    DynamicWindowedHistoryNode,
-)
-from promptflow.src.nodes.dummy_llm_node import DummyNode
-from promptflow.src.nodes.prompt_node import PromptNode
-from promptflow.src.nodes.embedding_node import (
-    EmbeddingInNode,
-    EmbeddingQueryNode,
-    EmbeddingsIngestNode,
-)
-from promptflow.src.nodes.test_nodes import AssertNode, LoggingNode, InterpreterNode
-from promptflow.src.nodes.env_node import EnvNode, ManualEnvNode
-from promptflow.src.nodes.audio_node import WhispersNode, ElevenLabsNode
-from promptflow.src.nodes.db_node import PGQueryNode, SQLiteQueryNode, PGGenerateNode
-from promptflow.src.nodes.structured_data_node import JsonNode, JsonerizerNode
-from promptflow.src.nodes.websearch_node import SerpApiNode, GoogleSearchNode
-from promptflow.src.nodes.output_node import FileOutput, JSONFileOutput
-from promptflow.src.nodes.http_node import HttpNode, JSONRequestNode, ScrapeNode
-from promptflow.src.nodes.server_node import ServerInputNode
-from promptflow.src.nodes.memory_node import PineconeInsertNode, PineconeQueryNode
-from promptflow.src.nodes.image_node import (
-    DallENode,
-    CaptionNode,
-    OpenImageFile,
-    JSONImageFile,
-    SaveImageNode,
-)
-from promptflow.src.connectors.connector import Connector
-from promptflow.src.connectors.partial_connector import PartialConnector
+
+if TYPE_CHECKING:
+    from promptflow.src.postgres_interface import DBInterface
+
 from promptflow.src.state import State
 from promptflow.src.text_data import TextData
+
+
+class FlowchartJson(BaseModel):
+    """A flowchart json file"""
+
+    label: str
+    uid: str
+    nodes: list[dict]
+    branches: list[dict]
+    created: Optional[str] = None
 
 
 class Flowchart:
@@ -59,8 +48,27 @@ class Flowchart:
     Holds the nodes and connectors of a flowchart.
     """
 
-    def __init__(self, canvas: tk.Canvas, init_nodes: bool = True):
-        self.canvas = canvas
+    interface: DBInterface
+    uid: str
+    name: str
+    created: datetime.datetime
+    nodes: list[NodeBase]
+    connectors: list[Connector]
+    id: Optional[int] = None
+
+    def __init__(
+        self,
+        interface: DBInterface,
+        uid: str,
+        name: Optional[str] = None,
+        created: Optional[datetime.datetime] = None,
+    ):
+        self.interface = interface
+        self.uid = uid
+        if not self.uid:
+            raise ValueError("Flowchart id not provided")
+        self.name = name or "Untitled"
+        self.created = created or datetime.datetime.now()
         self.graph = nx.DiGraph()
         self.nodes: list[NodeBase] = []
         self.connectors: list[Connector] = []
@@ -69,41 +77,45 @@ class Flowchart:
 
         self._selected_element: Optional[NodeBase | Connector] = None
         self._partial_connector: Optional[PartialConnector] = None
+
         self.is_dirty = False
         self.is_running = False
 
-        if init_nodes:
-            self.add_node(InitNode(self, 70, 100, "Init"))
-            self.add_node(StartNode(self, 70, 300, "Start"))
+    @classmethod
+    def get_flowchart_by_uid(cls, uid, interface: DBInterface):
+        """
+        Return a flowchart by uid
+        """
+        return interface.get_flowchart_by_uid(uid)
 
     @classmethod
-    def deserialize(
-        cls, canvas: tk.Canvas, data: dict[str, Any], pan=(0, 0), zoom=1.0
-    ) -> Flowchart:
+    def deserialize(cls, interface: DBInterface, data: dict[str, Any]) -> Flowchart:
         """
-        Deserialize a flowchart from a dict onto a canvas
+        Deserialize a flowchart from a dict
         """
-        flowchart = cls(canvas, init_nodes=False)
+        flowchart = cls(
+            interface,
+            uid=data["uid"],
+            name=data.get("label", "Untitled"),
+            created=data.get("created", time.time()),
+        )
         for node_data in data["nodes"]:
-            node = eval(node_data["classname"]).deserialize(flowchart, node_data)
-            x_offset = pan[0]
-            y_offset = pan[1]
-            flowchart.add_node(node, (x_offset, y_offset))
-            for item in node.items:
-                canvas.move(item, x_offset, y_offset)
-                canvas.scale(item, 0, 0, zoom, zoom)
-            for button in node.buttons:
-                button.configure(width=button.cget("width") * zoom)
-                button.configure(height=button.cget("height") * zoom)
-        for connector_data in data["connectors"]:
-            node1 = flowchart.find_node(connector_data["node1"])
-            node2 = flowchart.find_node(connector_data["node2"])
+            node = node_map[node_data["node_type"]].deserialize(flowchart, node_data)
+            flowchart.add_node(node)
+        for connector_data in data["branches"]:
+            prev = flowchart.find_node(connector_data["prev"])
+            next = flowchart.find_node(connector_data["next"])
             connector = Connector(
-                canvas, node1, node2, connector_data.get("condition", "")
+                prev,
+                next,
+                TextData(
+                    connector_data.get("label", DEFAULT_COND_NAME),
+                    connector_data.get("conditional", DEFAULT_COND_TEMPLATE),
+                    flowchart,
+                ),
+                uid=connector_data["uid"],
             )
             flowchart.add_connector(connector)
-        flowchart.reset_node_colors()
-        canvas.update()
         flowchart.is_dirty = False
         return flowchart
 
@@ -117,13 +129,6 @@ class Flowchart:
     @selected_element.setter
     def selected_element(self, elem: Optional[NodeBase | Connector]):
         self.logger.info("Selected element changed to %s", elem.label if elem else None)
-        # deselect previous node
-        if self._selected_element:
-            # configure to have solid border
-            self.canvas.itemconfig(self._selected_element.item, width=2)
-        # select new node
-        if elem:
-            self.canvas.itemconfig(elem.item, width=4)
         self._selected_element = elem
 
     @property
@@ -154,14 +159,14 @@ class Flowchart:
 
     def find_node(self, node_id: str) -> NodeBase:
         """
-        Given a node uuid, find and return the node
+        Given a node id, find and return the node
         """
         for node in self.nodes:
-            if node.id == node_id:
+            if node.uid == node_id:
                 return node
-        raise ValueError(f"No node with id {node_id} found")
+        raise ValueError(f"No node with uid {node_id} found")
 
-    def add_node(self, node: NodeBase, offset: tuple[int, int] = (0, 0)) -> None:
+    def add_node(self, node: NodeBase) -> NodeBase:
         """
         Safely insert a node into the flowchart
         """
@@ -173,20 +178,26 @@ class Flowchart:
         self.graph.add_node(node)
         self.selected_element = node
         self.is_dirty = True
+        return node
 
-    def add_connector(self, connector: Connector) -> None:
+    def add_connector(self, connector: Connector) -> Connector:
         """
         Safely insert a connector into the flowchart
         """
         # check for duplicate connectors
         self.logger.debug(f"Adding connector {connector}")
         self.connectors.append(connector)
-        self.graph.add_edge(connector.node1, connector.node2)
+        self.graph.add_edge(connector.prev, connector.next)
         self.selected_element = connector
         self.is_dirty = True
+        return connector
 
     def initialize(
-        self, state: State, console: customtkinter.CTkTextbox
+        self,
+        job_id: int,
+        state: State,
+        interface: DBInterface,
+        logging_function: Callable[[str], None],
     ) -> Optional[State]:
         """
         Initialize the flowchart
@@ -194,18 +205,21 @@ class Flowchart:
         self.is_running = True
         init_node: Optional[InitNode] = self.init_node
         if not init_node or init_node.run_once:
-            console.insert(tk.END, "\n[System: Already initialized]\n")
-            console.see(tk.END)
+            self.logger.info("Flowchart already initialized")
             return state
         queue: Queue[NodeBase] = Queue()
         queue.put(init_node)
-        return self.run(state, console, queue)
+        return self.run(
+            job_id, state, interface, queue, logging_function=logging_function
+        )
 
     def run(
         self,
+        job_id: int,
         state: Optional[State],
-        console: customtkinter.CTkTextbox,
+        interface: DBInterface,
         queue: Optional[Queue[NodeBase]] = None,
+        logging_function: Callable[[str], None] = lambda x: None,
     ) -> Optional[State]:
         """
         Given a state, run the flowchart and update the state
@@ -222,53 +236,71 @@ class Flowchart:
 
         if not queue.empty():
             if not self.is_running:
-                self.reset_node_colors()
-                console.insert(tk.END, "\n[System: Stopped]\n")
-                console.see(tk.END)
+                self.logger.info("Flowchart stopped")
                 self.is_running = False
                 return state
             cur_node: NodeBase = queue.get()
-            # turn node light yellow while running
-            cur_node.canvas.itemconfig(cur_node.item, fill="#ffffcc")
-            cur_node.canvas.update()
             self.logger.info(f"Running node {cur_node.label}")
-            before_result = cur_node.before(state, console)
+            before_result = cur_node.before(state)
+            if before_result:
+                redis_url = os.environ.get("REDIS_URL")
+                if not redis_url:
+                    raise ValueError("REDIS_URL not set")
+                red = redis.StrictRedis.from_url(redis_url)
+                if "input" in before_result:
+                    self.logger.info(f"Node {cur_node.label} requires user input")
+                    interface.update_job_status(job_id, "INPUT_REQUIRED")
+
+                elif "filename" in before_result:
+                    self.logger.info(f"Node {cur_node.label} requires filename input")
+                    interface.update_job_status(job_id, "FILE_INPUT_REQUIRED")
+
+                else:
+                    raise ValueError(f"Unknown before result: {before_result}")
+
+                # wait for input
+                sub = red.pubsub()
+                sub.subscribe(f"{job_id}/input")
+                input_received = False
+                while not input_received:
+                    for msg in sub.listen():
+                        self.logger.info(f"Received message: {msg}")
+                        if msg and msg["type"] == "message":
+                            data = msg.get("data")
+                            if data:
+                                before_result["input"] = data.decode()
+                                input_received = True
+                                break
+
             try:
                 thread = threading.Thread(
                     target=cur_node.run_node,
-                    args=(before_result, state, console),
+                    args=(before_result, state),
                     daemon=True,
                 )
                 thread.start()
                 while thread.is_alive():
-                    self.canvas.update()
+                    pass
                 thread.join()
                 output = state.result
+                logging_function(f"Node {cur_node.label} output: {str(output)}")
             except Exception as node_err:
                 self.logger.error(
                     f"Error running node {cur_node.label}: {node_err}", exc_info=True
                 )
-                if console:
-                    console.insert(
-                        tk.END, f"[ERROR]{cur_node.label}: {node_err}" + "\n"
-                    )
-                    console.see(tk.END)
-                return state
-            if console:
-                console.insert(tk.END, f"{cur_node.label}: {output}" + "\n")
-                console.see(tk.END)
+                raise node_err
             self.logger.info(f"Node {cur_node.label} output: {output}")
-            # turn node light green
-            cur_node.canvas.itemconfig(cur_node.item, fill="#ccffcc")
-            cur_node.canvas.update()
 
             if output is None:
                 self.logger.info(
                     f"Node {cur_node.label} output is None, stopping execution"
                 )
-                self.reset_node_colors()
-                console.insert(tk.END, "\n[System: Done]\n")
-                console.see(tk.END)
+                return state
+
+            if state.exception:
+                self.logger.info(
+                    f"Node {cur_node.label} raised exception, stopping execution"
+                )
                 return state
 
             for connector in cur_node.output_connectors:
@@ -283,16 +315,10 @@ class Flowchart:
                         cond = state.snapshot["main"](state)  # type: ignore
                     except Exception as node_err:
                         # log complete error traceback
-                        # self.logger.error(f"Error evaluating condition: {node_err}")
                         self.logger.error(
                             f"Error evaluating condition: {node_err}",
                             exc_info=True,
                         )
-                        if console:
-                            console.insert(
-                                tk.END, f"[ERROR]{cur_node.label}: {node_err}" + "\n"
-                            )
-                            console.see(tk.END)
                         break
                     self.logger.info(
                         f"Condition {connector.condition} evaluated to {cond}"
@@ -301,17 +327,23 @@ class Flowchart:
                     cond = True
                 if cond:
                     # if connector.node2 not in queue:
-                    if queue.queue.count(connector.node2) == 0:
-                        queue.put(connector.node2)
-                        self.canvas.master.after(0, self.run, state, console, queue)
-                    self.logger.info(f"Added node {connector.node2.label} to queue")
+                    if queue.queue.count(connector.next) == 0:
+                        queue.put(connector.next)
+                        self.run(
+                            job_id,
+                            state,
+                            interface,
+                            queue,
+                            logging_function=logging_function,
+                        )
+                    self.logger.info(f"Added node {connector.next.label} to queue")
 
         if queue.empty():
-            self.reset_node_colors()
-            console.insert(tk.END, "\n[System: Done]\n")
-            console.see(tk.END)
+            self.logger.info("Flowchart stopped")
             self.is_running = False
             return state
+
+        raise RuntimeError("Flowchart stopped unexpectedly")
 
     def begin_add_connector(self, node: NodeBase):
         """
@@ -320,22 +352,23 @@ class Flowchart:
         if self._partial_connector:
             self._partial_connector.delete(None)
         self._partial_connector = PartialConnector(self, node)
-        self.canvas.bind("<Motion>", self._partial_connector.update)
-        self.canvas.bind("<Button-1>", self._partial_connector.finish)
-        self.canvas.bind("<Escape>", self._partial_connector.delete)
 
-    def serialize(self) -> dict[str, Any]:
+    def serialize(self) -> FlowchartJson:
         """
         Write the flowchart to a dictionary
         """
-        data: dict[str, Any] = {}
+        data: dict[str, Any] = {
+            "uid": self.uid,
+            "label": self.name,
+            "created": str(self.created),
+        }
         data["nodes"] = []
         for node in self.nodes:
             data["nodes"].append(node.serialize())
-        data["connectors"] = []
+        data["branches"] = []
         for connector in self.connectors:
-            data["connectors"].append(connector.serialize())
-        return data
+            data["branches"].append(connector.serialize())
+        return FlowchartJson(**data)
 
     def remove_node(self, node: NodeBase) -> None:
         """
@@ -347,17 +380,17 @@ class Flowchart:
         # remove all connectors connected to this node
         for other_node in self.nodes:
             for connector in other_node.connectors:
-                if connector.node1 == node or connector.node2 == node:
+                if connector.prev == node or connector.next == node:
                     connector.delete()
-                    self.graph.remove_edge(connector.node1, connector.node2)
+                    self.graph.remove_edge(connector.prev, connector.next)
                     if connector in other_node.input_connectors:
                         other_node.input_connectors.remove(connector)
                     if connector in other_node.output_connectors:
                         other_node.output_connectors.remove(connector)
         for connector in self.connectors:
-            if connector.node1 == node or connector.node2 == node:
+            if connector.prev == node or connector.next == node:
                 connector.delete()
-                self.graph.remove_edge(connector.node1, connector.node2)
+                self.graph.remove_edge(connector.prev, connector.next)
         self.graph.remove_node(node)
         self.is_dirty = True
 
@@ -372,17 +405,8 @@ class Flowchart:
         for connector in self.connectors:
             connector.delete()
         self.connectors = []
-        self.canvas.delete("all")
-        self.canvas.update()
         self.graph.clear()
         self.is_dirty = True
-
-    def reset_node_colors(self) -> None:
-        """
-        Set all node colors to their default color.
-        """
-        for node in self.nodes:
-            self.canvas.itemconfig(node.item, fill=node.node_color)
 
     def register_text_data(self, text_data: TextData) -> None:
         """
@@ -396,7 +420,7 @@ class Flowchart:
         """
         Return the cost of the flowchart.
         """
-        cost = 0
+        cost = 0.0
         for node in self.nodes:
             cost += node.cost(state)
         return cost
@@ -405,16 +429,39 @@ class Flowchart:
         """
         Return a mermaid string representation of the flowchart.
         """
-        mermaid_str = "graph TD\n"
-        for node in self.nodes:
-            mermaid_str += f"{node.id}({node.label})\n"
-        for connector in self.connectors:
-            if connector.condition_label:
-                mermaid_str += f"{connector.node1.id} -->|{connector.condition_label}| {connector.node2.id}\n"
-            else:
-                mermaid_str += f"{connector.node1.id} --> {connector.node2.id}\n"
+        converter = MermaidConverter(self)
+        return converter.to_mermaid()
 
-        return mermaid_str
+    def to_flowchart_js(self) -> str:
+        """
+        Convert the flowchart to a flowchart.js string.
+        """
+
+        def strip_symbols(text: str) -> str:
+            sequences_to_remove = ["=>", "->", ":>", "|", "@>", ":$"]
+            for seq in sequences_to_remove:
+                text = text.replace(seq, "")
+            return text
+
+        def sanitize_identifier(identifier: str) -> str:
+            return strip_symbols(identifier.replace(" ", "_").replace("'", ""))
+
+        def sanitize_label(label: str) -> str:
+            return strip_symbols(label.replace("'", ""))
+
+        flowchart_str = ""
+        for node in self.nodes:
+            uid = sanitize_identifier(node.uid)
+            label = sanitize_label(node.label)
+            flowchart_str += f"{uid}=>{node.js_shape.value}: {label}|{node.uid}\n"
+        for connector in self.sorted_connectors():
+            prev_uid = sanitize_identifier(connector.prev.uid)
+            next_uid = sanitize_identifier(connector.next.uid)
+            flowchart_str += f"{prev_uid}->{next_uid}\n"
+        return flowchart_str
+
+    def get_color_map(self) -> dict[str, str]:
+        return {node.uid: node.color for node in self.nodes}
 
     def to_graph_ml(self) -> str:
         """
@@ -424,58 +471,45 @@ class Flowchart:
         <graphml xmlns="http://graphml.graphdrawing.org/xmlns">
         """
         for node in self.nodes:
-            graphml_string += f"""<node id="{node.id}">
+            graphml_string += f"""<node id="{node.uid}">
             <data key="d0">{node.label}</data>
             </node>
             """
         for connector in self.connectors:
             if connector.condition_label:
-                graphml_string += f"""<edge source="{connector.node1.id}" target="{connector.node2.id}">
+                graphml_string += f"""<edge source="{connector.prev.uid}" target="{connector.next.uid}">
                 <data key="d0">{connector.condition_label}</data>
                 </edge>
                 """
             else:
-                graphml_string += f"""<edge source="{connector.node1.id}" target="{connector.node2.id}"/>
+                graphml_string += f"""<edge source="{connector.prev.uid}" target="{connector.next.uid}"/>
                 """
         graphml_string += "\r</graphml>"
         return graphml_string
 
-    def to_postscript(self, filename: str = "flowchart.ps"):
-        """
-        Convert the flowchart to postscript
-        """
-        self.canvas.postscript(file=filename, colormode="color")
-        with open(filename, "r") as f:
-            return f.read()
-
-    def arrange_tree(self, root: NodeBase, x=0.0, y=0.0, x_gap=60.0, y_gap=60.0):
-        """
-        Arrange all nodes in a tree-like structure.
-        """
-        root.visited = True
-        root.move_to(x, y)
-        if root.get_children():
-            next_y = y + root.size_px + y_gap
-            total_width = (
-                sum(child.size_px + x_gap for child in root.get_children()) - x_gap
-            )
-            next_x = x + (root.size_px - total_width) / 2
-            for child in root.get_children():
-                if not child.visited:
-                    self.arrange_tree(child, next_x, next_y, x_gap, y_gap)
-                    next_x += child.size_px + x_gap
-        for connector in self.connectors:
-            connector.update()
-
-    def arrange_networkx(self, algorithm):
+    def arrange_networkx(self, algorithm: Callable) -> dict[str, tuple[float, float]]:
         """
         Arrange all nodes using a networkx algorithm.
         """
         kwargs = {}
-        if algorithm == nx.layout.bipartite_layout:
+        if algorithm == nx.layout.bipartite_layout:  # pylint: disable=no-member
             kwargs["nodes"] = self.graph.nodes
-        pos = algorithm(self.graph, scale=self.nodes[0].size_px * 10, **kwargs)
-        for node in self.nodes:
-            node.move_to(pos[node][0], pos[node][1])
+        pos = algorithm(self.graph, scale=50, **kwargs)
+        return pos
+
+    def sorted_connectors(self) -> List[Connector]:
+        """
+        Return a list of connectors sorted by their distance from the start node.
+        """
+        connectors = []
         for connector in self.connectors:
-            connector.update()
+            connectors.append(
+                (
+                    connector,
+                    dict(nx.all_pairs_shortest_path(self.graph))[self.start_node][
+                        connector.prev
+                    ],
+                )
+            )
+        connectors.sort(key=lambda x: x[1])
+        return [connector[0] for connector in connectors]

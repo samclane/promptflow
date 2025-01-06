@@ -1,0 +1,38 @@
+.tree {
+    @apply p-4;
+}
+
+.node,
+.branch {
+    @apply text-white rounded p-2 transition duration-200;
+}
+
+.children,
+.branches {
+    @apply ml-4;
+}
+
+.child {
+    @apply text-white rounded p-2 mt-2 transition duration-200;
+}
+
+.branch {
+    @apply mt-2;
+}
+
+.card {
+    @apply bg-white rounded-lg p-2 mb-2 w-full transition duration-200;
+}
+
+.card-header {
+    @apply font-bold text-sm;
+}
+
+.card-body {
+    @apply text-sm w-full;
+}
+
+.node-info,
+.branch-info {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 justify-items-stretch;
+}

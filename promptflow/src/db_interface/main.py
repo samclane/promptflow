@@ -1,15 +1,17 @@
-from abc import ABC, abstractmethod
 import json
-import uuid
-from typing import Any, Optional, Union
-import psycopg2
 import sqlite3
+import uuid
+from abc import ABC, abstractmethod
+from typing import Any, Optional, Union
+
+import psycopg2
+
 from promptflow.src.db_interface.pgml_constants import (
     Algorithm,
     Sampling,
     Search,
-    Task,
     Strategy,
+    Task,
 )
 
 

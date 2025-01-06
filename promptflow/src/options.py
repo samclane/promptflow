@@ -1,16 +1,13 @@
 """
 Manage and validate options for the promptflow application
 """
-from pydantic import BaseModel
+from pydantic import BaseModel  # pylint: disable=no-name-in-module
 
 from promptflow.src.serializable import Serializable
 
 
 class Options(BaseModel, Serializable):
     """Options for PromptFlow"""
-
-    width: int = 800
-    height: int = 600
 
     def serialize(self) -> dict:
         return self.dict()

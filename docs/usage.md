@@ -1,90 +1,139 @@
 (Usage)=
-# Usage
+# PromptFlow
 
-## Creating a flowchart
+PromptFlow is a Python application for creating and running conversational AI pipelines. It provides an interface for building pipelines and leverages FastAPI for the backend API.
 
-When you first start the program, you'll see this screen:
+(Running)=
+# Running PromptFlow
 
-![image](../screenshots/readme/blank.png)
+Before starting, make sure to populate the `.env` file with the appropriate values. The `.env` file should be located in the root directory of the project.
 
-The [`Init`](Init) node is run once and only once. Use it for any initialization code you need to run before your flowchart starts, such as connecting to Databases or ingesting embedding files.
+## Docker Compose
 
-The [`Start`](Start) node is the beginning of your flowchart. It will *always* run first, and can be connected to any other node in your flowchart with a [`Connector`](Connector).
+The easiest way to run PromptFlow is with Docker Compose. To do so, run the following command:
 
-### Creating a node
-
-To create a node, click the `Add` menu in the top left corner, and select the type of node you want to create. The node will be dropped into the flowchart. For example, let's add an [`Input`](Input) node, which pauses the flowchart and waits for user input:
-
-![image](../screenshots/readme/input.png)
-
-Left-click and drag the input node to move it to a better spot.
-
-To add it to the flow, left-click the `+` button under the [`Start`](Start) node, and then left-click the [`Input`](Input) node. You should see a [`Connector`](Connector) between the two nodes:
-
-![image](../screenshots/readme/connector.png)
-
-### Running the flowchart
-
-To run the flowchart, press the `Run` button in the top left corner. You should see the [`Init`](Init) node run, followed by the [`Start`](Start) node. The flowchart will pause at the [`Input`](Input) node, waiting for you to enter some text:
-
-![image](../screenshots/readme/run.png)
-
-Enter some text, hit `Ok`, and the program should exit.
-
-Congratulations, you've created your first flowchart!
-
-
-(working-with-llms)=
-## Working with LLMs
-
-To use an LLM, we'll introduce 3 nodes- the [`LLM`](LLM), [`Prompt`](Prompt), and [`History`](History) Nodes. Let's make a chat with a caveman. First, build the following flowchart:
-
-![image](../screenshots/readme/caveman1.png)
-
-Note the cycle at the end of the chart. This will allow us to carry on our conversation with the caveman.
-
-Next, we need to give our AI a prompt to act as a caveman. Double click on the lower [`Prompt`](Prompt) label on the Prompt node to open the prompt editor. Fill out the `Label` and [`Prompt`](Prompt) as follows:
-
-![image](../screenshots/readme/caveman2.png)
-
-Then, hit `File -> Save` or `Ctrl+S` to save the prompt. You should see the prompt appear in the flowchart:
-
-![image](../screenshots/readme/caveman3.png)
-
-Now press `Run`, or `F5` to run the flowchart. Let's ask the caveman who George Washington is. You should see the output of each node in the console on the right:
-
-```text
-Init: 
-
-[System: Done]
-Start: 
-Prompt: You are a caveman, answer each question as such. Ooga booga.
-
-History: You are a caveman, answer each question as such. Ooga booga.
-
-Input: who was george washington?
-History: who was george washington?
-LLM: Me not know who George Washington is. Me caveman, not know much about outside world.
-Input: None
-
-[System: Done]
+```bash
+docker compose up --build
 ```
 
-That's good, as a caveman probably wouldn't know who George Washington is. Let's ask him about rocks:
+This will run the DB, Redis, API (Backend), Celery Worker, and Frontend containers. The API will run on port `8069` by default, with the frontend
+on port `4200`.
 
-```text
-[System: Already initialized]
-Start: 
-Prompt: You are a caveman, answer each question as such. Ooga booga.
+(Creation)=
+# Creating a Flowchart
 
-History: You are a caveman, answer each question as such. Ooga booga.
+When you first visit the frontend, you'll be greeted with the home screen. From here, you can create view all flowcharts, or all [jobs](Jobs).
 
-Input: what's your favorite kind of rock?
-History: what's your favorite kind of rock?
-LLM: Me like shiny rock. Shiny rock pretty.
-Input: None
+![Home Screen](../screenshots/docs/homepage.png)
 
-[System: Done]
+Click the `Flowcharts` button  to view all flowcharts. You can see all existing flowcharts, and scrolling down to the bottom, paste your own JSON to create a new flowchart.
+
+![Flowchart List](../screenshots/docs/flowchartlist.png)
+
+As an example, paste in this code:
+
+```json
+{
+  "label": "Documentation Example",
+  "uid": "doc_example_1",
+  "nodes": [
+    {
+      "uid": "start_node_1",
+      "label": "Start",
+      "node_type": "StartNode"
+    }
+  ],
+  "branches": []
+}
 ```
 
-Note the system doesn't initialize again, as it's already been initialized.
+This will create a flowchart with a single node, the `StartNode`. This node is the entry point for all flowcharts, and is required for a flowchart to be valid.
+Scroll up and click on the `Documentation Example` flowchart to view it.
+
+![Flowchart View](../screenshots/docs/flowchartview.png)
+
+While this flowchart doesn't do much, let's run it anyway. Click the `Run Flowchart` button in the top left corner. This should create a new Job under the `Jobs` tab. On the far-right of the new job, click the `View Details` button to view the job.
+
+![Flowchart Job](../screenshots/docs/flowchartjoboutput.png)
+
+Let's try making this more interesting. In the flowchart view, go to the `Import Flowchart JSON` card, and edit the JSON as so:
+
+```json
+{
+  "label": "Documentation Example",
+  "uid": "doc_example_1",
+  "nodes": [
+    {
+      "uid": "start_node_1",
+      "label": "Start",
+      "node_type": "StartNode"
+    },
+    {
+        "uid": "random_node_1",
+        "label": "Random",
+        "node_type": "RandomNode"
+    },
+    {
+        "uid": "random_node_2",
+        "label": "Random2",
+        "node_type": "RandomNode"
+    }
+  ],
+  "branches": [
+    {
+        "uid": "branch_1",
+        "prev": "start_node_1",
+        "next": "random_node_1"
+    },
+    {
+        "uid": "branch_2",
+        "prev": "random_node_1",
+        "next": "random_node_2"
+    }
+  ]
+}
+```
+
+After saving, you should see the new nodes and branches in the flowchart view.
+
+![Flowchart View 2](../screenshots/docs/flowchartview2.png)
+
+To run this flowchart, click the `Run Flowchart` button again. This will create a new job, which can be viewed from the `Jobs` tab.
+
+![Flowchart Job 2](../screenshots/docs/flowchartrandomoutput.png)
+
+(Jobs)=
+# Jobs
+
+Jobs are the execution of a flowchart. They are created by running a flowchart. Jobs can be viewed from the home screen, or from the flowchart view.
+
+Here's an example of a simple, completed Job:
+
+![Job List](../screenshots/docs/jobview.png)
+
+## Job Input
+
+If a job requires input at the current Node, the `Input` form will be displayed.
+
+![Job Input](../screenshots/docs/jobinput.png)
+
+
+# Chat Interface
+
+The chat interface is the primary way to create/edit a flowchart using natural language. The chat interface has access to the entire PromptFlow API, and can be used to create/edit flowcharts, run jobs, and more.
+
+![Simple Chat](../screenshots/docs/chatsimple.png)
+
+For a more advanced, and applicable flowchart, try the following Prompt:
+
+```text
+Create a flowchart named "Documentation Example 2" with a StartNode, an InputNode, and an OpenAINode, all linked together in a circle.
+```
+
+This will create a simple, memory-less chatbot. 
+
+![Chatbot Flowchart](../screenshots/docs/chatcircle.png)
+
+It can be run the same way as the previous flowchart. Input can be given to the Job as shown above, via the `Job Input` form.
+
+![Chat Input](../screenshots/docs/chatinput.png)

@@ -2,17 +2,15 @@
 Handles long term memory storage and retrieval.
 """
 
-from abc import ABC
 import os
-from uuid import uuid4
+from abc import ABC
 from typing import Any, Optional
+from uuid import uuid4
 
-import customtkinter
 import pinecone
 from InstructorEmbedding import INSTRUCTOR
 
 from promptflow.src.nodes.node_base import NodeBase
-from promptflow.src.dialogues.node_options import NodeOptions
 from promptflow.src.state import State
 
 
@@ -37,26 +35,16 @@ class PineconeNode(MemoryNode, ABC):
         embedding = instructor.encode(state.result)
         return embedding
 
-    def run_subclass(
-        self, before_result: Any, state, console: customtkinter.CTkTextbox
-    ) -> str:
+    def run_subclass(self, before_result: Any, state) -> str:
         pinecone.init(
             api_key=os.environ["PINECONE_API_KEY"],
             environment=os.environ["PINECONE_ENVIRONMENT"],
         )
         return state.result
 
-    def edit_options(self, event):
-        options_popup = NodeOptions(
-            self.canvas,
-            {
-                "index": self.index,
-            },
-        )
-        self.canvas.wait_window(options_popup)
-        if options_popup.cancelled:
-            return
-        self.index = options_popup.result["index"]
+    @staticmethod
+    def get_option_keys() -> list[str]:
+        return NodeBase.get_option_keys() + ["index"]
 
 
 class PineconeInsertNode(PineconeNode):
@@ -64,12 +52,9 @@ class PineconeInsertNode(PineconeNode):
     Inserts data into Pinecone
     """
 
-    def run_subclass(
-        self, before_result: Any, state, console: customtkinter.CTkTextbox
-    ) -> str:
-        super().run_subclass(before_result, state, console)
+    def run_subclass(self, before_result: Any, state) -> str:
+        super().run_subclass(before_result, state)
         if self.index is None:
-            console.insert("end", "Index must be set")
             raise ValueError("Index must be set")
         index = pinecone.Index(self.index)
         embedding = self.embed(state)
@@ -88,32 +73,18 @@ class PineconeQueryNode(PineconeNode):
         super().__init__(*args, **kwargs)
         self.k = kwargs.get("k", 1)
 
-    def run_subclass(
-        self, before_result: Any, state, console: customtkinter.CTkTextbox
-    ) -> str:
-        super().run_subclass(before_result, state, console)
+    def run_subclass(self, before_result: Any, state) -> str:
+        super().run_subclass(before_result, state)
         if self.index is None:
-            console.insert("end", "Index must be set")
             raise ValueError("Index must be set")
         index = pinecone.Index(self.index)
         embedding = self.embed(state.result)
         results = index.query(embedding, k=self.k, include_metadata=True)
-        console.insert("end", f"Results: {results}")
         result = ""
         for match in results["matches"]:
             result += f"{match['metadata']['text']}\n"
         return result
 
-    def edit_options(self, event):
-        options_popup = NodeOptions(
-            self.canvas,
-            {
-                "index": self.index,
-                "k": self.k,
-            },
-        )
-        self.canvas.wait_window(options_popup)
-        if options_popup.cancelled:
-            return
-        self.index = options_popup.result["index"]
-        self.k = options_popup.result["k"]
+    @staticmethod
+    def get_option_keys() -> list[str]:
+        return NodeBase.get_option_keys() + ["k"]

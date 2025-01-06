@@ -1,13 +1,12 @@
 """
 Interface for http requests
 """
-from enum import Enum
-import customtkinter
-from typing import Any, Callable, Optional
 import json
-import requests
+from enum import Enum
+from typing import Any, Callable
+
 import bs4
-from promptflow.src.dialogues.node_options import NodeOptions
+import requests
 
 from promptflow.src.nodes.node_base import NodeBase
 from promptflow.src.state import State
@@ -39,7 +38,6 @@ class HttpNode(NodeBase):
 
     url: str
     request_type: str
-    options_popup: Optional[NodeOptions]
 
     def __init__(
         self,
@@ -52,26 +50,8 @@ class HttpNode(NodeBase):
         )
         self.url = kwargs.get("url", "")
         self.request_type = kwargs.get("request_type", RequestType.GET.value)
-        self.options_popup: Optional[NodeOptions] = None
-        self.request_type_item = self.canvas.create_text(
-            self.center_x,
-            self.center_y + 30,
-            text=self.request_type.upper(),
-            font=("Arial", 10),
-            fill="black",
-            width=self.size_px * 2,
-            justify="center",
-        )
-        self.items.append(self.request_type_item)
-        self.canvas.tag_bind(
-            self.request_type_item, "<Double-Button-1>", self.edit_options
-        )
-        self.bind_drag()
-        self.bind_mouseover()
 
-    def run_subclass(
-        self, before_result: Any, state, console: customtkinter.CTkTextbox
-    ) -> str:
+    def run_subclass(self, before_result: Any, state) -> str:
         """
         Sends a http request
         """
@@ -79,39 +59,19 @@ class HttpNode(NodeBase):
             data = json.loads(state.result)
         except json.decoder.JSONDecodeError:
             return "Invalid JSON"
-        response = request_functions[self.request_type](self.url, json=data)
+        kwargs = {"json": data} if self.request_type == RequestType.POST.value else {}
+        response = request_functions[self.request_type](self.url, **kwargs)
         return response.text
-
-    def edit_options(self, event):
-        self.options_popup = NodeOptions(
-            self.canvas,
-            {
-                "url": self.url,
-                "request_type": self.request_type,
-            },
-            {
-                "request_type": [
-                    RequestType.GET.value,
-                    RequestType.POST.value,
-                    RequestType.PUT.value,
-                    RequestType.DELETE.value,
-                ],
-            },
-        )
-        self.canvas.wait_window(self.options_popup)
-        result = self.options_popup.result
-        # check if cancel
-        if self.options_popup.cancelled:
-            return
-        self.url = result["url"]
-        self.request_type = result["request_type"]
-        self.canvas.itemconfig(self.request_type_item, text=self.request_type.upper())
 
     def serialize(self):
         return super().serialize() | {
             "url": self.url,
             "request_type": self.request_type,
         }
+
+    @staticmethod
+    def get_option_keys() -> list[str]:
+        return NodeBase.get_option_keys() + ["url", "request_type"]
 
 
 class JSONRequestNode(NodeBase):
@@ -121,7 +81,6 @@ class JSONRequestNode(NodeBase):
 
     key: str = "url"
     request_type: str
-    options_popup: Optional[NodeOptions]
 
     def __init__(
         self,
@@ -134,28 +93,11 @@ class JSONRequestNode(NodeBase):
         )
         self.request_type = kwargs.get("request_type", RequestType.GET.value)
         self.key = kwargs.get("key", "url")
-        self.options_popup: Optional[NodeOptions] = None
-        self.request_type_item = self.canvas.create_text(
-            self.center_x,
-            self.center_y + 30,
-            text=self.request_type.upper(),
-            font=("Arial", 10),
-            fill="black",
-            width=self.size_px * 2,
-            justify="center",
-        )
-        self.items.append(self.request_type_item)
-        self.canvas.tag_bind(
-            self.request_type_item, "<Double-Button-1>", self.edit_options
-        )
-        self.bind_drag()
-        self.bind_mouseover()
 
     def run_subclass(
         self,
         before_result: Any,
         state: State,
-        console: customtkinter.CTkTextbox,
     ) -> str:
         """
         Sends a http request
@@ -166,39 +108,19 @@ class JSONRequestNode(NodeBase):
                 data[self.key] = "https://" + data[self.key]
         except json.decoder.JSONDecodeError:
             return "Invalid JSON"
-        response = request_functions[self.request_type](data[self.key], json=data)
+        kwargs = {"json": data} if self.request_type == RequestType.POST.value else {}
+        response = request_functions[self.request_type](data[self.key], **kwargs)
         return response.text
-
-    def edit_options(self, event):
-        self.options_popup = NodeOptions(
-            self.canvas,
-            {
-                "key": self.key,
-                "request_type": self.request_type,
-            },
-            {
-                "request_type": [
-                    RequestType.GET.value,
-                    RequestType.POST.value,
-                    RequestType.PUT.value,
-                    RequestType.DELETE.value,
-                ],
-            },
-        )
-        self.canvas.wait_window(self.options_popup)
-        result = self.options_popup.result
-        # check if cancel
-        if self.options_popup.cancelled:
-            return
-        self.key = result["key"]
-        self.request_type = result["request_type"]
-        self.canvas.itemconfig(self.request_type_item, text=self.request_type.upper())
 
     def serialize(self):
         return super().serialize() | {
             "key": self.key,
             "request_type": self.request_type,
         }
+
+    @staticmethod
+    def get_option_keys() -> list[str]:
+        return NodeBase.get_option_keys() + ["key", "request_type"]
 
 
 class ScrapeNode(NodeBase):
@@ -207,7 +129,6 @@ class ScrapeNode(NodeBase):
     """
 
     key: str = "url"
-    options_popup: Optional[NodeOptions]
 
     def __init__(
         self,
@@ -219,15 +140,11 @@ class ScrapeNode(NodeBase):
             **kwargs,
         )
         self.key = kwargs.get("key", "url")
-        self.options_popup: Optional[NodeOptions] = None
-        self.bind_drag()
-        self.bind_mouseover()
 
     def run_subclass(
         self,
         before_result: Any,
         state: State,
-        console: customtkinter.CTkTextbox,
     ) -> str:
         """
         Scrapes a page
@@ -263,21 +180,11 @@ class ScrapeNode(NodeBase):
         text = "\n".join(chunk for chunk in chunks if chunk)
         return text
 
-    def edit_options(self, event):
-        self.options_popup = NodeOptions(
-            self.canvas,
-            {
-                "key": self.key,
-            },
-        )
-        self.canvas.wait_window(self.options_popup)
-        result = self.options_popup.result
-        # check if cancel
-        if self.options_popup.cancelled:
-            return
-        self.key = result["key"]
-
     def serialize(self):
         return super().serialize() | {
             "key": self.key,
         }
+
+    @staticmethod
+    def get_option_keys() -> list[str]:
+        return NodeBase.get_option_keys() + ["key"]

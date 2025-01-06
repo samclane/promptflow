@@ -1,0 +1,51 @@
+.chat-box {
+  @apply p-4 border rounded-md shadow-md;
+}
+
+.messages {
+  @apply mb-2;
+}
+
+.message {
+  @apply p-2 bg-gray-200 rounded-md flex justify-between;
+}
+
+.sender {
+  @apply font-bold;
+}
+
+.text {
+  @apply flex-grow px-1 whitespace-pre-wrap;
+}
+
+.timestamp {
+  @apply text-xs text-gray-400;
+}
+
+.input-container {
+  @apply flex;
+}
+
+.message-input {
+  @apply flex-grow p-2 border rounded-md mr-2;
+}
+
+.send-button {
+  @apply px-4 py-2 bg-blue-500 text-white rounded-md;
+}
+
+.clear-button {
+  @apply px-4 py-2 text-gray-700 rounded-md bg-blue-200 ml-2;
+}
+
+.options-button {
+  @apply px-4 py-2 text-gray-700 rounded-md bg-white ml-2 border;
+}
+
+.ai-message {
+  @apply bg-gray-100;
+}
+
+.loading {
+  @apply text-center text-gray-500 italic animate-pulse;
+}

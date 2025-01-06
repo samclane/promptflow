@@ -1,1 +1,0 @@
-pyinstaller --noconfirm --onedir --console --add-data "venv/lib/python3.10/site-packages/customtkinter:customtkinter/" --add-data "promptflow/res:res" --copy-metadata tqdm --copy-metadata regex --copy-metadata requests --copy-metadata packaging --copy-metadata filelock --copy-metadata numpy --copy-metadata tokenizers --hidden-import='PIL._tkinter_finder' promptflow/__main__.py

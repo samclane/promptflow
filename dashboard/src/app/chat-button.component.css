@@ -1,0 +1,21 @@
+.chat-button {
+    @apply fixed bottom-4 right-4 bg-blue-500 text-white px-4 py-2 rounded-full shadow-md;
+}
+
+.chat-button:hover {
+    @apply bg-blue-600;
+}
+  
+app-chat {
+    @apply fixed bottom-16 right-4 w-max bg-white border rounded-md shadow-lg w-[600px] max-h-[700px] overflow-y-auto;
+}
+
+@media screen and (max-width: 640px) {
+    app-chat {
+        @apply bottom-0 right-0 w-full h-full max-h-full;
+    }
+
+    .chat-button {
+        @apply fixed bottom-4 right-4 bg-blue-500 text-white px-4 py-2 rounded-full shadow-md z-50;
+    }
+}

@@ -23,43 +23,20 @@ When run your flowchart, PromptFlow executes each node in the sequence defined b
 
 ## 🛠️ Initial Setup 
 
-You can install PromptFlow via pip with
-
-```bash
-pip install promptflow-gui
-```
-
-If you want to install PromptFlow from source, clone this repository and install the dependencies with
-
-```bash
-python -m pip install -r requirements.txt
-```
-
-Encountered a hiccup? Try this instead:
-
-```bash
-python -m pip install -r requirements-no-nvidia.txt
-```
+Before starting, make sure to populate the `.env` file with the appropriate values. The `.env` file should be located in the root directory of the project.
 
 ## 🚀 Launching
 
-If you installed from `pip`, you can launch PromptFlow with
+## Docker Compose
+
+The easiest way to run PromptFlow is with Docker Compose. To do so, run the following command:
 
 ```bash
-promptflow
+docker compose up --build
 ```
 
-Otherwise, run PromptFlow with Python from the command line:
-
-```bash
-python run.py 
-```
-
-If you're hitting a roadblock, ensure your `PYTHONPATH` is set correctly:
-
-```bash
-export PYTHONPATH=$PYTHONPATH:.
-```
+This will run the DB, Redis, API (Backend), Celery Worker, and Frontend containers. The API will run on port `8069` by default, with the frontend
+on port `4200`.
 
 ## 📚 Documentation
 

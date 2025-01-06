@@ -2,10 +2,7 @@
 Hosts a simple HTTP server that can be used as Input node.
 """
 import http.server
-from typing import Any, Optional
-
-import customtkinter
-from promptflow.src.dialogues.node_options import NodeOptions
+from typing import Any
 
 from promptflow.src.nodes.node_base import NodeBase
 
@@ -32,26 +29,20 @@ class ServerInputNode(NodeBase):
 
     host: str = ""
     port: str = "8000"
-    options_popup: Optional[NodeOptions]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.host = kwargs.get("host", "")
         self.port = kwargs.get("port", "8000")
 
-    def run_subclass(
-        self, before_result: Any, state, console: customtkinter.CTkTextbox
-    ) -> str:
+    def run_subclass(self, before_result: Any, state) -> str:
         with http.server.HTTPServer((self.host, int(self.port)), Handler) as httpd:
             httpd.handle_request()
             return httpd.data
 
-    def edit_options(self, event):
-        self.options_popup = NodeOptions(
-            self.canvas, {"host": self.host, "port": self.port}
-        )
-        self.canvas.wait_window(self.options_popup)
-        if self.options_popup.cancelled:
-            return
-        self.port = self.options_popup.result["port"]
-        self.host = self.options_popup.result["host"]
+    def serialize(self) -> dict[str, Any]:
+        return super().serialize() | {"host": self.host, "port": self.port}
+
+    @staticmethod
+    def get_option_keys() -> list[str]:
+        return NodeBase.get_option_keys() + ["host", "port"]

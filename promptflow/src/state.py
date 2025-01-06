@@ -3,9 +3,12 @@ State class definition
 """
 
 from __future__ import annotations
-from typing import Any
+
 import logging
+from typing import Any
+
 import tiktoken
+
 from promptflow.src.serializable import Serializable
 
 
@@ -19,8 +22,9 @@ class State(Serializable):
         self.snapshot: dict[str, str] = kwargs.get("snapshot", {})
         self.history: list[dict[str, str]] = kwargs.get("history", [])
         self.result: str = kwargs.get("result", "")
-        self.data: dict[str, Any] = kwargs.get("data", {})
+        self.data: Any = kwargs.get("data", {})
         self.logger = logging.getLogger(__name__)
+        self.exception: bool = False
 
     def reset(self) -> None:
         """
@@ -39,7 +43,7 @@ class State(Serializable):
             self.snapshot.update(__t.snapshot)
         return self
 
-    def copy(self) -> State:
+    def copy(self) -> "State":
         """
         Create a new State object with a copy of the snapshot and history
         """
@@ -52,12 +56,13 @@ class State(Serializable):
         )
 
     @classmethod
-    def deserialize(cls, data: dict[str, Any]) -> State:
+    def deserialize(cls, data: dict[str, Any]) -> "State":
         return cls(**data)
 
     def serialize(self) -> dict[str, Any]:
+        str_snapshot = {k: str(v) for k, v in self.snapshot.items()}
         return {
-            "snapshot": self.snapshot,
+            "snapshot": str_snapshot,
             "history": self.history,
             "result": self.result,
             "data": self.data,

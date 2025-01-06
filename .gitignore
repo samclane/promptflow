@@ -6,6 +6,7 @@
 __pycache__
 run_promptflow.sh
 *.egg-info
+.env
 venv/
 build/
 dist/

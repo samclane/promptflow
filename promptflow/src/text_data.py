@@ -2,6 +2,7 @@
 Handles reusable text data in the flowchart
 """
 from typing import TYPE_CHECKING
+
 from promptflow.src.serializable import Serializable
 
 if TYPE_CHECKING:

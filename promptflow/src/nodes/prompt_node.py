@@ -2,12 +2,9 @@
 Holds text which gets formatted with state data
 """
 from typing import TYPE_CHECKING, Any, Optional
-import tkinter as tk
-import customtkinter
-from promptflow.src.dialogues.text_input import TextInput
+
 from promptflow.src.nodes.node_base import NodeBase
 from promptflow.src.state import State
-
 from promptflow.src.text_data import TextData
 from promptflow.src.themes import monokai
 
@@ -25,16 +22,12 @@ class PromptNode(NodeBase):
     def __init__(
         self,
         flowchart: "Flowchart",
-        center_x: float,
-        center_y: float,
         label: str,
         prompt: Optional[TextData | dict] = None,
         **kwargs,
     ):
         super().__init__(
             flowchart,
-            center_x,
-            center_y,
             label,
             **kwargs,
         )
@@ -43,24 +36,8 @@ class PromptNode(NodeBase):
         if isinstance(prompt, dict):
             prompt = TextData.deserialize(prompt, self.flowchart)
         self.prompt = prompt
-        self.prompt_item = self.canvas.create_text(
-            center_x,
-            center_y + 30,
-            text=self.prompt.label,
-            fill="black",
-            width=self.size_px * 2,
-            justify="center",
-        )
-        self.items.extend([self.prompt_item])
-        self.canvas.tag_bind(self.prompt_item, "<Double-Button-1>", self.edit_options)
 
-        self.text_window: Optional[TextInput] = None
-        self.bind_drag()
-        self.bind_mouseover()
-
-    def run_subclass(
-        self, before_result: Any, state, console: customtkinter.CTkTextbox
-    ) -> str:
+    def run_subclass(self, before_result: Any, state) -> str:
         """
         Formats TextData with state data
         """
@@ -68,38 +45,20 @@ class PromptNode(NodeBase):
         state.result = prompt
         return prompt
 
-    def edit_options(self, _: tk.Event):
-        """
-        Create a text input window to edit the prompt.
-        """
-        self.text_window = TextInput(self.canvas, self.flowchart, self.prompt)
-        self.text_window.set_callback(self.save_prompt)
-
-    def save_prompt(self):
-        """
-        Write the prompt to the canvas.
-        """
-        if self.text_window is None:
-            self.logger.warning("No text window to save")
-            return
-        self.prompt = self.text_window.get_text()
-        self.canvas.itemconfig(self.prompt_item, text=self.prompt.label)
-        self.text_window.destroy()
-
     def serialize(self) -> dict:
         return super().serialize() | {
             "prompt": self.prompt.serialize(),
         }
 
+    @staticmethod
+    def get_option_keys() -> list[str]:
+        return NodeBase.get_option_keys() + ["prompt"]
+
     @classmethod
     def deserialize(cls, flowchart: "Flowchart", data: dict) -> "PromptNode":
         return cls(
             flowchart,
-            data["center_x"],
-            data["center_y"],
-            data["label"],
-            prompt=data["prompt"],
-            id=data["id"],
+            **data,
         )
 
     def cost(self, state: State):

@@ -13,14 +13,14 @@
 PromptFlow is a tool that allows you to create executable flowcharts that 
 link LLMs (Large Language Models), Prompts, Python functions, and 
 conditional logic together. With PromptFlow, you can create complex 
-workflows in a visual way, without having to write too much code or 
+workflows, without having to write too much code or 
 deal with complicated logic.
 
 `View PromptFlow on GitHub here. <https://github.com/InsuranceToolkits/promptflow>`_
 
 How it works
 ------------
-PromptFlow is based on a visual flowchart editor that allows you to 
+PromptFlow is based on a flowchart editor that allows you to 
 create nodes and connections between them. Each node can be a :ref:`Prompt`,
 a Python :ref:`Function`, or an :ref:`LLM`. Connections between nodes represent
 conditional logic, and allow you to specify the flow of your program.

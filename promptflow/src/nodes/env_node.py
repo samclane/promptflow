@@ -2,12 +2,9 @@
 Initialize environmental variables using .env
 """
 import os
-import customtkinter
-from typing import Any, Optional
+from typing import Any
 
 from dotenv import load_dotenv
-from promptflow.src.dialogues.multi_file import MultiFileInput
-from promptflow.src.dialogues.node_options import NodeOptions
 
 from promptflow.src.nodes.node_base import NodeBase
 
@@ -18,7 +15,6 @@ class EnvNode(NodeBase):
     """
 
     filename: str = ".env"
-    options_popup: Optional[MultiFileInput] = None
 
     def __init__(
         self,
@@ -28,28 +24,18 @@ class EnvNode(NodeBase):
         super().__init__(*args, **kwargs)
         self.filename = kwargs.get("filename", ".env")
 
-    def run_subclass(
-        self, before_result: Any, state, console: customtkinter.CTkTextbox
-    ) -> str:
+    def run_subclass(self, before_result: Any, state) -> str:
         load_dotenv(self.filename)
         return state.result
-
-    def edit_options(self, event):
-        self.options_popup = MultiFileInput(
-            self.canvas,
-            {
-                "filename": self.filename,
-            },
-        )
-        self.canvas.wait_window(self.options_popup)
-        if self.options_popup.cancelled:
-            return
-        self.filename = self.options_popup.result["filename"]
 
     def serialize(self):
         return super().serialize() | {
             "filename": self.filename,
         }
+
+    @staticmethod
+    def get_option_keys() -> list[str]:
+        return NodeBase.get_option_keys() + ["filename"]
 
 
 class ManualEnvNode(NodeBase):
@@ -59,7 +45,6 @@ class ManualEnvNode(NodeBase):
 
     key: str = ""
     val: str = ""
-    options_popup: Optional[NodeOptions] = None
 
     def __init__(
         self,
@@ -70,29 +55,16 @@ class ManualEnvNode(NodeBase):
         self.key = kwargs.get("key", "")
         self.val = kwargs.get("val", "")
 
-    def run_subclass(
-        self, before_result: Any, state, console: customtkinter.CTkTextbox
-    ) -> str:
+    def run_subclass(self, before_result: Any, state) -> str:
         os.environ[self.key] = self.val
         return state.result
-
-    def edit_options(self, event):
-        self.options_popup = NodeOptions(
-            self.canvas,
-            {
-                "key": self.key,
-                "value": self.val,
-            },
-        )
-        self.canvas.wait_window(self.options_popup)
-        result = self.options_popup.result
-        if self.options_popup.cancelled:
-            return
-        self.key = result["key"]
-        self.val = result["value"]
 
     def serialize(self):
         return super().serialize() | {
             "key": self.key,
             "val": self.val,
         }
+
+    @staticmethod
+    def get_option_keys() -> list[str]:
+        return NodeBase.get_option_keys() + ["key", "val"]

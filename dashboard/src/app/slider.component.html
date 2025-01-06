@@ -1,0 +1,5 @@
+<div class="p-4 flex items-center">
+    <input type="range" [min]="min" [max]="max" [step]="stepSize" class="slider w-full" [formControl]="sliderControl">
+    <div class="ml-2 w-12 text-right">{{sliderControl.value}}</div>
+  </div>
+  

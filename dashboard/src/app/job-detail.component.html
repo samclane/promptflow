@@ -1,0 +1,29 @@
+<div class="info-container m-4 max-w-[80%] mx-auto" *ngIf="vm$ | async as vm">
+  <h2 class="text-4xl font-semibold mb-4">Job Detail</h2>
+
+  <div class="p-4 bg-blue-100 rounded-lg">
+    <p class="font-semibold text-lg mb-2"><strong>ID:</strong> {{ vm.job?.job_id }}</p>
+    <p class="font-semibold text-lg mb-2"><strong>Status:</strong> {{ vm.job?.job_status }}</p>
+    <p class="font-semibold text-lg mb-2"><strong>Created:</strong> {{ vm.job?.created }}</p>
+    <p class="font-semibold text-lg mb-2"><strong>Updated:</strong> {{ vm.job?.updated }}</p>
+    <p class="font-semibold text-lg mb-2"><strong>Metadata:</strong> <pre class="font-semibold text-sm">{{ vm.job?.metadata | json }}</pre>
+  </div>
+
+  <h3 class="text-2xl font-semibold my-2">Logs:</h3>
+  <app-job-logs [jobId]="vm.jobId"></app-job-logs>
+
+  <div class="p-4 bg-blue-100 rounded-lg mt-4" *ngIf="vm.job?.job_status === 'INPUT_REQUIRED'">
+    <h3 class="text-xl font-semibold mb-2">Input required:</h3>
+    <form (ngSubmit)="onSubmit()" >
+      <textarea class="border border-gray-300 rounded-lg p-2 w-full h-32" [(ngModel)]="input" name="submit"></textarea>
+      <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg mt-2">Submit</button>
+    </form>
+  </div>
+  <div class="p-4 bg-blue-100 rounded-lg mt-4" *ngIf="vm.job?.job_status === 'FILE_INPUT_REQUIRED'">
+    <h3 class="text-xl font-semibold mb-2">File Input Required:</h3>
+    <form (ngSubmit)="onFileSubmit()">
+      <input type="file" class="border border-gray-300 rounded-lg p-2 w-full" (change)="onFileChange($event)" />
+      <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg mt-2">Upload</button>
+    </form>
+  </div>
+</div>

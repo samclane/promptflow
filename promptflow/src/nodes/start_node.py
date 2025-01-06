@@ -2,10 +2,10 @@
 Special node that prompts the user for input
 Also signals the start of the flowchart
 """
-import customtkinter
 from typing import TYPE_CHECKING, Any
-import uuid
-from promptflow.src.nodes.node_base import NodeBase
+
+from promptflow.src.mermaid_converter import MermaidNodeShape
+from promptflow.src.nodes.node_base import FlowchartJSTypes, NodeBase, NxNodeShape
 from promptflow.src.themes import monokai
 
 if TYPE_CHECKING:
@@ -18,46 +18,27 @@ class StartNode(NodeBase):
     """
 
     node_color = monokai.BLUE
+    nx_shape = NxNodeShape.CIRCLE
+    js_shape = FlowchartJSTypes.start
+    mermaid_shape = MermaidNodeShape.STADIUM
 
     def __init__(
         self,
-        flowchart: "Flowchart",
-        center_x: float,
-        center_y: float,
-        label: str,
+        *args,
         **kwargs,
     ):
+        super().__init__(*args, **kwargs)
         # make sure there is only one start node
-        for node in flowchart.nodes:
+        for node in self.flowchart.nodes:
             if isinstance(node, StartNode):
                 raise ValueError("Only one start node is allowed")
 
-        super().__init__(flowchart, center_x, center_y, label, **kwargs)
+    @classmethod
+    def deserialize(cls, flowchart: "Flowchart", data: dict):
+        return cls(flowchart, **data)
 
-    @staticmethod
-    def deserialize(flowchart: "Flowchart", data: dict):
-        return StartNode(
-            flowchart,
-            data["center_x"],
-            data["center_y"],
-            data["label"],
-            id=data.get("id", str(uuid.uuid4())),
-        )
-
-    def run_subclass(
-        self, before_result: Any, state, console: customtkinter.CTkTextbox
-    ) -> str:
+    def run_subclass(self, before_result: Any, state) -> str:
         return ""
-
-    def draw_shape(self, x: int, y: int):
-        return self.canvas.create_oval(
-            x - self.size_px,
-            y - self.size_px,
-            x + self.size_px,
-            y + self.size_px,
-            fill=self.node_color,
-            outline="black",
-        )
 
 
 class InitNode(NodeBase):
@@ -66,38 +47,25 @@ class InitNode(NodeBase):
     """
 
     node_color = monokai.ORANGE
+    nx_shape = NxNodeShape.CIRCLE
+    js_shape = FlowchartJSTypes.start
 
     def __init__(
         self,
-        flowchart: "Flowchart",
-        center_x: float,
-        center_y: float,
-        label: str,
+        *args,
         **kwargs,
     ):
+        super().__init__(*args, **kwargs)
         # make sure there is only one init node
-        for node in flowchart.nodes:
+        for node in self.flowchart.nodes:
             if isinstance(node, InitNode):
                 raise ValueError("Only one init node is allowed")
 
-        super().__init__(flowchart, center_x, center_y, label, **kwargs)
         self.run_once = False
 
-    def run_subclass(
-        self, before_result: Any, state, console: customtkinter.CTkTextbox
-    ) -> str:
+    def run_subclass(self, before_result: Any, state) -> str | None:
         if not self.run_once:
             self.run_once = True
             return ""
         else:
             return None
-
-    def draw_shape(self, x: int, y: int):
-        return self.canvas.create_oval(
-            x - self.size_px,
-            y - self.size_px,
-            x + self.size_px,
-            y + self.size_px,
-            fill=self.node_color,
-            outline="black",
-        )

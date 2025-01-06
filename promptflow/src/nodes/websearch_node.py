@@ -2,14 +2,14 @@
 Nodes for querying the web.
 """
 
-from abc import ABC
 import os
-import customtkinter
+from abc import ABC
 from typing import Any
-from promptflow.src.nodes.node_base import NodeBase
-from promptflow.src.dialogues.node_options import NodeOptions
-from serpapi import GoogleSearch
+
 from googlesearch import search
+from serpapi import GoogleSearch
+
+from promptflow.src.nodes.node_base import NodeBase
 
 
 class WebSearchNode(NodeBase, ABC):
@@ -23,9 +23,7 @@ class SerpApiNode(WebSearchNode):
     Query Google using the SerpApi.
     """
 
-    def run_subclass(
-        self, before_result: Any, state, console: customtkinter.CTkTextbox
-    ) -> str:
+    def run_subclass(self, before_result: Any, state) -> str:
         searchParams = {
             "engine": "google",
             "q": str(state.result),
@@ -51,21 +49,16 @@ class GoogleSearchNode(WebSearchNode):
         super().__init__(*args, **kwargs)
         self.num_results = num_results
 
-    def run_subclass(
-        self, before_result: Any, state, console: customtkinter.CTkTextbox
-    ) -> str:
+    def run_subclass(self, before_result: Any, state) -> str:
         results = search(str(state.result), num_results=self.num_results, advanced=True)
         s = ""
         for r in results:
             s += r.title + "\n" + r.description + "\n" + r.url + "\n\n"
         return s
 
-    def edit_options(self, event):
-        """
-        Edit the options for the node.
-        """
-        self.options_popup = NodeOptions(self.canvas, {"num_results": self.num_results})
-        self.canvas.wait_window(self.options_popup)
-        if self.options_popup.cancelled:
-            return
-        self.num_results = int(self.options_popup.result["num_results"])
+    def serialize(self):
+        return super().serialize() | {"num_results": self.num_results}
+
+    @staticmethod
+    def get_option_keys() -> list[str]:
+        return NodeBase.get_option_keys() + ["num_results"]

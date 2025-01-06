@@ -2,58 +2,72 @@
 
 # Development
 
-## Development Environment
+One of the best ways to contribute is to create a new Node. This section will walk you through the process of creating a new Node.
 
-The current environment can be installed simply from the `requirements.txt` file. Install into a virtual environment if you want to keep your system clean.
+## Creating a New Node
 
-```bash
-python -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
+
+### 1. Import NodeBase Class
+
+You'll need to import the `NodeBase` class from the appropriate module.
+
+```python
+from promptflow.src.nodes.node_base import NodeBase
 ```
 
-(Running)=
+### 2. Define Your Custom Node
 
-## Running
+Create a new class that inherits from `NodeBase`.
 
-Promptflow can be run with Python from the commandline:
+```python
+class CustomNode(NodeBase):
 
-```bash
-python promptflow/main.py
 ```
 
-If you're having trouble ensure your `PYTHONPATH` is set correctly:
+### 3. Implement the Constructor
 
-```bash
-export PYTHONPATH=$PYTHONPATH:.
+Define the constructor (`__init__`) for your node, and make sure to call the superclass's constructor. You can also add any custom initialization.
+
+```python
+def __init__(self, flowchart, label, custom_attribute=None, **kwargs):
+    super().__init__(flowchart: Flowchart, label: str, **kwargs)
+    self.custom_attribute = custom_attribute
 ```
 
-## Starting Point: Adding a Node
+### 4. Implement the run_subclass Method
 
-Creating a new [`Node`](Node) is a good starting point for understanding the codebase. Let's take a look at the [`RandomNumber`](RandomNumber) node:
+Define the `run_subclass` method to handle your custom node logic. This is where you'll format the text or perform other actions.
 
-```{literalinclude} ../promptflow/src/nodes/random_number.py
+```python
+def run_subclass(self, before_result, state) -> str:
+    # Your custom logic here
+    return result
 ```
 
-1. We import the necessary libraries, including the `Node` base class, aptly named `NodeBase`.
+### 5. Serialization and Other Methods
 
-2. We create a new class, `RandomNumber`, that inherits from `NodeBase`.
+You may want to implement additional methods like `serialize`, `deserialize`, or `cost`. These are optional, but may be useful depending on your node's implementation. For example, here's the `serialize` method for the `OpenAINode`:
 
-    a. We can specify the color of the node by setting the `node_color` to a hex string. In this case, we inherit from the `monokai` color scheme.
+```python
+    def serialize(self):
+        return super().serialize() | {
+            "model": self.model,
+            "temperature": self.temperature,
+            "top_p": self.top_p,
+            "n": self.n,
+            "max_tokens": self.max_tokens,
+            "presence_penalty": self.presence_penalty,
+            "frequency_penalty": self.frequency_penalty,
+        }
 
-    b. We set the default `min` and `max`. 
+```
 
-    c. We initialize the `OptionsPopup` to `None`; it will later be used to set `min` and `max` at runtime.
+This method calls the superclass's `serialize` method, and then adds additional attributes to the serialized dictionary.
 
-3. `run_subclass` is the most important function in the `Node` class. It is called when the node is run. In this case, we simply return a random number between `min` and `max`.
+### 6. Create an Instance of Your Node
 
-4. `edit_options` is called when the node is double-clicked. It opens the `OptionsPopup` and sets the `min` and `max` values. The main window waits until the popup is closed before continuing execution. Finally, we set the `min` and `max` values to the values in the popup.
+Finally, create an instance of your custom node and use it within your flowchart.
 
-## Runtime Popups
-
-In order to add a runtime popup, such as a text input, to a node, you must must create a new tkinter `root` window, and `withdraw()` it.
-
-As an example, let's look at the [`InputNode`](Input):
-
-```{literalinclude} ../promptflow/src/nodes/input_node.py
+```python
+my_node = CustomNode(flowchart, label="My Custom Node", custom_attribute="value", uid="custom_1")
 ```

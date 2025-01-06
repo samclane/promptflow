@@ -1,0 +1,8 @@
+<button
+  class="px-4 py-2 bg-white-500 text-black rounded-full border-2 border-blue-200 hover:bg-blue-300 hover:text-white-500 transition-all"
+  [class.bg-blue-500]="isToggled | async"
+  [class.text-white-500]="isToggled | async"
+  (click)="toggle()"
+>
+  {{ (isToggled | async) ? 'On' : 'Off' }}
+</button>

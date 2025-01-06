@@ -1,0 +1,14 @@
+<label
+  class="cursor-pointer"
+  (click)="toggle()"
+>
+  <div
+    class="relative w-12 h-6 bg-gray-400 rounded-full transition-all duration-300"
+    [class.bg-blue-500]="isToggled | async"
+  >
+    <div
+      class="absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300"
+      [class.translate-x-6]="isToggled | async"
+    ></div>
+  </div>
+</label>
